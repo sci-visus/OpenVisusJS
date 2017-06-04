@@ -4,7 +4,7 @@
 //example http://atlantis.sci.utah.edu/mod_visus?action=list&format=json
 function visusAsyncGetListOfDatasets(url) 
 {
-  fetch(url,{method:'get'})
+  return fetch(url,{method:'get'})
   .then(function (response) {  
     
     if (response.headers.get("content-type").indexOf("application/json") == -1) 
@@ -28,7 +28,9 @@ function visusAsyncGetListOfDatasets(url)
         console.log("unknown item encountered: "+item.name);
     }
     
-    console.log("List of datasets: "+ret);
+    ret=ret.sort(function (a, b) {return a.toLowerCase().localeCompare(b.toLowerCase());});
+    
+    //console.log("List of datasets: "+ret);
     return ret;
   }) 
 }
@@ -262,180 +264,24 @@ function VisusOSD(params)
   {
     self.tile_size=self.dataset.dims;     
   }
-  
-  //createDefaultGui
-  self.createDefaultGui=function() 
-  {
-    self.gui={};
-    
-    var body=(
-        "<table style='width: 100%;height: 100%;border-spacing:0px;padding:0px;'>"+
-        "  <tr style='width: 100%;height: 100%;'><td>"+
-        "    <table style='width: 100%;height:100%;border-spacing:0px;padding:0px;'>"+
-        "      <tr style='height:100%;'>"+
-        "        <td ><div id='$(id)osd' style='width: 100%;height: 100%;background-color:#66ccff;'></div></td>"+
-        "      </tr>"+
-        "    </table>"+
-        "  <tr style='width: 100%;'><td>"+      
-        "    <table style='width: 100%;border-spacing:0px;padding:0px;'>"+     
-        "      <tr style='width:100%;'>"+
-        "        <td>Field"+
-        "        <td><select id='$(id)field' ></select>"+   
-        "        <td>Axis"+
-        "        <td>"+
-        "          <select id='$(id)axis'>"+
-        "            <option value='0'>X</option>"+
-        "            <option value='1'>Y</option>"+
-        "            <option value='2'>Z</option>"+
-        "          </select>"+
-        "        <td>Slice"+
-        "        <td width='100%'>"+
-        "          <input id='$(id)slice' type='range' step='1' style='width:100%;'>"+
-        "        <td><output id='$(id)show_slice'>Value</output>"+
-        "      </tr>"+
-        "    </table>"+
-        "  </tr>"+
-        "  <tr style='width: 100%;'><td>"+      
-        "    <table style='width: 100%;border-spacing:0px;padding:0px;'>"+
-        "      <tr style='width:100%;'>"+
-        "        <td>Time"+
-        "        <td><input  id='$(id)time' type='range' step='1' >"+
-        "        <td><output id='$(id)show_time'>Value</output>"+
-        "        <td>Palette"+
-        "        <td><select id='$(id)palette'></select>"+
-        "        <td>Min<td ><input  id='$(id)palette_min' >"+
-        "        <td>Max<td ><input  id='$(id)palette_max' >"+
-        "        <td>Interpolation"+
-        "          <select id='$(id)palette_interp'>"+
-        "            <option value='Default'>Default</option>"+
-        "            <option value='Flat'>Flat</option>"+
-        "            <option value='Inverted'>Inverted</option>"+
-        "          </select>"+        
-        "      </tr>"+
-        "    </table>"+
-        "  </tr>"+          
-        "</table>")
-      .split("$(id)").join(self.id);
-    
-    document.getElementById(self.id).innerHTML=body;
-    
-    self.gui.osd = document.getElementById(self.id+'osd');
-    
-    self.gui.axis = document.getElementById(self.id+'axis');
-    if (self.gui.axis)
-      self.gui.axis.onchange=function(){ self.setSlice(self.gui.axis.value,self.gui.slice.value); self.refresh();};     
-    
-    self.gui.slice = document.getElementById(self.id+'slice');
-    if (self.gui.slice)
-    {
-      self.gui.slice.oninput=function(){self.setSlice(self.gui.axis.value,self.gui.slice.value); self.refresh();}   
-      self.gui.slice.min=0;
-      self.gui.slice.step=1;  
-    }
-    
-    self.gui.show_slice = document.getElementById(self.id+'show_slice');
-    
-    self.gui.field = document.getElementById(self.id+'field');
-    if (self.gui.field)
-    {
-      self.gui.field.onchange=function(){ 
-        self.setField(self.gui.field.value); 
-        self.refresh();
-      };    
-      
-      for(var i = 0; i < self.dataset.fields.length; i++) {
-        var fieldname = self.dataset.fields[i].name;
-        var item = document.createElement("option");
-        item.textContent = item.value = fieldname;
-        self.gui.field.appendChild(item);
-      } 
-    } 
-    
-    self.gui.time = document.getElementById(self.id+'time');
-    if (self.gui.time)
-    {
-      self.gui.time.min=self.dataset.timesteps[0];
-      self.gui.time.max=self.dataset.timesteps[1];
-      self.gui.time.step=1;  
-      self.gui.time.oninput=function(){ 
-        self.setTime(self.gui.time.value); 
-        self.refresh();
-      }   
-    }; 
-    
-    self.gui.show_time = document.getElementById(self.id+'show_time');
-    
-    self.gui.palette = document.getElementById(self.id+'palette');
-    if (self.gui.palette)
-    {
-      palettes=['','grayopaque','graytransparent','hsl' ,'banded','bry','bgry','gamma'
-        ,'hot1','hot2','ice' ,'lighthues','rich','smoothrich','lut16'
-        ,'BlueGreenDivergent','AsymmetricBlueGreenDivergent' ,'GreenGold'
-        ,'LinearGreen','LinearTurquois','MutedBlueGreen','ExtendedCoolWarm','AsymmetricBlueOrangeDivergent'
-        ,'LinearYellow','LinearGray5','LinearGray4'];
-        
-      for(var i = 0; i < palettes.length; i++) {
-        var item = document.createElement("option");
-        item.textContent = item.value = palettes[i];
-        self.gui.palette.appendChild(item);
-      }  
-    }
-    
-    self.gui.palette_min    = document.getElementById(self.id+'palette_min');
-    self.gui.palette_max    = document.getElementById(self.id+'palette_max');
-    self.gui.palette_interp = document.getElementById(self.id+'palette_interp');
-    
-    //refreshGui
-    self.refreshGui=function()
-    {
-      if (self.gui.axis)
-        self.gui.axis.value=self.axis;
-        
-      if (self.gui.slice)
-      {
-        self.gui.slice.max=self.dataset.pow2dims[self.axis]-1;  
-        self.gui.slice.value=self.slice; 
-      }
-      
-      if (self.gui.show_slice)
-        self.gui.show_slice.value=self.slice;
-        
-      if (self.gui.field)
-        self.gui.field.value=self.field;
-        
-      if (self.gui.time)
-        self.gui.time.value=self.time;
-        
-      if (self.gui.show_time)
-        self.gui.show_time.value=self.time;
-        
-      if (self.gui.palette)
-        self.gui.palette.value=self.palette;
-        
-      if (self.gui.palette_min)
-        self.gui.palette_min.value=self.palette_min;
-        
-      if (self.gui.palette_max)
-        self.gui.palette_max.value=self.palette_max;
-        
-      if (self.gui.palette_interp)
-        self.gui.palette_interp.value=self.palette_interp;    
-    }    
-  };
-  
+
+  var div=document.getElementById(self.id);
+
+  var osd_id=self.id+"_osd";
+
+  div.innerHTML="<div id='"+osd_id+"' style='width: 100%;height: 100%'></div>"; 
+
   //refresh
   self.refresh=function() 
   { 
-    self.refreshGui();
-    
     permutation=[[1,2,0],[0,2,1],[0,1,2]];
     X = permutation[self.axis][0];
     Y = permutation[self.axis][1];
     Z = permutation[self.axis][2];
-    
-    document.getElementById(self.id+'osd').innerHTML=""; 
+   
+    document.getElementById(osd_id).innerHTML=""; 
     self.osd=OpenSeadragon({
-      id: self.id+'osd', 
+      id: osd_id, 
       prefixUrl: 'https://raw.githubusercontent.com/openseadragon/svg-overlay/master/openseadragon/images/', 
       showNavigator: self.showNavigator, 
       debugMode: self.debugMode, 
@@ -497,7 +343,7 @@ function VisusOSD(params)
           	  +'&toh='+toh;    
           }
           
-          //console.log(ret);
+          console.log(ret);
           return ret;
         }
       }
@@ -518,40 +364,95 @@ function VisusOSD(params)
     self.maxLevel=5;
   }
   
+  //getAxis
+  self.getAxis=function() {
+    return self.axis; 
+  };
+  
+  //setAxis
+  self.setAxis=function(value) {
+    self.axis=value;
+    self.slice=clamp(self.slice,0,self.dataset.pow2dims[axis]-1);
+  };
+  
+  //getSlice
+  self.getSlice=function() {
+    return self.slice;
+  };
+  
   //setSlice
-  self.setSlice=function(axis,slice)
-  {
-    self.axis =parseInt(axis);
-    self.slice=clamp(parseInt(slice),0,self.dataset.pow2dims[axis]-1);
-  }  
+  self.setSlice=function(value) {
+    self.slice=clamp(value,0,self.dataset.pow2dims[axis]-1);
+  } ; 
+  
+  //getField
+  self.getField=function() {
+    return self.field;
+  };
   
   //setField
-  self.setField=function(value)
-  {
+  self.setField=function(value) {
     self.field=value;
-  }
+  };
+  
+  //getTime
+  self.getTime=function() {
+    return self.time; 
+  };
   
   //setTime
-  self.setTime=function(value)
-  {
+  self.setTime=function(value) {
     self.time=value;
-  }
+  };
+  
+  //getPalette
+  self.getPalette=function() {
+    return self.palette;
+  };
   
   //setPalette
-  self.setPalette=function(value,min,max,interp)
-  {
+  self.setPalette=function(value) {
     self.palette=value;
-    self.palette_min=min;
-    self.palette_max=max;
-    self.palette_interp=interp;
-  }
+  };
   
-  self.createDefaultGui();
+  //getPaletteMin
+  self.getPaletteMin=function() {
+    return self.palette_min;
+  };
   
-  self.setSlice(2,0,false); 
+   //setPaletteMin
+  self.setPaletteMin=function(value) {
+    self.palette_min=value;
+  } ;
+  
+   //getPaletteMax
+  self.getPaletteMax=function() {
+    return self.palette_max;
+  };
+  
+  //setPaletteMax
+  self.setPaletteMax=function(value) {
+    self.palette_max=value;
+  }  ;
+  
+  //getPaletteInterp
+  self.getPaletteInterp=function() {
+    return self.palette_interp;
+  };
+  
+  //setPaletteInterp
+  self.setPaletteInterp=function(value) {
+    self.palette_interp=value;
+  }; 
+   
+  self.setAxis(2);
+  self.setSlice(0);
   self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
-  self.setPalette("",0,0,"Default");
+  self.setPalette("");
+  self.setPaletteMin(0);
+  self.setPaletteMax(0);
+  self.setPaletteInterp("Default");
   
   self.refresh();
   

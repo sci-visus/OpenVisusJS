@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Visus Javascript</title>
+
+<style>
+body {font: normal 10px Verdana, Arial, sans-serif;}
+
+.toolbar_value { 
+    border: none;
+    background-color: #C0D0E0;
+}
+
+</style>
+
+<script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
+<script src="visus.js"></script>
+
+<script>
+
+var visus1;
+
+//refreshAll
+function refreshAll()
+{
+  visus1.refresh();
+  
+  document.getElementById('slice').max=visus1.dataset.pow2dims[visus1.getAxis()]-1;  
+  
+  document.getElementById('axis').value=visus1.getAxis();
+  document.getElementById('slice').value=visus1.getSlice();
+  document.getElementById('edit_slice').value=visus1.getSlice();
+  document.getElementById('field').value=visus1.getField();
+  document.getElementById('time').value=visus1.getTime();
+  document.getElementById('edit_time').value=visus1.getTime();
+  
+  document.getElementById('palette').value=visus1.getPalette();
+  document.getElementById('palette_min').value=visus1.getPaletteMin();
+  document.getElementById('palette_max').value=visus1.getPaletteMax();
+  document.getElementById('palette_interp').value=visus1.getPaletteInterp();
+}
+
+///////////////////////////////////////////////////////
+function getServer() {
+  return document.getElementById('server').value;
+}
+
+///////////////////////////////////////////////////////
+function setServer(value)
+{
+  document.getElementById('server').value=value;
+  
+  visusAsyncGetListOfDatasets(value+'&action=list&format=json')
+  .then(function (datasets) 
+  { 
+    dataset_widget=document.getElementById('dataset');
+    dataset_widget.options.length = 0;
+    for(var i = 0; i < datasets.length; i++) 
+    {
+      var value = datasets[i];
+      var item = document.createElement("option");
+      item.textContent = value;
+      item.value=item.value = value;
+      dataset_widget.appendChild(item);
+    }     
+    
+    setDataset(datasets[0]);
+  });
+}
+
+
+///////////////////////////////////////////////////////
+function getDataset() {
+  return document.getElementById('dataset').value;
+}
+
+///////////////////////////////////////////////////////
+function setDataset(value) 
+{
+  document.getElementById('dataset').value=value;
+  
+  visusAsyncLoadDataset(getServer()+'action=read_dataset&dataset='+value)
+  .then(function (dataset) {
+    
+    //update fieldnames
+    {
+      field_widget=document.getElementById('field');
+      field_widget.options.length = 0;
+      for(var i = 0; i < dataset.fields.length; i++) 
+      {
+        var fieldname = dataset.fields[i].name;
+        var item = document.createElement("option");
+        item.textContent = fieldname;
+        item.value=item.value = fieldname;
+        field_widget.appendChild(item);
+      }  
+    }   
+    
+    //update time range
+    {
+      time_widget=document.getElementById('time');
+      time_widget.min=dataset.timesteps[0];
+      time_widget.max=dataset.timesteps[1];
+      time_widget.step=1;
+    }   
+    
+    //lauch visus_widget
+    visus1=VisusOSD({
+      id : 'visus1',
+      dataset : dataset,
+      compression : 'png',
+      showNavigator : false,
+      debugMode : false
+    }); 
+    
+    refreshAll();
+  });  
+  
+}
+
+
+function onAxisChange(value){
+  visus1.setAxis(value); refreshAll();
+}
+
+function onSliceChange(value){
+  visus1.setSlice(value); refreshAll();
+}
+
+function onFieldChange(value){
+  visus1.setField(value); refreshAll();
+}
+
+function onTimeChange(value){
+  visus1.setTime(value); refreshAll();
+}
+
+function onPaletteChange(){
+  visus1.setPalette(document.getElementById('palette').value); 
+  visus1.setPaletteMin(parseInt(document.getElementById('palette_min').value)); 
+  visus1.setPaletteMax(parseInt(document.getElementById('palette_max').value)); 
+  visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
+  refreshAll();
+}
+
+</script>
+
+</head>
+
+<body>
+
+<table cellspacing="0" cellpadding="0" style='height:100%;width:100%; position: absolute; top: 0; bottom: 0; left: 0; right: 0;'>
+  
+
+  
+  <tr style='height:100%'>
+    <td>
+      <div id='visus1' style='width:100%; height:100%;background-color:#7aefff'>
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      <table width='100%' style='background-color:#B0B0B0;'>
+        <tr>
+          <td> <label>Server</label>
+          <td> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'>
+            
+          <td> <label>Dataset</label>
+          <td> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value'>
+            
+          <td><label>Field</label>
+          <td><select id='field' onchange='onFieldChange(this.value);' class='toolbar_value' />
+        </tr>
+      </table>
+    </td>   
+  </tr>    
+  
+  <tr>
+    <td>
+      <table width='100%' style='background-color:#B0B0B0'>
+        
+        <tr>
+          <td><label>Axis</label>
+          <td>
+            <select id='axis' onchange='onAxisChange(this.value);' class='toolbar_value'>
+              <option value='0'>X</option>
+              <option value='1'>Y</option>
+              <option value='2'>Z</option>
+            </select>
+          
+          <td><label>Slice</label>
+          <td width='50%'>
+            <table width='100%'>
+              <tr width='100%'>
+                <td width='100%'>
+                  <input id='slice' type='range' min='0' step='1' style='width:100%' oninput='onSliceChange(this.value);' />
+                <td>
+                  <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value'>
+              </tr>
+            </table>
+            
+          <td><label>Time</label>       
+          <td width='50%'>
+            <table width='100%'>
+              <tr width='100%'>            
+                <td width='100%'><input  id='time' type='range' step='1' style='width:100%' oninput='onTimeChange(this.value);'>
+                <td><input id='edit_time' size=2 onchange='onTimeChange(this.value);' class='toolbar_value'>
+              </tr>
+            </table>                  
+           
+          <td><label>Palette</label>     
+          <td>
+            <select id='palette' onchange='onPaletteChange();' class='toolbar_value'>
+              <option value=''></option>
+              <option value='grayopaque'>grayopaque</option>
+              <option value='graytransparent'>graytransparent</option>
+              <option value='hsl'>hsl</option>
+              <option value='banded'>banded</option>
+              <option value='bry'>bry</option>
+              <option value='bgry'>bgry</option>
+              <option value='gamma'>gamma</option>
+              <option value='hot1'>hot1</option>
+              <option value='hot2'>hot2</option>
+              <option value='ice'>ice</option>
+              <option value='lighthues'>lighthues</option>
+              <option value='rich'>rich</option>
+              <option value='smoothrich'>smoothrich</option>
+              <option value='lut16'>lut16</option>
+              <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
+              <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option>
+              <option value='GreenGold'>GreenGold</option>
+              <option value='LinearGreen'>LinearGreen</option>
+              <option value='LinearTurquois'>LinearTurquois</option>
+              <option value='MutedBlueGreen'>MutedBlueGreen</option>
+              <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
+              <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
+              <option value='LinearYellow'>LinearYellow</option>
+              <option value='LinearGray5'>LinearGray5</option>
+              <option value='LinearGray4'>LinearGray4</option>     
+            </select>
+              
+          <td><label>Min</label>
+          <td><input id='palette_min' size=2 onchange='onPaletteChange();' class='toolbar_value'>
+            
+          <td><label>Max</label> 
+          <td><input id='palette_max' size=2 onchange='onPaletteChange();' class='toolbar_value'>
+            
+          <td><label>Interpolation</label>    
+          <td>
+            <select id='palette_interp' onchange='onPaletteChange();' class='toolbar_value'>
+              <option value='Default'>Default</option>
+              <option value='Flat'>Flat</option>
+              <option value='Inverted'>Inverted</option>
+            </select> 
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  
+<table>
+  
+<script>
+setServer('http://atlantis.sci.utah.edu:80/mod_visus?');
+</script>
+
+</body>
+</html>
