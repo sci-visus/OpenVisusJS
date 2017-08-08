@@ -1,9 +1,9 @@
-First version:
+First version (visus.js):
 
 http://rawgit.com/sci-visus/visus_javascript/master/example.html
 
 
-Second version:
+Second version (visus2.js):
 
 http://rawgit.com/sci-visus/visus_javascript/master/david.html
 

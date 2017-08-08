@@ -4,7 +4,7 @@
     <meta charset='utf-8'>
     <title>Dermography Powered by Visus</title>
     <script src="https://openseadragon.github.io/openseadragon/openseadragon.min.js"></script>
-    <script src="getTileSources.js"></script>
+    <script src="visus2.js"></script>
 </head>
 <body>
     <!--openseadragon-->
@@ -13,7 +13,7 @@
       var bXRoad=false;
       OpenSeadragon({
           id: "openseadragon1",
-          prefixUrl: "./images/",
+          prefixUrl: "https://raw.githubusercontent.com/openseadragon/svg-overlay/master/openseadragon/images/",
           showNavigator: true,
           showReferenceStrip: true,
           navigatorPosition: "TOP_RIGHT",
