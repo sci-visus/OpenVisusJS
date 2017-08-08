@@ -1,0 +1,82 @@
+
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Dermography Powered by Visus</title>
+    <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js' />
+    <script src="getTileSources.js" />
+</head>
+<body>
+    <!--openseadragon-->
+    <div id="openseadragon1" class="openseadragon" style="width:100%; height:100%;background-color: black;"></div>
+    <script type="text/javascript">
+      bXRoad=false;
+      OpenSeadragon({
+          id: "openseadragon1",
+          prefixUrl: "./images/",
+          showNavigator: true,
+          showReferenceStrip: true,
+          navigatorPosition: "TOP_RIGHT",
+          sequenceMode: true,
+          preserveViewport: true,
+          tileSources: [
+                getTileSources("http://atlantis.sci.utah.edu", "capilla00000", 768, 576, 20, 512, bXRoad)
+              , getTileSources("http://atlantis.sci.utah.edu", "capilla00001", 768, 576, 20, 512, bXRoad)
+              , getTileSources("http://atlantis.sci.utah.edu", "capilla00002", 768, 576, 20, 512, bXRoad)
+              , getTileSources("http://atlantis.sci.utah.edu", "capilla00003", 768, 576, 20, 512, bXRoad)
+              , getTileSources("http://atlantis.sci.utah.edu", "capilla00004", 768, 576, 20, 512, bXRoad)
+              , getTileSources("http://atlantis.sci.utah.edu", "capilla00005", 768, 576, 20, 512, bXRoad)
+              , getTileSources("http://atlantis.sci.utah.edu", "capilla00006", 768, 576, 20, 512, bXRoad)
+          ]
+      });
+    </script>
+
+
+    <!--openseadragon-->
+    <!--<div id="openseadragon2" style="height:100%;width:100%;background: black;" class="openseadragon"></div>
+    <script type="text/javascript">
+        OpenSeadragon({
+            id: "openseadragon2",
+            prefixUrl: "./images/",
+            showNavigator: true,
+            showReferenceStrip: true,
+            navigatorPosition: "TOP_RIGHT",
+            sequenceMode: true,
+            preserveViewport: true,
+            tileSources: [
+                  getTileSources("http://atlantis.sci.utah.edu", "mela00000", 768, 576, 20, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "mela00001", 768, 576, 20, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "mela00002", 768, 576, 20, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "mela00003", 768, 576, 20, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "mela00004", 768, 576, 20, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "nevo00000", 768, 576, 20, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "nevo00001", 768, 576, 20, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "nevo00002", 768, 576, 20, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "nevo00004", 768, 576, 20, 512, true)
+            ]
+        });
+    </script>-->
+
+    <!--openseadragon-->
+    <!--<div id="openseadragon3" style="height:100%;width:100%;background: black;" class="openseadragon"></div>
+    <script type="text/javascript">
+        OpenSeadragon({
+            id: "openseadragon3",
+            prefixUrl: "./images/",
+            showNavigator: true,
+            showReferenceStrip: true,
+            navigatorPosition: "TOP_RIGHT",
+            sequenceMode: true,
+            preserveViewport: true,
+            tileSources: [
+                  getTileSources("http://atlantis.sci.utah.edu", "dsothers00000", 3136, 2352, 24, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "dsothers00001", 3136, 2352, 24, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "dsothers00002", 3136, 2352, 24, 512, true) 
+                , getTileSources("http://atlantis.sci.utah.edu", "dsothers00003", 3136, 2352, 24, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "dsothers00004", 3136, 2352, 24, 512, true)
+                , getTileSources("http://atlantis.sci.utah.edu", "dsothers00005", 3136, 2352, 24, 512, true)
+            ]
+        });
+    </script>-->
+</body>
+</html>

@@ -1,0 +1,25 @@
+﻿<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>David Powered by Visus</title>
+    <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js' />
+    <script src="getTileSources.js" />
+</head>
+
+<body>
+
+    <div id="openseadragon1" class="openseadragon" style="width:100%; height:100%;background-color: black;"></div>
+    <script type="text/javascript">
+      bXRoad=false;
+      OpenSeadragon({
+          id: "openseadragon1",
+          prefixUrl: "./images/",
+          showNavigator: true,
+          debugMode: false,
+          tileSources: getTileSources("http://atlantis.sci.utah.edu", "david_subsampled", 29280, 70416, 32, 512, bXRoad)
+      });
+    </script>
+
+</body>
+</html>
