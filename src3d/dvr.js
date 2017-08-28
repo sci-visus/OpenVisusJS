@@ -127,6 +127,7 @@ main(void)
                         return;
                 }
 #elif (METHOD == DVR)
+
                 vec4 sample_color = texture(colormap_sampler, vec2(value/255.0, 0.0));
                 color.xyz += (1.0 - color.a)*sample_color.xyz*sample_color.a;
                 color.a += (1.0 - color.a)*sample_color.a;
@@ -336,13 +337,14 @@ if (!gl) {
 if (!gl.getExtension('OES_texture_float_linear'))
         console.log('WebGL: no linear filtering for float textures')
 
+/*
 const isovalue_select = document.getElementById('isovalue_select')
 isovalue_select.addEventListener('input', e => {
         console.log('isovalue', e.target.value)
         gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), e.target.value)
         render()
 })
-
+*/
 
 gl.enable(gl.CULL_FACE)
 gl.cullFace(gl.FRONT)
@@ -424,7 +426,6 @@ gl.bindVertexArray(null)
 
 let volume_tex
 
-
 const test_colormap = [
     255, 255, 0, 5,
     0, 255, 0, 200,
@@ -432,41 +433,105 @@ const test_colormap = [
     0,0,0,0
 ]
 
-const colormap = smoothrich_colormap;
+var colormap_tex = gl.createTexture()
+var volume_sampler = gl.createSampler()
+var colormap_sampler = gl.createSampler()
+var ubo = gl.createBuffer()
 
-const colormap_tex = gl.createTexture()
-/* WebGL does not support 1D textures directly */
-gl.bindTexture(gl.TEXTURE_2D, colormap_tex)
-gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
-gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
-                 gl.UNSIGNED_BYTE, new Uint8Array(colormap))
+updateColorMap();
 
-/* create sampler objects for each texture */
-const volume_sampler = gl.createSampler()
-gl.samplerParameteri(volume_sampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-gl.samplerParameteri(volume_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
+// const test_colormap = [
+//     255, 255, 0, 5,
+//     0, 255, 0, 200,
+//     0, 255, 255, 255,
+//     0,0,0,0
+// ]
 
-const colormap_sampler = gl.createSampler()
-gl.samplerParameteri(colormap_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+// const colormap = gamma_colormap;
 
+// const colormap_tex = gl.createTexture()
+// /* WebGL does not support 1D textures directly */
+// gl.bindTexture(gl.TEXTURE_2D, colormap_tex)
+// gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
+// gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
+//                  gl.UNSIGNED_BYTE, new Uint8Array(colormap))
 
+// /* create sampler objects for each texture */
+// const volume_sampler = gl.createSampler()
+// gl.samplerParameteri(volume_sampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+// gl.samplerParameteri(volume_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+// gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+// gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+// gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
 
-const ubo = gl.createBuffer()
-gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
-gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
+// const colormap_sampler = gl.createSampler()
+// gl.samplerParameteri(colormap_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+// gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+// gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
-gl.clearColor(1.0,1.0,1.0,1.0)
+// const ubo = gl.createBuffer()
+// gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
+// gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
 
-gl.uniform1i(gl.getUniformLocation(program, 'volume_sampler'), 0)
-gl.uniform1i(gl.getUniformLocation(program, 'colormap_sampler'), 1)
+// gl.clearColor(1.0,1.0,1.0,1.0)
 
-gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), isovalue_select.value)
+// gl.uniform1i(gl.getUniformLocation(program, 'volume_sampler'), 0)
+// gl.uniform1i(gl.getUniformLocation(program, 'colormap_sampler'), 1)
 
+// gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), isovalue_select.value)
+
+function updateColorMap()
+{
+  var palette_str = document.getElementById('palette').value;
+  console.log("New Palette: "+palette_str)
+
+  var colormap;
+
+  if (palette_str == "gamma") 
+    colormap = gamma_colormap;
+  else if (palette_str == "rich") 
+    colormap = rich_colormap;
+  else if (palette_str == "smoothrich") 
+    colormap = smoothrich_colormap;
+  // else if (palette_str == "graytransparent") 
+  //   colormap = gray_transparent_colormap();
+  // else if (palette_str == "grayopaque") 
+  //   colormap = gray_opaque_colormap();
+  // else if (palette_str == "AsymmetricBlueGreenDivergent") 
+  //   colormap = AsymmetricBlueGreenDivergent_colormap;
+  else 
+    colormap = smoothrich_colormap;
+
+  colormap_tex = gl.createTexture()
+  /* WebGL does not support 1D textures directly */
+  gl.bindTexture(gl.TEXTURE_2D, colormap_tex)
+  gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
+  gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
+                   gl.UNSIGNED_BYTE, new Uint8Array(colormap))
+
+  /* create sampler objects for each texture */
+  volume_sampler = gl.createSampler()
+  gl.samplerParameteri(volume_sampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+  gl.samplerParameteri(volume_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+  gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+  gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
+
+  // colormap_sampler = gl.createSampler()
+  gl.samplerParameteri(colormap_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+  gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+  ubo = gl.createBuffer()
+  gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
+  gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
+
+  gl.clearColor(1.0,1.0,1.0,1.0)
+
+  gl.uniform1i(gl.getUniformLocation(program, 'volume_sampler'), 0)
+  gl.uniform1i(gl.getUniformLocation(program, 'colormap_sampler'), 1)
+
+}
 
 function
 render()
@@ -492,7 +557,7 @@ render()
 
 /* setup scene for 2D view */
 function
-present()
+resetView()
 {
         q = quat(1.0, 0.0, 0.0, 0.0)
         matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -view_distance, 1.0)
@@ -608,10 +673,10 @@ upload_data(gl, buffer, size, data_type, box_size)
         console.log('extent', extent)
 
         /* update isovalue slider and shader uniform */
-        isovalue_select.min = extent[0]
-        isovalue_select.max = extent[1]
-        isovalue_select.value = 0.5*(extent[0] + extent[1])
-        gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), isovalue_select.value)
+        // isovalue_select.min = extent[0]
+        // isovalue_select.max = extent[1]
+        // isovalue_select.value = 0.5*(extent[0] + extent[1])
+        // gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), isovalue_select.value)
 
         gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
         if (array.BYTES_PER_ELEMENT === 2) {

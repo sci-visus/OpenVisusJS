@@ -530,8 +530,8 @@ function VisusVR(params)
             +'&dataset='+self.dataset.name
             +'&compression='+self.compression             
             +'&maxh='+ self.dataset.maxh
-            +'&time=0'//+self.time
-            //+'&field='+self.field
+            +'&time='+self.time
+            +'&field='+self.field
             //+'&palette='+self.palette
             //'&palette_min='+self.palette_min
             //'&palette_max='+self.palette_max
@@ -580,6 +580,8 @@ function VisusVR(params)
           console.log(ret);
 
           self.query_str = ret;
+
+          return ret;
         // }
       // }
     // });    
@@ -600,96 +602,96 @@ function VisusVR(params)
   // }
   
   //getAxis
-  // self.getAxis=function() {
-  //   return self.axis; 
-  // };
+  self.getAxis=function() {
+    return self.axis; 
+  };
   
-  // //setAxis
-  // self.setAxis=function(value) {
-  //   self.axis=value;
-  //   self.slice=clamp(self.slice,0,self.dataset.pow2dims[axis]-1);
-  // };
+  //setAxis
+  self.setAxis=function(value) {
+    self.axis=value;
+    self.slice=clamp(self.slice,0,self.dataset.pow2dims[axis]-1);
+  };
   
-  // //getSlice
-  // self.getSlice=function() {
-  //   return self.slice;
-  // };
+  //getSlice
+  self.getSlice=function() {
+    return self.slice;
+  };
   
-  // //setSlice
-  // self.setSlice=function(value) {
-  //   self.slice=clamp(value,0,self.dataset.pow2dims[axis]-1);
-  // } ; 
+  //setSlice
+  self.setSlice=function(value) {
+    self.slice=clamp(value,0,self.dataset.pow2dims[axis]-1);
+  } ; 
   
   // //getField
-  // self.getField=function() {
-  //   return self.field;
-  // };
+  self.getField=function() {
+    return self.field;
+  };
   
   // //setField
-  // self.setField=function(value) {
-  //   self.field=value;
-  // };
+  self.setField=function(value) {
+    self.field=value;
+  };
   
   // //getTime
-  // self.getTime=function() {
-  //   return self.time; 
-  // };
+  self.getTime=function() {
+    return self.time; 
+  };
   
-  // //setTime
-  // self.setTime=function(value) {
-  //   self.time=value;
-  // };
+  //setTime
+  self.setTime=function(value) {
+    self.time=value;
+  };
   
   // //getPalette
-  // self.getPalette=function() {
-  //   return self.palette;
-  // };
+  self.getPalette=function() {
+    return self.palette;
+  };
   
-  // //setPalette
-  // self.setPalette=function(value) {
-  //   self.palette=value;
-  // };
+  //setPalette
+  self.setPalette=function(value) {
+    self.palette=value;
+  };
   
-  // //getPaletteMin
-  // self.getPaletteMin=function() {
-  //   return self.palette_min;
-  // };
+  //getPaletteMin
+  self.getPaletteMin=function() {
+    return self.palette_min;
+  };
   
-  //  //setPaletteMin
-  // self.setPaletteMin=function(value) {
-  //   self.palette_min=value;
-  // } ;
+   //setPaletteMin
+  self.setPaletteMin=function(value) {
+    self.palette_min=value;
+  } ;
   
-  //  //getPaletteMax
-  // self.getPaletteMax=function() {
-  //   return self.palette_max;
-  // };
+   //getPaletteMax
+  self.getPaletteMax=function() {
+    return self.palette_max;
+  };
   
-  // //setPaletteMax
-  // self.setPaletteMax=function(value) {
-  //   self.palette_max=value;
-  // }  ;
+  //setPaletteMax
+  self.setPaletteMax=function(value) {
+    self.palette_max=value;
+  }  ;
   
-  // //getPaletteInterp
-  // self.getPaletteInterp=function() {
-  //   return self.palette_interp;
-  // };
+  //getPaletteInterp
+  self.getPaletteInterp=function() {
+    return self.palette_interp;
+  };
   
-  // //setPaletteInterp
-  // self.setPaletteInterp=function(value) {
-  //   self.palette_interp=value;
-  // }; 
+  //setPaletteInterp
+  self.setPaletteInterp=function(value) {
+    self.palette_interp=value;
+  }; 
    
-  // self.setAxis(2);
-  // self.setSlice(0);
-  // self.setField(self.dataset.fields[0].name);
-  // self.setTime(self.dataset.timesteps[0]);
-  // self.setPalette("");
-  // self.setPaletteMin(0);
-  // self.setPaletteMax(0);
-  // self.setPaletteInterp("Default");
+  self.setAxis(2);
+  self.setSlice(0);
+  self.setField(self.dataset.fields[0].name);
+  self.setTime(self.dataset.timesteps[0]);
+  self.setPalette("");
+  self.setPaletteMin(0);
+  self.setPaletteMax(0);
+  self.setPaletteInterp("Default");
   
-  // self.refresh();
+  self.refresh();
   
   return self;
 };
