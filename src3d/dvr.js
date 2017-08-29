@@ -494,6 +494,10 @@ updateColorMap(NaN, NaN);
 
 // gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), isovalue_select.value)
 
+function get_data_extent(){
+  return data_extent;
+}
+
 function updateColorMap(ext1, ext2)
 {
   var palette_str = document.getElementById('palette').value;
