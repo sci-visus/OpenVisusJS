@@ -62,6 +62,9 @@ in vec3 eye;
 in mat4 to_world;
 in mat3 to_worldn;
 
+uniform float extent1;
+uniform float extent2;
+
 layout (location = 0) out vec4 color;
 
 
@@ -85,13 +88,17 @@ main(void)
 
         /* intersect aabb */
         vec3 near = min(-eye/d, (vec3(1.0) - eye)/d);
+        //vec3 near_dt = min((1.0/256.0-eye)/d, (vec3(1.0) - eye)/d);
         vec3 far = max(-eye/d, (vec3(1.0) - eye)/d);
 
         float tnear = max(near.x, max(near.y, near.z));
+        //float tnear_dt = max(near_dt.x, max(near_dt.y, near_dt.z));
         float tfar  = min(far.x, min(far.y, far.z));
 
         ivec3 size = textureSize(volume_sampler, 0);
         /* TODO: step in correct dts along x, y, and z */
+        //vec3 dts = vec3(size)*abs(d);
+        //float dt = 1.0/float(max(dts.x, max(dts.y, dts.z)));
         float dt = 1.0/float(max(size.x, max(size.y, size.z)));
 
         color = vec4(0.0, 0.0, 0.0, 0.0);
@@ -127,10 +134,14 @@ main(void)
                         return;
                 }
 #elif (METHOD == DVR)
-
-                vec4 sample_color = texture(colormap_sampler, vec2(value/255.0, 0.0));
-                color.xyz += (1.0 - color.a)*sample_color.xyz*sample_color.a;
-                color.a += (1.0 - color.a)*sample_color.a;
+                if(color.a < 255.0 && value >=extent1 && value <= extent2){
+                  vec4 sample_color = texture(colormap_sampler, vec2(clamp((value-extent1)/(extent2-extent1),0.0,1.0), 0.0));
+                  color.xyz += (1.0 - color.a)*sample_color.xyz*sample_color.a;
+                  color.a += (1.0 - color.a)*sample_color.a;
+                //  color = vec4(t, 0.0, 0.0, 1.0);
+                 //color = vec4(clamp((value-extent1)/(extent2-extent1),0.0,1.0), 0.0, 0.0, 1.0);
+                 // return;
+                }
 #endif
         }
         if (color.a == 0.0) 
@@ -427,8 +438,8 @@ gl.bindVertexArray(null)
 let volume_tex
 
 const test_colormap = [
-    255, 255, 0, 5,
-    0, 255, 0, 200,
+    255, 255, 0, 0,
+    0, 255, 0, 0,
     0, 255, 255, 255,
     0,0,0,0
 ]
@@ -437,8 +448,11 @@ var colormap_tex = gl.createTexture()
 var volume_sampler = gl.createSampler()
 var colormap_sampler = gl.createSampler()
 var ubo = gl.createBuffer()
+var extent1=0.0;
+var extent2=255.0;
+var data_extent=[];
 
-updateColorMap();
+updateColorMap(NaN, NaN);
 
 // const test_colormap = [
 //     255, 255, 0, 5,
@@ -480,10 +494,24 @@ updateColorMap();
 
 // gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), isovalue_select.value)
 
-function updateColorMap()
+function updateColorMap(ext1, ext2)
 {
   var palette_str = document.getElementById('palette').value;
   console.log("New Palette: "+palette_str)
+
+  if(!isNaN(ext1))
+    extent1 = ext1;
+  else
+    extent1 = data_extent[0]
+  if(!isNaN(ext2))
+    extent2 = ext2;
+  else
+    extent2 = data_extent[1]
+
+  console.log("pal_min "+extent1+" pal_max "+extent2)
+
+  gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
+  gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
 
   var colormap;
 
@@ -621,8 +649,6 @@ const to_half = (() => {
         }
 })()
 
-
-
 function
 compute_extent(array)
 {
@@ -635,27 +661,34 @@ function
 to_array(buffer, data_type)
 {
         if (data_type === "uint8") {
-                const view = new Uint8Array(buffer)
-                const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
-                const extent = compute_extent(view)
-                return {extent, array}
-
+            const view = new Uint8Array(buffer)
+            const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
+            const extent = compute_extent(view)
+            return {extent, array}
         } else if (data_type === "uint16") {
-                const view = new Uint16Array(buffer)
-                const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
-                const extent = compute_extent(view)
-                return {extent, array}
-
+            const view = new Uint16Array(buffer)
+            const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
+            const extent = compute_extent(view)
+            return {extent, array}
         } else if (data_type === "int16") {
-                const view = new Int16Array(buffer)
-                const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
-                const extent = compute_extent(view)
-                return {extent, array}
-
+            const view = new Int16Array(buffer)
+            const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
+            const extent = compute_extent(view)
+            return {extent, array}
+        } else if (data_type === "int32") {
+            const view = new Int32Array(buffer)
+            const array = new Float32Array(view.length).map((_, i) => view[i])
+            const extent = compute_extent(array)
+            return {extent, array}
         } else if (data_type === "float32") {
-                const array = new Float32Array(buffer)
-                const extent = compute_extent(array)
-                return {extent, array}
+            const array = new Float32Array(buffer)
+            const extent = compute_extent(array)
+            return {extent, array}
+        } else if (data_type === "float64") {
+            const view = new Float64Array(buffer)
+            const array = new Float32Array(view.length).map((_, i) => view[i])
+            const extent = compute_extent(array)
+            return {extent, array}
         }
 }
 
@@ -663,7 +696,7 @@ to_array(buffer, data_type)
 
 /* 8 and 16 bit integers are converted to float16 */
 function
-upload_data(gl, buffer, size, data_type, box_size)
+upload_data(gl, buffer, size, data_type, box_size)//, min_extent, max_extent)
 {
         /* TODO: dealloc or if same size then reuse */
         volume_tex = gl.createTexture()
@@ -671,6 +704,11 @@ upload_data(gl, buffer, size, data_type, box_size)
 
         const {array, extent} = to_array(buffer, data_type)
         console.log('extent', extent)
+        
+        data_extent = extent;
+
+        gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent[0]);
+        gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent[1]);
 
         /* update isovalue slider and shader uniform */
         // isovalue_select.min = extent[0]
@@ -687,7 +725,7 @@ upload_data(gl, buffer, size, data_type, box_size)
                                  gl.RED, gl.HALF_FLOAT, array)
 
         } else {
-                gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R32, size.width, size.height, size.depth)
+                gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R32F, size.width, size.height, size.depth)
                 gl.texSubImage3D(gl.TEXTURE_3D, 0,
                                  0, 0, 0,
                                  size.width, size.height, size.depth,

@@ -17,7 +17,7 @@
   <tr style='height:100%'>
     <td align="center">
       
-      <canvas width="800" height="600" ></canvas>
+      <canvas width="1000" height="600" ></canvas>
     </td>
   </tr>
   
@@ -102,11 +102,11 @@
               <option value='LinearGray4'>LinearGray4</option>      -->
             </select>
               
-          <!-- <td><label>Min</label>
+          <td><label>Min</label>
           <td><input id='palette_min' size=2 onchange='onPaletteChange();' class='toolbar_value'>
             
           <td><label>Max</label> 
-          <td><input id='palette_max' size=2 onchange='onPaletteChange();' class='toolbar_value'> -->
+          <td><input id='palette_max' size=2 onchange='onPaletteChange();' class='toolbar_value'>
             
           <!-- <td><label>Interpolation</label>    
           <td>
@@ -158,11 +158,12 @@ function fetch_and_draw(query_str, reset_view=1)
       data_size[0]=parseInt(dims[0]);
       data_size[1]=parseInt(dims[1]);
       data_size[2]=parseInt(dims[2]);
-
-      console.log(dtype)
+     
       console.log(data_size)
 
       dtype=response.headers.get('visus-dtype')
+
+      console.log(dtype)
 
       return response.arrayBuffer()
     }).then(data => {
@@ -172,10 +173,16 @@ function fetch_and_draw(query_str, reset_view=1)
 
       viewer.style.display = 'block'
 
+      let pal_min= parseFloat(document.getElementById('palette_min').value)
+      let pal_max= parseFloat(document.getElementById('palette_max').value)
+
+      console.log("update color map "+pal_min+" "+pal_max)
+      updateColorMap(pal_min, pal_max);
+      
       if(reset_view==1)
         resetView()
-      else
-        render()
+
+      render();
 
     })
 }
@@ -200,6 +207,7 @@ function refreshAll(reset_view=1)
   // document.getElementById('palette_min').value=visus1.getPaletteMin();
   // document.getElementById('palette_max').value=visus1.getPaletteMax();
   // document.getElementById('palette_interp').value=visus1.getPaletteInterp();
+
 }
 
 ///////////////////////////////////////////////////////
@@ -241,6 +249,10 @@ function setDataset(value)
 {
   document.getElementById('dataset').value=value;
 
+  // reset palette
+  document.getElementById('palette_min').value="";
+  document.getElementById('palette_max').value="";
+
   dataset_url=getServer()+'action=read_dataset&dataset='+value
   level=24
 
@@ -279,7 +291,8 @@ function setDataset(value)
     
     refresh();
 
-    fetch_and_draw(visus1.query_str)
+    refreshAll();
+    //fetch_and_draw(visus1.query_str)
 
   });  
 
@@ -306,12 +319,16 @@ function onTimeChange(value){
 
 function onPaletteChange(){
   visus1.setPalette(document.getElementById('palette').value); 
-  // visus1.setPaletteMin(parseInt(document.getElementById('palette_min').value)); 
-  // visus1.setPaletteMax(parseInt(document.getElementById('palette_max').value)); 
+  visus1.setPaletteMin(parseInt(document.getElementById('palette_min').value)); 
+  visus1.setPaletteMax(parseInt(document.getElementById('palette_max').value)); 
   // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
 
-  updateColorMap();
-  refreshAll(0);
+  let pal_min= parseFloat(document.getElementById('palette_min').value)
+  let pal_max= parseFloat(document.getElementById('palette_max').value)
+
+  updateColorMap(pal_min, pal_max);
+  render();
+  //refreshAll(0);
 }
 
 setServer('http://molniya.sci.utah.edu:80/mod_visus?');
