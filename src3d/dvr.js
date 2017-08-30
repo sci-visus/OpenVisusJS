@@ -387,7 +387,7 @@ gl.uniformBlockBinding(program, uniform_matrices_location, 0)
 
 
 /* TODO: can use one triangle strip */
-const positions = new Float32Array([
+var positions = new Float32Array([
         0.0, 0.0, 0.0,
         1.0, 0.0, 0.0,
         0.0, 1.0, 0.0,
@@ -397,6 +397,7 @@ const positions = new Float32Array([
         0.0, 1.0, 1.0,
         1.0, 1.0, 1.0,
 ])
+
 const indices = new Uint8Array([
         /* bottom */
         0, 2, 1,

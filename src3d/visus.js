@@ -496,6 +496,7 @@ function VisusVR(params)
   self.minLevel=0;
   self.maxLevel=33;
   self.compression='raw'
+  self.isVolumeRender=false
 
   // var div=document.getElementById(self.id);
 
@@ -537,45 +538,41 @@ function VisusVR(params)
             //'&palette_max='+self.palette_max
             //'&palette_interp='+self.palette_interp;
           
-          // if (self.dataset.dim==2)
-          // {
-            toh=level;//*2;
+            toh=clamp(level,0,self.maxLevel);
             vs = Math.pow(2, self.maxLevel-level); 
             w=self.tile_size[0] * vs; x1=x * w; x2=x1 + w;
             h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
             d=self.tile_size[2] * vs; z1=z * d; z2=z1 + d;
             
-            //mirror y
-            // {
-            //   yt = y1; 
-            //   y1 = self.dataset.dims[1] - y2; 
-            //   y2 = self.dataset.dims[1] - yt;
-            // }
   
-            ret = base_url
-              +'&action=boxquery'
-              +'&box='
-                +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
-                +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'
-                +clamp(z1, 0, self.dataset.dims[2])+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
-              +'&toh='+toh;
-          // }
-          // else
-          // {
-            // toh=self.dataset.maxh-(self.maxLevel-level)*3;
-  
-            // box=[];
-            // box[X]=[0,self.dataset.dims[X]];
-            // box[Y]=[0,self.dataset.dims[Y]];
-            // box[Z]=[0,self.dataset.dims[Z]];//self.slice,self.slice];       
-            
-            // ret = base_url
-            //   +'&action=pointquery' 
-            //   +'&box='
-            //     +box[0][0]+'%20'+box[1][0]+'%20'+box[2][0]+'%20'
-            //     +box[0][1]+'%20'+box[1][1]+'%20'+box[2][1]
-            //   +'&toh='+toh;    
-          // }
+            if(!isVolumeRender){
+              console.log("slice "+self.slice+" axis "+self.axis);
+              if(self.axis=='0'){
+                x1=Math.floor(self.dataset.dims[0]*(self.slice/100.0))
+                x2=x1+1
+              }else if(self.axis=='1'){
+                y1=Math.floor(self.dataset.dims[1]*(self.slice/100.0))
+                y2=y1+1
+              }else if(self.axis=='2'){
+                z1=Math.floor(self.dataset.dims[2]*(self.slice/100.0))
+                z2=z1+1
+                console.log("box "+z1+" "+z2)
+              }
+              
+              ret = base_url
+                +'&action=pointquery'
+
+            }else{
+              ret = base_url
+                +'&action=boxquery'
+            }
+
+            ret +='&box='
+                  +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
+                  +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'
+                  +clamp(z1, 0, self.dataset.dims[2])+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
+                +'&toh='+toh;
+
           
           console.log(ret);
 
@@ -601,6 +598,10 @@ function VisusVR(params)
   //   self.maxLevel=5;
   // }
   
+  self.setRenderType=function(value){
+    self.isVolumeRender=value;
+  };
+
   //getAxis
   self.getAxis=function() {
     return self.axis; 
@@ -609,7 +610,7 @@ function VisusVR(params)
   //setAxis
   self.setAxis=function(value) {
     self.axis=value;
-    self.slice=clamp(self.slice,0,self.dataset.pow2dims[axis]-1);
+    self.slice=clamp(self.slice,0,100);//self.dataset.pow2dims[axis]-1);
   };
   
   //getSlice
@@ -619,7 +620,7 @@ function VisusVR(params)
   
   //setSlice
   self.setSlice=function(value) {
-    self.slice=clamp(value,0,self.dataset.pow2dims[axis]-1);
+    self.slice=clamp(value,0,100);//self.dataset.pow2dims[axis]-1);
   } ; 
   
   // //getField
@@ -683,7 +684,7 @@ function VisusVR(params)
   }; 
    
   self.setAxis(2);
-  self.setSlice(0);
+  self.setSlice(50);
   self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
   self.setPalette("");

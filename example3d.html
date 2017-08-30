@@ -27,6 +27,7 @@
         <tr>
           <td> <label>Server</label>
           <td> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'>
+          <td> <input id='vr_cb' type='checkbox' size=32 onchange='onVRchange(this.value);' class='toolbar_value'>
             
           <td> <label>Dataset</label>
           <td> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value'>
@@ -44,24 +45,24 @@
       <table width='100%' style='background-color:#B0B0B0'>
         
         <tr>
-          <!-- <td><label>Axis</label>
+          <td><label>Axis</label>
           <td>
             <select id='axis' onchange='onAxisChange(this.value);' class='toolbar_value'>
-              <option value='0'>X</option>
-              <option value='1'>Y</option>
               <option value='2'>Z</option>
+              <option value='1'>Y</option>
+              <option value='0'>X</option>
             </select>
           
           <td><label>Slice</label>
-          <td width='50%'> -->
-            <!-- <table width='100%'>
+          <td width='50%'>
+            <table width='100%'>
               <tr width='100%'>
                 <td width='100%'>
-                  <input id='slice' type='range' min='0' step='1' style='width:100%' oninput='onSliceChange(this.value);' />
+                  <input id='slice' type='range' min='0' step='1' max='100' style='width:100%' oninput='onSliceChange(this.value);' />
                 <td>
                   <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value'>
               </tr>
-            </table> -->
+            </table>
             
           <td><label>Time</label>       
           <td width='50%'>
@@ -160,6 +161,9 @@ function fetch_and_draw(query_str, reset_view=1)
       data_size[1]=parseInt(dims[1]);
       data_size[2]=parseInt(dims[2]);
      
+      if(isNaN(data_size[2]))
+        data_size[2]=1
+
       console.log(data_size)
 
       dtype=response.headers.get('visus-dtype')
@@ -189,7 +193,10 @@ function fetch_and_draw(query_str, reset_view=1)
 
       render();
 
-    })
+    }).catch(e => {
+    console.log(e);
+  });
+
 }
 
 
@@ -307,11 +314,11 @@ function setDataset(value)
 
 
 function onAxisChange(value){
-  visus1.setAxis(value); refreshAll();
+  visus1.setAxis(value); refreshAll(0);
 }
 
 function onSliceChange(value){
-  visus1.setSlice(value); refreshAll();
+  visus1.setSlice(value); refreshAll(0);
 }
 
 function onFieldChange(value){
@@ -320,6 +327,10 @@ function onFieldChange(value){
 
 function onTimeChange(value){
   visus1.setTime(value); refreshAll(0);
+}
+
+function onVRChange(){
+  visus1.setRenderType(document.getElementById('vr_cb').checked);
 }
 
 function onPaletteChange(){
