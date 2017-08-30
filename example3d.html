@@ -27,7 +27,8 @@
         <tr>
           <td> <label>Server</label>
           <td> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'>
-          <td> <input id='vr_cb' type='checkbox' size=32 onchange='onVRchange(this.value);' class='toolbar_value'>
+          <td> <label>Volume render</label>
+          <td> <input id='vr_cb' type='checkbox' size=32 onchange='onVRChange(this.value);' class='toolbar_value' checked>
             
           <td> <label>Dataset</label>
           <td> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value'>
@@ -47,7 +48,7 @@
         <tr>
           <td><label>Axis</label>
           <td>
-            <select id='axis' onchange='onAxisChange(this.value);' class='toolbar_value'>
+            <select id='axis' onchange='onAxisChange(this.value);' class='toolbar_value' disabled>
               <option value='2'>Z</option>
               <option value='1'>Y</option>
               <option value='0'>X</option>
@@ -58,9 +59,9 @@
             <table width='100%'>
               <tr width='100%'>
                 <td width='100%'>
-                  <input id='slice' type='range' min='0' step='1' max='100' style='width:100%' oninput='onSliceChange(this.value);' />
+                  <input id='slice' type='range' min='0' step='1' max='100' style='width:100%' oninput='onSliceChange(this.value);' disabled/>
                 <td>
-                  <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value'>
+                  <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value' disabled>
               </tr>
             </table>
             
@@ -330,7 +331,15 @@ function onTimeChange(value){
 }
 
 function onVRChange(){
-  visus1.setRenderType(document.getElementById('vr_cb').checked);
+
+  ischecked=document.getElementById('vr_cb').checked
+
+  document.getElementById('axis').disabled=ischecked
+  document.getElementById('slice').disabled=ischecked
+  document.getElementById('edit_slice').disabled=ischecked
+
+  visus1.setRenderType(ischecked);
+  onSliceChange(50);
 }
 
 function onPaletteChange(){

@@ -496,7 +496,7 @@ function VisusVR(params)
   self.minLevel=0;
   self.maxLevel=33;
   self.compression='raw'
-  self.isVolumeRender=false
+  self.isVolumeRender=true
 
   // var div=document.getElementById(self.id);
 
