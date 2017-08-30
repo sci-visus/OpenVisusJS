@@ -549,30 +549,35 @@ function VisusVR(params)
               console.log("slice "+self.slice+" axis "+self.axis);
               if(self.axis=='0'){
                 x1=Math.floor(self.dataset.dims[0]*(self.slice/100.0))
-                x2=x1+1
+                x2=x1
+                console.log("box "+x1+" "+x2)
               }else if(self.axis=='1'){
                 y1=Math.floor(self.dataset.dims[1]*(self.slice/100.0))
                 y2=y1+1
               }else if(self.axis=='2'){
                 z1=Math.floor(self.dataset.dims[2]*(self.slice/100.0))
-                z2=z1+1
-                console.log("box "+z1+" "+z2)
+                z2=z1+1;
               }
               
               ret = base_url
                 +'&action=pointquery'
+                +'&box='
+                +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(y1, 0, self.dataset.dims[0]))+'%20'+clamp(z1, 0, self.dataset.dims[2])+'%20'
+                +clamp(x2, 0, self.dataset.dims[0]-1)+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
+                +'&toh='+toh;
 
             }else{
               ret = base_url
                 +'&action=boxquery'
-            }
-
-            ret +='&box='
+                +'&box='
                   +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
                   +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'
                   +clamp(z1, 0, self.dataset.dims[2])+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
                 +'&toh='+toh;
 
+            }
+
+            
           
           console.log(ret);
 
