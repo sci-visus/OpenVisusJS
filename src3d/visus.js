@@ -627,24 +627,28 @@ function VisusVR(params)
   }
 
   self.getDataSize=function(level){
-    var sample_size = 1;
+    var sample_size = 0;
 
     if(self.dtype.includes("8"))
-      sample_size*=8
+      sample_size=1
     if(self.dtype.includes("32"))
-      sample_size*=32
+      sample_size=4
     if(self.dtype.includes("64"))
-      sample_size*=64
+      sample_size=8
     
     sd=[1,1,1];
     for (I=0;I<level;I++) 
       sd[self.dataset.bitmask[self.dataset.maxh-I]]*=2;
 
+    for(d=0;d<3;d++)
+      if(sd[d]>dataset.dims[d])
+        sd[d]=dataset.dims[d]
+
     if(!isVolumeRender)
       sd[axis] = 1
 
     mag=sd[0]*sd[1]*sd[2]
-    console.log("level "+level+" nsamples "+mag)
+    console.log("level "+level+" nsamples "+mag+"="+sd)
 
     return (mag*sample_size)/1024.0/1024.0
 

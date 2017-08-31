@@ -395,7 +395,7 @@ function download(){
 
   out_ext_file = ".raw"
 
-  if(!document.getElementById('vr_cb').checked){
+  if(visus1.dtype.includes("int8") && !document.getElementById('vr_cb').checked){
     data_url=data_url.split("compression=raw").join("compression=png");
     out_ext_file = ".png"
   }
@@ -417,17 +417,19 @@ function download(){
 
           out_dtype=response.headers.get('visus-dtype')
 
+          time_value = document.getElementById('time').value
+
           console.log(out_dtype)
 
-           response.blob().then( blob => {
+          response.blob().then( blob => {
 
-            var url = window.URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = visus1.dataset.name+"_"+out_size[0]+"_"+out_size[1]+"_"+out_size[2]+"_"+out_dtype+"_lvl"+sel_level+out_ext_file;
-            a.click();                    
-          });
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = visus1.dataset.name+"_"+out_size[0]+"_"+out_size[1]+"_"+out_size[2]+"_"+out_dtype+"_t"+time_value+"_lvl"+sel_level+out_ext_file;
+          a.click();                    
         });
+      });
 }
 
 setServer('http://molniya.sci.utah.edu:80/mod_visus?');
