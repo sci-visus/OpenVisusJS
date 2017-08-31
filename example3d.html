@@ -41,7 +41,7 @@
           <td><input  id='resolution' type='range' step='1' min='0' step='1' max='33' style='width:100%' oninput='onResolutionChange(this.value);'>
           <td><input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='toolbar_value'>
           <td><label id="size_est"> ... KB </label>
-          <td><input type='button' value='Download'/>
+          <td><input type='button' value='Download' onclick='download()'/>
         </tr>
       </table>
     </td>   
@@ -194,7 +194,7 @@ function fetch_and_draw(query_str, reset_view=1)
 
       var range=get_data_extent();
       console.log("R:"+range[0]+", "+range[1])
-      document.getElementById('comp_range').innerHTML="["+range[0]+", "+range[1]+"]"
+      document.getElementById('comp_range').innerHTML="["+parseFloat(range[0]).toFixed(3)+", "+parseFloat(range[1]).toFixed(3)+"]"
       
       if(reset_view==1)
         resetView()
@@ -273,6 +273,12 @@ function setDataset(value)
   document.getElementById('palette_min').value="";
   document.getElementById('palette_max').value="";
 
+  document.getElementById('vr_cb').checked=true
+  document.getElementById('axis').disabled=true
+  document.getElementById('axis').value='2'
+  document.getElementById('slice').disabled=true
+  document.getElementById('edit_slice').disabled=true
+
   dataset_url=getServer()+'action=read_dataset&dataset='+value
   level=24
 
@@ -328,7 +334,10 @@ function onAxisChange(value){
 }
 
 function onSliceChange(value){
-  visus1.setSlice(value); refreshAll(0);
+  visus1.setSlice(value); 
+  document.getElementById('edit_slice').value=value;
+  document.getElementById('slice').value=value;
+  refreshAll(0);
 }
 
 function onFieldChange(value){
@@ -336,10 +345,16 @@ function onFieldChange(value){
 }
 
 function onTimeChange(value){
-  visus1.setTime(value); refreshAll(0);
+  visus1.setTime(value); 
+  document.getElementById('edit_time').value=value;
+  document.getElementById('time').value=value;
+  refreshAll(0);
 }
 
 function onResolutionChange(value){
+  document.getElementById('resolution').value=value;
+  document.getElementById('edit_resolution').value=value;
+
   size=visus1.getDataSize(value);
   document.getElementById('size_est').innerHTML="~"+parseFloat(size).toFixed(1)+"MB";
 
@@ -369,6 +384,50 @@ function onPaletteChange(){
   updateColorMap(pal_min, pal_max);
   render();
   //refreshAll(0);
+}
+
+function download(){
+  sel_level = parseInt(document.getElementById('resolution').value)
+  data_url = visus1.refresh(sel_level)
+
+  out_size = []
+  out_dtype = ""
+
+  out_ext_file = ".raw"
+
+  if(!document.getElementById('vr_cb').checked){
+    data_url=data_url.split("compression=raw").join("compression=png");
+    out_ext_file = ".png"
+  }
+
+  console.log("download req "+data_url)
+
+  fetch(data_url, { method: 'GET'
+        }).then(response => {
+          nsamples=response.headers.get('visus-nsamples')
+          var dims=nsamples.split(' ');
+          out_size[0]=parseInt(dims[0]);
+          out_size[1]=parseInt(dims[1]);
+          out_size[2]=parseInt(dims[2]);
+         
+          if(isNaN(out_size[2]))
+            out_size[2]=1
+
+          console.log(out_size)
+
+          out_dtype=response.headers.get('visus-dtype')
+
+          console.log(out_dtype)
+
+           response.blob().then( blob => {
+
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = visus1.dataset.name+"_"+out_size[0]+"_"+out_size[1]+"_"+out_size[2]+"_"+out_dtype+"_lvl"+sel_level+out_ext_file;
+            a.click();                    
+          });
+        });
 }
 
 setServer('http://molniya.sci.utah.edu:80/mod_visus?');

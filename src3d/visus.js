@@ -506,88 +506,68 @@ function VisusVR(params)
   // div.innerHTML="<div id='"+osd_id+"' style='width: 100%;height: 100%'></div>"; 
 
   //refresh
-  self.refresh=function() 
+  self.refresh=function(req_lev=self.level) 
   { 
     //permutation=[[1,2,0],[0,2,1],[0,1,2]];
     X = 0;//permutation[self.axis][0];
     Y = 1;//permutation[self.axis][1];
     Z = 2;//permutation[self.axis][2];
    
-    // document.getElementById(osd_id).innerHTML=""; 
-    // self.osd=OpenSeadragon({
-    //   id: osd_id, 
-    //   prefixUrl: 'https://raw.githubusercontent.com/openseadragon/svg-overlay/master/openseadragon/images/', 
-    //   showNavigator: self.showNavigator, 
-    //   debugMode: self.debugMode, 
-    //   tileSources: {
-    //     width:      self.dataset.dims[X],
-    //     height:     self.dataset.dims[Y],  
-    //     tileWidth:  self.tile_size[X], 
-    //     tileHeight: self.tile_size[Y],
-    //     minLevel:   self.minLevel, 
-    //     maxLevel:   self.maxLevel, 
-    //     getTileUrl: function(level,x,y)
-    //     {  
-          base_url=self.dataset.base_url
-            +'&dataset='+self.dataset.name
-            +'&compression='+self.compression             
-            +'&maxh='+ self.dataset.maxh
-            +'&time='+self.time
-            +'&field='+self.field
-            //+'&palette='+self.palette
-            //'&palette_min='+self.palette_min
-            //'&palette_max='+self.palette_max
-            //'&palette_interp='+self.palette_interp;
-          
-            toh=clamp(level,0,self.maxLevel);
-            vs = Math.pow(2, self.maxLevel-level); 
-            w=self.tile_size[0] * vs; x1=x * w; x2=x1 + w;
-            h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
-            d=self.tile_size[2] * vs; z1=z * d; z2=z1 + d;
-            
-  
-            if(!isVolumeRender){
-              console.log("slice "+self.slice+" axis "+self.axis);
-              if(self.axis=='0'){
-                x1=Math.floor(self.dataset.dims[0]*(self.slice/100.0))
-                x2=x1
-                console.log("box "+x1+" "+x2)
-              }else if(self.axis=='1'){
-                y1=Math.floor(self.dataset.dims[1]*(self.slice/100.0))
-                y2=y1+1
-              }else if(self.axis=='2'){
-                z1=Math.floor(self.dataset.dims[2]*(self.slice/100.0))
-                z2=z1+1;
-              }
-              
-              ret = base_url
-                +'&action=pointquery'
-                +'&box='
-                +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(y1, 0, self.dataset.dims[0]))+'%20'+clamp(z1, 0, self.dataset.dims[2])+'%20'
-                +clamp(x2, 0, self.dataset.dims[0]-1)+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
-                +'&toh='+toh;
 
-            }else{
-              ret = base_url
-                +'&action=boxquery'
-                +'&box='
-                  +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
-                  +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'
-                  +clamp(z1, 0, self.dataset.dims[2])+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
-                +'&toh='+toh;
+    base_url=self.dataset.base_url
+      +'&dataset='+self.dataset.name
+      +'&compression='+self.compression             
+      +'&maxh='+ self.dataset.maxh
+      +'&time='+self.time
+      +'&field='+self.field
+      //+'&palette='+self.palette
+      //'&palette_min='+self.palette_min
+      //'&palette_max='+self.palette_max
+      //'&palette_interp='+self.palette_interp;
+    
+      toh=clamp(req_lev,0,self.maxLevel);
+      vs = Math.pow(2, self.maxLevel-req_lev); 
+      w=self.tile_size[0] * vs; x1=x * w; x2=x1 + w;
+      h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
+      d=self.tile_size[2] * vs; z1=z * d; z2=z1 + d;
+      
+      if(!isVolumeRender){
+        console.log("slice "+self.slice+" axis "+self.axis);
+        if(self.axis=='0'){
+          x1=Math.floor(self.dataset.dims[0]*(self.slice/100.0))
+          x2=x1
+          console.log("box "+x1+" "+x2)
+        }else if(self.axis=='1'){
+          y1=Math.floor(self.dataset.dims[1]*(self.slice/100.0))
+          y2=y1+1
+        }else if(self.axis=='2'){
+          z1=Math.floor(self.dataset.dims[2]*(self.slice/100.0))
+          z2=z1+1;
+        }
+        
+        ret = base_url
+          +'&action=pointquery'
+          +'&box='
+          +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(y1, 0, self.dataset.dims[0]))+'%20'+clamp(z1, 0, self.dataset.dims[2])+'%20'
+          +clamp(x2, 0, self.dataset.dims[0]-1)+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
+          +'&toh='+toh;
 
-            }
+      }else{
+        ret = base_url
+          +'&action=boxquery'
+          +'&box='
+            +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
+            +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'
+            +clamp(z1, 0, self.dataset.dims[2])+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
+          +'&toh='+toh;
 
-            
-          
-          console.log(ret);
+      }
 
-          self.query_str = ret;
+      console.log(ret);
 
-          return ret;
-        // }
-      // }
-    // });    
+      self.query_str = ret;
+
+      return ret;
   }; 
   
   // if (self.dataset.dim==2)
