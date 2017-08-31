@@ -497,6 +497,7 @@ function VisusVR(params)
   self.maxLevel=33;
   self.compression='raw'
   self.isVolumeRender=true
+  self.nsamples=[]
 
   // var div=document.getElementById(self.id);
 
@@ -507,7 +508,7 @@ function VisusVR(params)
   //refresh
   self.refresh=function() 
   { 
-    permutation=[[1,2,0],[0,2,1],[0,1,2]];
+    //permutation=[[1,2,0],[0,2,1],[0,1,2]];
     X = 0;//permutation[self.axis][0];
     Y = 1;//permutation[self.axis][1];
     Z = 2;//permutation[self.axis][2];
@@ -632,7 +633,43 @@ function VisusVR(params)
   self.getField=function() {
     return self.field;
   };
+
+  self.setNSamples=function(value) {
+    self.nsamples=value;
+  }
   
+  self.getNSamples=function(){
+    return self.nsamples;
+  }
+
+  self.setDType=function(value) {
+    self.dtype=value;
+  }
+
+  self.getDataSize=function(level){
+    var sample_size = 1;
+
+    if(self.dtype.includes("8"))
+      sample_size*=8
+    if(self.dtype.includes("32"))
+      sample_size*=32
+    if(self.dtype.includes("64"))
+      sample_size*=64
+    
+    sd=[1,1,1];
+    for (I=0;I<level;I++) 
+      sd[self.dataset.bitmask[self.dataset.maxh-I]]*=2;
+
+    if(!isVolumeRender)
+      sd[axis] = 1
+
+    mag=sd[0]*sd[1]*sd[2]
+    console.log("level "+level+" nsamples "+mag)
+
+    return (mag*sample_size)/1024.0/1024.0
+
+  }
+
   // //setField
   self.setField=function(value) {
     self.field=value;
