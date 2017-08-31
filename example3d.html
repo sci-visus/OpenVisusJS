@@ -27,22 +27,17 @@
   <tr>
     <td>
       <div class="datagrid">
-      <table width='100%' style='background-color:#B0B0B0;'>
+      <table width='100%'>
         <tr>
-          <td> <label>Server</label>
-          <td> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'>
-          <td> <label>Volume render</label>
-          <td> <input id='vr_cb' type='checkbox' size=32 onchange='onVRChange(this.value);' class='toolbar_value' checked>
+          <td> <label>Server</label> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'>
+          <td> <label>Volume render</label> <input id='vr_cb' type='checkbox' size=32 onchange='onVRChange(this.value);' class='toolbar_value' checked>
             
-          <td> <label>Dataset</label>
-          <td> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value'>
+          <td> <label>Dataset</label> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value'>
             
-          <td><label>Field</label>
-          <td><select id='field' onchange='onFieldChange(this.value);' class='toolbar_value' /> 
-          <td><label id="comp_range"> [...] </label>
+          <td><label>Field</label> <select id='field' onchange='onFieldChange(this.value);' class='toolbar_value' /> 
+          <td><label>Range</label> <label id="comp_range"> [...] </label>
 
-          <td><label>Res</label>
-          <td><input  id='resolution' type='range' step='1' min='0' step='1' max='33' style='width:100%' oninput='onResolutionChange(this.value);'>
+          <td><label>Resolution</label><input  id='resolution' type='range' step='1' min='0' step='1' max='33' style='width:100%' oninput='onResolutionChange(this.value);'>
           <td><input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='toolbar_value'>
           <td><label id="size_est"> ... KB </label>
           <td><input type='button' value='Download' onclick='download()'/>
@@ -55,7 +50,7 @@
   <tr>
     <td>
     <div class="datagrid">
-      <table width='100%' style='background-color:#B0B0B0'>
+      <table width='100%' >
         
         <tr>
           <td><label>Axis</label>
