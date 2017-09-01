@@ -516,7 +516,7 @@ function VisusVR(params)
     Z = 2;//permutation[self.axis][2];
    
     if(!self.isVolumeRender && req_lev==self.level)
-      req_lev=level=28 > self.maxh ? 28 : 24
+      req_lev=level=24 > self.maxLevel ? self.maxLevel : 24
 
     base_url=self.dataset.base_url
       +'&dataset='+self.dataset.name

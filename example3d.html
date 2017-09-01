@@ -17,13 +17,13 @@
         <div>
           <table cellspacing="0" cellpadding="0" style='height:100%;width:100%; position: absolute; top: 0; bottom: 0; left: 0; right: 0;'>
   
-  <tr style='height:100%'>
+  <tr style='height:100%;width:100%'>
     <td align="center">
       
-      <canvas width="1000" height="600" ></canvas>
+      <canvas width='1000px' height='600px' style='display:block'></canvas>
     </td>
   </tr>
-  
+  <tr><td><input id='link_text' style='width:100%' disabled/></td></tr>
   <tr>
     <td>
       <div class="datagrid">
@@ -38,10 +38,8 @@
           <td><label>Range</label> <label id="comp_range"> [...] </label>
 
           <td><label>Resolution</label><input  id='resolution' type='range' step='1' min='0' step='1' max='33' style='width:100%' oninput='onResolutionChange(this.value);'>
-          <td><input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='toolbar_value'>
-          <td><label id="size_est"> ... KB </label>
-          <td><input type='button' value='Download' onclick='download()'/>
-          <td><input type='button' value='Share' onclick='shareLink()'/>
+          <td><div><input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='toolbar_value'><label id="size_est"> ... KB </label></div>
+          <td><div><input type='button' value='View' onclick='onViewResolution()'/> <input type='button' value='Download' onclick='download()'/> <input type='button' value='Share' onclick='shareLink()'/></div>
         </tr>
       </table>
       </div>
@@ -398,6 +396,13 @@ function onPaletteChange(){
   updateColorMap(pal_min, pal_max);
   render();
   //refreshAll(0);
+}
+
+function onViewResolution(){
+  sel_level = parseInt(document.getElementById('resolution').value)
+  data_url = visus1.refresh(sel_level)
+
+  fetch_and_draw(data_url,0)
 }
 
 function download(){

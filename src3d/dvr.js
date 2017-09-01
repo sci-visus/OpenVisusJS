@@ -277,6 +277,8 @@ function arcball_quat(start_point, end_point)
 const viewer = document.querySelector('#viewer')
 
 const canvas = viewer.querySelector('canvas')
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
 const width = canvas.width
 const height = canvas.height
 
@@ -584,7 +586,7 @@ render()
         gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, 0)
         gl.bindVertexArray(null)
 
-        
+
 }
 
 
