@@ -23,7 +23,7 @@
       <canvas width='1000px' height='600px' style='display:block'></canvas>
     </td>
   </tr>
-  <tr><td><input id='link_text' style='width:100%' disabled/> <input type='button' value='Copy' onclick='onCopy()'/></td></tr>
+  <tr id='row_link' hidden><td><input id='link_text' style='width:100%' /> <input type='button' value='Copy' onclick='onCopy()'/></td></tr>
   <tr>
     <td>
       <div class="datagrid">
@@ -500,16 +500,20 @@ function shareLink(){
 
   document.getElementById('link_text').value = link;
 
+  document.getElementById('row_link').hidden=false
+
 }
 
 function onCopy(){
+  
   document.getElementById('link_text').select();
-
   var successful = document.execCommand('copy');
 
   if(successful)
     document.getElementById('link_text').value = 'The URL has been copied to your clipboard'
-  
+
+  setTimeout(function(){ document.getElementById('row_link').hidden=true }, 3000);
+
 }
 
 function loadPresets(){
