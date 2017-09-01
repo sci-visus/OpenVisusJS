@@ -189,11 +189,11 @@ function fetch_and_draw(query_str, reset_view=1)
       let pal_min= parseFloat(document.getElementById('palette_min').value)
       let pal_max= parseFloat(document.getElementById('palette_max').value)
 
-      console.log("update color map "+pal_min+" "+pal_max)
+      //console.log("update color map "+pal_min+" "+pal_max)
       updateColorMap(pal_min, pal_max);
 
       var range=get_data_extent();
-      console.log("R:"+range[0]+", "+range[1])
+      //console.log("R:"+range[0]+", "+range[1])
       document.getElementById('comp_range').innerHTML="["+parseFloat(range[0]).toFixed(3)+", "+parseFloat(range[1]).toFixed(3)+"]"
       
       if(reset_view==1)
@@ -211,7 +211,7 @@ function fetch_and_draw(query_str, reset_view=1)
 //refreshAll
 function refreshAll(reset_view=1)
 {
-  query_str = visus1.refresh();
+  query_str = visus1.refresh(level);
 
   fetch_and_draw(query_str, reset_view)
   
@@ -284,7 +284,6 @@ function setDataset(value, presets=false)
   //document.getElementById('edit_slice').disabled=true
 
   dataset_url=getServer()+'action=read_dataset&dataset='+value
-  level=24
 
   query_str = visusAsyncLoadDataset(dataset_url).then(function (dataset) {
 
@@ -329,11 +328,8 @@ function setDataset(value, presets=false)
     refresh();
 
     refreshAll(!presets);
-    //fetch_and_draw(visus1.query_str)
 
   });  
-
-  //refreshAll();
 
 }
 
@@ -419,7 +415,7 @@ function download(){
     out_ext_file = ".png"
   }
 
-  console.log("download req "+data_url)
+  //console.log("download req "+data_url)
 
   fetch(data_url, { method: 'GET'
         }).then(response => {
@@ -432,13 +428,13 @@ function download(){
           if(isNaN(out_size[2]))
             out_size[2]=1
 
-          console.log(out_size)
+          //console.log(out_size)
 
           out_dtype=response.headers.get('visus-dtype')
 
           time_value = document.getElementById('time').value
 
-          console.log(out_dtype)
+          //console.log(out_dtype)
 
           response.blob().then( blob => {
 
@@ -470,8 +466,6 @@ function getParameterByName(name, url) {
 let pre_server = getParameterByName('server'); 
 let pre_dataset = getParameterByName('dataset'); 
 
-console.log("Server: "+pre_server+"END");
-console.log("Dataset: "+pre_dataset+"END");
 if(pre_server==null)
   setServer('http://molniya.sci.utah.edu:80/mod_visus?');
 else{
@@ -480,7 +474,6 @@ else{
 
 function shareLink(){
 
-  console.log(matrices.view)
   base_url=window.location.href.split('?')[0]
 
   vp=matrices.view[0]
@@ -494,7 +487,7 @@ function shareLink(){
 
   vr_status=(document.getElementById('vr_cb').checked)?"1":"0"
   link = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
-         +"&slice="+visus1.slice+"&time="+visus1.time+"&vr="+vr_status
+         +"&slice="+visus1.slice+"&time="+visus1.time+"&vr="+vr_status+"&res="+document.getElementById('resolution').value
          +"&palette="+visus1.palette+"&palette_min="+visus1.palette_min+"&palette_max="+visus1.palette_max
          +"&vp="+vp+"&vd="+view_distance+"&q="+qs;
 
@@ -526,23 +519,33 @@ function loadPresets(){
   let pre_vpoint = getParameterByName('vp')
   let pre_q = getParameterByName('q')
   let pre_view_distance = getParameterByName('vd')
+  let pre_resolution = getParameterByName('res')
     
   if(pre_slice!=null){
-    document.getElementById('slice').value=pre_slice
-    onSliceChange(pre_slice)
+    document.getElementById('edit_slice').value=pre_slice;
+    document.getElementById('slice').value=pre_slice;
   }
 
   if(pre_time!=null){
     document.getElementById('time').value=pre_time
-    console.log(document.getElementById('time').value)
-    onTimeChange(pre_time)
+    document.getElementById('edit_time').value=pre_time
   }
 
   if(pre_vr!=null){
-    document.getElementById('vr_cb').checked=(pre_vr=='1')
-    onVRChange(pre_vr=='1')
+    ischecked=(pre_vr=='1')
+    document.getElementById('vr_cb').checked=ischecked
+    document.getElementById('axis').disabled=ischecked
+    document.getElementById('slice').disabled=ischecked
+    document.getElementById('edit_slice').disabled=ischecked
+
+    visus1.setRenderType(ischecked);
   }
 
+  if(pre_resolution!=null){
+    level=parseInt(pre_resolution)
+    document.getElementById('resolution').value=level
+  }
+ 
   if(pre_palette!=null){
     document.getElementById('palette').value=pre_palette
     onPaletteChange()

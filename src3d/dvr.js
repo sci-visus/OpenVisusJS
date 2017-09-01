@@ -504,7 +504,6 @@ function get_data_extent(){
 function updateColorMap(ext1, ext2)
 {
   var palette_str = document.getElementById('palette').value;
-  console.log("New Palette: "+palette_str)
 
   if(!isNaN(ext1))
     extent1 = ext1;
@@ -514,8 +513,6 @@ function updateColorMap(ext1, ext2)
     extent2 = ext2;
   else
     extent2 = data_extent[1]
-
-  console.log("pal_min "+extent1+" pal_max "+extent2)
 
   gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
   gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);

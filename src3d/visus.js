@@ -515,8 +515,8 @@ function VisusVR(params)
     Y = 1;//permutation[self.axis][1];
     Z = 2;//permutation[self.axis][2];
    
-    if(!self.isVolumeRender && req_lev==self.level)
-      req_lev=level=24 > self.maxLevel ? self.maxLevel : 24
+    // if(!self.isVolumeRender && req_lev==self.level)
+    //   req_lev=level=24 > self.maxLevel ? self.maxLevel : 24
 
     base_url=self.dataset.base_url
       +'&dataset='+self.dataset.name
@@ -536,11 +536,11 @@ function VisusVR(params)
       d=self.tile_size[2] * vs; z1=z * d; z2=z1 + d;
       
       if(!isVolumeRender){
-        console.log("slice "+self.slice+" axis "+self.axis);
+        //console.log("slice "+self.slice+" axis "+self.axis);
         if(self.axis=='0'){
           x1=Math.floor(self.dataset.dims[0]*(self.slice/100.0))
           x2=x1
-          console.log("box "+x1+" "+x2)
+          //console.log("box "+x1+" "+x2)
         }else if(self.axis=='1'){
           y1=Math.floor(self.dataset.dims[1]*(self.slice/100.0))
           y2=y1+1
@@ -567,26 +567,12 @@ function VisusVR(params)
 
       }
 
-      console.log(ret);
+      //console.log(ret);
 
       self.query_str = ret;
 
       return ret;
   }; 
-  
-  // if (self.dataset.dim==2)
-  // {
-  //   //each open sea dragon level is a "01" in visus
-  //   //euristic, for each OSD level I have two Visus levels, so I have to double the tile_size 
-  //   //in order to get the same number of samples
-  //   self.minLevel=Math.floor(self.dataset.bitsperblock/2);
-  //   self.maxLevel=Math.floor(self.dataset.maxh/2);  
-  // }
-  // else
-  // {
-  //   self.minLevel=0;
-  //   self.maxLevel=5;
-  // }
   
   self.setRenderType=function(value){
     self.isVolumeRender=value;
@@ -652,7 +638,7 @@ function VisusVR(params)
       sd[axis] = 1
 
     mag=sd[0]*sd[1]*sd[2]
-    console.log("level "+level+" nsamples "+mag+"="+sd)
+    //console.log("level "+level+" nsamples "+mag+"="+sd)
 
     return (mag*sample_size)/1024.0/1024.0
 
