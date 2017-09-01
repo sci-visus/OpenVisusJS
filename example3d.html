@@ -30,7 +30,7 @@
       <table width='100%'>
         <tr>
           <td> <label>Server</label> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'>
-          <td> <label>Volume render</label> <input id='vr_cb' type='checkbox' size=32 onchange='onVRChange(this.value);' class='toolbar_value' checked>
+          <td> <label>Volume render</label> <input id='vr_cb' type='checkbox' size=32 onchange='onVRChange(this.value);' class='toolbar_value'>
             
           <td> <label>Dataset</label> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value'>
             
@@ -41,6 +41,7 @@
           <td><input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='toolbar_value'>
           <td><label id="size_est"> ... KB </label>
           <td><input type='button' value='Download' onclick='download()'/>
+          <td><input type='button' value='Share' onclick='shareLink()'/>
         </tr>
       </table>
       </div>
@@ -55,7 +56,7 @@
         <tr>
           <td><label>Axis</label>
           <td>
-            <select id='axis' onchange='onAxisChange(this.value);' class='toolbar_value' disabled>
+            <select id='axis' onchange='onAxisChange(this.value);' class='toolbar_value'>
               <option value='2'>Z</option>
               <option value='1'>Y</option>
               <option value='0'>X</option>
@@ -66,9 +67,9 @@
             <table width='100%'>
               <tr width='100%'>
                 <td width='100%'>
-                  <input id='slice' type='range' min='0' step='1' max='100' style='width:100%' oninput='onSliceChange(this.value);' disabled/>
+                  <input id='slice' type='range' min='0' step='1' max='100' style='width:100%' oninput='onSliceChange(this.value);'/>
                 <td>
-                  <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value' disabled>
+                  <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value'>
               </tr>
             </table>
             
@@ -237,7 +238,7 @@ function getServer() {
 }
 
 ///////////////////////////////////////////////////////
-function setServer(value)
+async function setServer(value,pre_dataset=null)
 {
   document.getElementById('server').value=value;
   
@@ -255,7 +256,11 @@ function setServer(value)
       dataset_widget.appendChild(item);
     }     
     
-    setDataset(datasets[0]);
+    if(pre_dataset==null)
+      setDataset(datasets[0]);
+    else
+      setDataset(pre_dataset, true)
+
   });
 }
 
@@ -266,19 +271,19 @@ function getDataset() {
 }
 
 ///////////////////////////////////////////////////////
-function setDataset(value) 
+function setDataset(value, presets=false) 
 {
   document.getElementById('dataset').value=value;
 
   // reset palette
-  document.getElementById('palette_min').value="";
-  document.getElementById('palette_max').value="";
+  // document.getElementById('palette_min').value="";
+  // document.getElementById('palette_max').value="";
 
-  document.getElementById('vr_cb').checked=true
-  document.getElementById('axis').disabled=true
-  document.getElementById('axis').value='2'
-  document.getElementById('slice').disabled=true
-  document.getElementById('edit_slice').disabled=true
+  //document.getElementById('vr_cb').checked=true
+  //document.getElementById('axis').disabled=true
+  //document.getElementById('axis').value='2'
+  //document.getElementById('slice').disabled=true
+  //document.getElementById('edit_slice').disabled=true
 
   dataset_url=getServer()+'action=read_dataset&dataset='+value
   level=24
@@ -318,6 +323,11 @@ function setDataset(value)
       debugMode : false
     }); 
     
+    visus1.setRenderType(document.getElementById('vr_cb').checked)
+
+    if(presets)
+      loadPresets();
+
     refresh();
 
     refreshAll();
@@ -370,7 +380,10 @@ function onVRChange(){
   document.getElementById('edit_slice').disabled=ischecked
 
   visus1.setRenderType(ischecked);
-  onSliceChange(50);
+  if(!ischecked)
+    onSliceChange(50);
+  else
+    refreshAll(0)
 }
 
 function onPaletteChange(){
@@ -433,7 +446,86 @@ function download(){
       });
 }
 
-setServer('http://molniya.sci.utah.edu:80/mod_visus?');
+// palette
+// palette_min palette_max
+// position
+
+//window.onload = function (){
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+let pre_server = getParameterByName('server'); 
+let pre_dataset = getParameterByName('dataset'); 
+
+console.log("Server: "+pre_server+"END");
+console.log("Dataset: "+pre_dataset+"END");
+if(pre_server==null)
+  setServer('http://molniya.sci.utah.edu:80/mod_visus?');
+else{
+  setServer(pre_server, pre_dataset);
+}
+
+function shareLink(){
+
+  console.log(matrices.view)
+  base_url=window.location.href.split('?')[0]
+  link= base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value);
+   // +
+   //      +"slice="+encodeURIComponent(document.getElementById('slice').value)+
+   //      +"time="+encodeURIComponent(document.getElementById('time').value)
+
+  //alert(encodeURIComponent(link))
+}
+
+function loadPresets(){
+  let pre_vr = getParameterByName('vr')
+  let pre_slice = getParameterByName('slice')
+  let pre_time = getParameterByName('time')
+  let pre_palette = getParameterByName('palette')
+  let pre_palette_min = getParameterByName('palette_min')
+  let pre_palette_max = getParameterByName('palette_max')
+  let pmatrix = getParameterByName('pmatrix')
+    
+  if(pre_slice!=null){
+    document.getElementById('slice').value=pre_slice
+    onSliceChange(pre_slice)
+  }
+
+  if(pre_time!=null){
+    document.getElementById('time').value=pre_time
+    console.log(document.getElementById('time').value)
+    onTimeChange(pre_time)
+  }
+
+  if(pre_vr!=null){
+    document.getElementById('vr_cb').checked=(pre_vr=='1')
+    onVRChange(pre_vr=='1')
+  }
+
+  if(pre_palette!=null){
+    document.getElementById('palette').value=pre_palette
+    onPaletteChange()
+  }
+
+  if(pre_palette_min!=null){
+    document.getElementById('palette_min').value=pre_palette_min
+    onPaletteChange()
+  }
+
+  if(pre_palette_max!=null){
+    document.getElementById('pre_palette_max').value=pre_palette_max
+    onPaletteChange()
+  }
+}
+
 </script>
 
 </body></html>

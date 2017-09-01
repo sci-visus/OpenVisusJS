@@ -464,6 +464,7 @@ function VisusOSD(params)
 //////////////////////////////////////////////////////////////////////
 function VisusVR(params) 
 {
+
   var self=this;
   
   self.id             = params['id'];
@@ -489,6 +490,7 @@ function VisusVR(params)
   }
 
   level=24
+
   x=0
   y=0
   z=0
@@ -513,6 +515,8 @@ function VisusVR(params)
     Y = 1;//permutation[self.axis][1];
     Z = 2;//permutation[self.axis][2];
    
+    if(!self.isVolumeRender && req_lev==self.level)
+      req_lev=level=28 > self.maxh ? 28 : 24
 
     base_url=self.dataset.base_url
       +'&dataset='+self.dataset.name
