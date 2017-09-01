@@ -23,7 +23,7 @@
       <canvas width='1000px' height='600px' style='display:block'></canvas>
     </td>
   </tr>
-  <tr><td><input id='link_text' style='width:100%' disabled/></td></tr>
+  <tr><td><input id='link_text' style='width:100%' disabled/> <input type='button' value='Copy' onclick='onCopy()'/></td></tr>
   <tr>
     <td>
       <div class="datagrid">
@@ -328,7 +328,7 @@ function setDataset(value, presets=false)
 
     refresh();
 
-    refreshAll();
+    refreshAll(!presets);
     //fetch_and_draw(visus1.query_str)
 
   });  
@@ -482,12 +482,34 @@ function shareLink(){
 
   console.log(matrices.view)
   base_url=window.location.href.split('?')[0]
-  link= base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value);
-   // +
-   //      +"slice="+encodeURIComponent(document.getElementById('slice').value)+
-   //      +"time="+encodeURIComponent(document.getElementById('time').value)
 
-  //alert(encodeURIComponent(link))
+  vp=matrices.view[0]
+  for(i=1;i<16;i++)
+    vp+=","+matrices.view[i]
+
+  qs=q.w+","+q.x+","+q.y+","+q.z;
+
+  vp=encodeURIComponent(vp)
+  qs=encodeURIComponent(qs)
+
+  vr_status=(document.getElementById('vr_cb').checked)?"1":"0"
+  link = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
+         +"&slice="+visus1.slice+"&time="+visus1.time+"&vr="+vr_status
+         +"&palette="+visus1.palette+"&palette_min="+visus1.palette_min+"&palette_max="+visus1.palette_max
+         +"&vp="+vp+"&vd="+view_distance+"&q="+qs;
+
+  document.getElementById('link_text').value = link;
+
+}
+
+function onCopy(){
+  document.getElementById('link_text').select();
+
+  var successful = document.execCommand('copy');
+
+  if(successful)
+    document.getElementById('link_text').value = 'The URL has been copied to your clipboard'
+  
 }
 
 function loadPresets(){
@@ -497,7 +519,9 @@ function loadPresets(){
   let pre_palette = getParameterByName('palette')
   let pre_palette_min = getParameterByName('palette_min')
   let pre_palette_max = getParameterByName('palette_max')
-  let pmatrix = getParameterByName('pmatrix')
+  let pre_vpoint = getParameterByName('vp')
+  let pre_q = getParameterByName('q')
+  let pre_view_distance = getParameterByName('vd')
     
   if(pre_slice!=null){
     document.getElementById('slice').value=pre_slice
@@ -520,15 +544,31 @@ function loadPresets(){
     onPaletteChange()
   }
 
-  if(pre_palette_min!=null){
+  if(pre_palette_min!=null && pre_palette_min!="NaN"){
     document.getElementById('palette_min').value=pre_palette_min
     onPaletteChange()
   }
 
-  if(pre_palette_max!=null){
+  if(pre_palette_max!=null && pre_palette_max!="NaN"){
     document.getElementById('pre_palette_max').value=pre_palette_max
     onPaletteChange()
   }
+
+  if(pre_vpoint!=null){
+    matrices.view = pre_vpoint.split(',').map(parseFloat);
+  }
+
+  if(pre_q != null){
+    qv = pre_q.split(',').map(parseFloat);
+
+    q.w=qv[0]
+    q.x=qv[1]
+    q.y=qv[2]
+    q.z=qv[3]
+  }
+
+  if(pre_view_distance != null)
+    view_distance = parseFloat(pre_view_distance)
 }
 
 </script>

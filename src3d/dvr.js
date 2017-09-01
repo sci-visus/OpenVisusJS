@@ -287,7 +287,7 @@ const arcball_circle = {
         radius: Math.min(width/2, height/2),
 }
 
-let view_distance = 1.0
+var view_distance = 1.0
 
 const near_plane = 0.01
 const far_plane = 100000.0
@@ -301,7 +301,7 @@ const matrices = {
 }
 
 let p0
-let q = quat(1.0, 0.0, 0.0, 0.0)
+var q = quat(1.0, 0.0, 0.0, 0.0)
 let q_down
 
 canvas.addEventListener('mousedown', e => {
@@ -585,7 +585,6 @@ render()
         gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
         gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, 0)
         gl.bindVertexArray(null)
-
 
 }
 
