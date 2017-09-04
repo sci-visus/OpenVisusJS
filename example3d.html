@@ -561,8 +561,9 @@ function loadPresets(){
   }
 
   if(pre_time!=null){
-    document.getElementById('time').value=pre_time
-    document.getElementById('edit_time').value=pre_time
+    document.getElementById('time').value=parseInt(pre_time)
+    document.getElementById('edit_time').value=parseInt(pre_time)
+    visus1.setTime(parseInt(pre_time))
   }
 
   if(pre_vr!=null){
