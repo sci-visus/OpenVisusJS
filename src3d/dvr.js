@@ -277,8 +277,8 @@ function arcball_quat(start_point, end_point)
 const viewer = document.querySelector('#viewer')
 
 const canvas = viewer.querySelector('canvas')
-canvas.width  = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width  = window.innerWidth-100;
+canvas.height = window.innerHeight-100;
 const width = canvas.width
 const height = canvas.height
 
