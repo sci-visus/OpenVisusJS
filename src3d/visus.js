@@ -704,8 +704,8 @@ function VisusVR(params)
   self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
   self.setPalette("");
-  self.setPaletteMin(0);
-  self.setPaletteMax(0);
+  self.setPaletteMin(NaN);
+  self.setPaletteMax(NaN);
   self.setPaletteInterp("Default");
   
   self.refresh();
