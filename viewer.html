@@ -16,7 +16,11 @@
         
         <div>
           <table cellspacing="0" cellpadding="0" style='height:100%;width:100%; position: absolute; top: 0; bottom: 0; left: 0; right: 0;'>
-  
+  <tr>
+    <td align="center" class="datagrid" height="18px">
+      <div id='status_bar' style="float:top" hidden><img src="img/spinner.gif" height="10px" ><label id='status' style="color: blue"></label></div>
+    </td>
+  </tr>
   <tr style='height:100%;width:100%'>
     <td align="center">
       <div id='2dCanvas' style='width:100%; height:100%;'></div>
@@ -152,23 +156,20 @@
 
 var visus1;
 
-
-function consume(stream, total = 0) {
-  while (stream.state === "readable") {
-    var data = stream.read()
-    total += data.byteLength;
-    console.log("received " + data.byteLength + " bytes (" + total + " bytes in total).")
-  }
-  if (stream.state === "waiting") {
-    stream.ready.then(() => consume(stream, total))
-  }
-  return stream.closed
+function notifyStatus(new_text)
+{
+  document.getElementById('status_bar').hidden=false
+  document.getElementById('status').innerHTML="  "+new_text
 }
+
+function hideStatus(){ document.getElementById('status_bar').hidden=true }
 
 function fetch_and_draw(query_str, reset_view=1)
 {
   data_size=[256, 256, 256]
   dtype='uint8'
+
+  notifyStatus("Streaming...");
 
   fetch(query_str, {method:'get'})
     .then(response => {
@@ -194,6 +195,8 @@ function fetch_and_draw(query_str, reset_view=1)
       return response.arrayBuffer()
     }).then(data => {
       
+      notifyStatus("Rendering...");
+
       upload_data(gl, data, {level: level, width: data_size[0], height: data_size[1], depth: data_size[2]}, dtype, 
                   {width: data_size[0], height: data_size[1], depth: data_size[2]})
 
@@ -214,9 +217,13 @@ function fetch_and_draw(query_str, reset_view=1)
 
       render();
 
+      hideStatus();
+
     }).catch(e => {
     console.log(e);
   });
+
+
 
 }
 
