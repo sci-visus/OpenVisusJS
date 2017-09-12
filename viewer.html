@@ -459,6 +459,8 @@ function download(){
 
   //console.log("download req "+data_url)
 
+  notifyStatus("Downloading data...");
+
   fetch(data_url, { method: 'GET'
         }).then(response => {
           nsamples=response.headers.get('visus-nsamples')
@@ -485,6 +487,8 @@ function download(){
           a.href = url;
           a.download = visus1.dataset.name+"_"+out_size[0]+"_"+out_size[1]+"_"+out_size[2]+"_"+out_dtype+"_t"+time_value+"_lvl"+sel_level+out_ext_file;
           a.click();                    
+        
+          hideStatus();
         });
       });
 }
