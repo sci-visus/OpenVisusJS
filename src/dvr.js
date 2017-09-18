@@ -519,18 +519,56 @@ function updateColorMap(ext1, ext2)
 
   var colormap;
 
-  if (palette_str == "gamma") 
+    if (palette_str == "gamma") 
     colormap = gamma_colormap;
   else if (palette_str == "rich") 
     colormap = rich_colormap;
   else if (palette_str == "smoothrich") 
     colormap = smoothrich_colormap;
-  // else if (palette_str == "graytransparent") 
-  //   colormap = gray_transparent_colormap();
-  // else if (palette_str == "grayopaque") 
-  //   colormap = gray_opaque_colormap();
-  // else if (palette_str == "AsymmetricBlueGreenDivergent") 
-  //   colormap = AsymmetricBlueGreenDivergent_colormap;
+  else if (palette_str == "banded") 
+    colormap = banded_colormap;
+  else if (palette_str == "bry") 
+    colormap = bry_colormap;
+  else if (palette_str == "bgry") 
+      colormap = bgry_colormap;
+  else if (palette_str == "hot1") 
+      colormap = hot1_colormap;
+  else if (palette_str == "hot2") 
+      colormap = hot2_colormap;
+  else if (palette_str == "ice") 
+      colormap = ice_colormap;
+  else if (palette_str == "lighthues") 
+      colormap = lighthues_colormap;
+  else if (palette_str == "lut16") 
+      colormap = lut16_colormap;
+  else if (palette_str == "BlueGreenDivergent") 
+    colormap = BlueGreenDivergent_colormap;
+  else if (palette_str == "GreenGold") 
+    colormap = GreenGold_colormap;
+  else if (palette_str == "LinearGreen") 
+    colormap = LinearGreen_colormap;
+  else if (palette_str == "AsymmetricBlueGreenDivergent") 
+    colormap = AsymmetricBlueGreenDivergent_colormap;
+  else if (palette_str == "LinearTurquois") 
+    colormap = LinearTurquois_colormap;
+  else if (palette_str == "MutedBlueGreen") 
+    colormap = MutedBlueGreen_colormap;
+  else if (palette_str == "ExtendedCoolWarm") 
+    colormap = ExtendedCoolWarm_colormap;
+  else if (palette_str == "AsymmetricBlueOrangeDivergent") 
+    colormap = AsymmetricBlueOrangeDivergent_colormap;
+  else if (palette_str == "LinearYellow") 
+    colormap = LinearYellow_colormap;
+  else if (palette_str == "LinearGray5") 
+    colormap = LinearGray5_colormap;
+  else if (palette_str == "LinearGray4") 
+    colormap = LinearGray4_colormap;
+  else if (palette_str == "graytransparent") 
+    colormap = hsv_colormap;//gray_transparent_colormap();
+  else if (palette_str == "grayopaque") 
+    colormap = gray_opaque_colormap();
+  else if (palette_str == "hsl") 
+    colormap = hsv_colormap;//hsl_colormap();
   else 
     colormap = smoothrich_colormap;
 
