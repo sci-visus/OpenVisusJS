@@ -41,9 +41,9 @@
           <td><label>Field</label> <select id='field' onchange='onFieldChange(this.value);' class='toolbar_value' /> 
           <td><label>Range</label> <label id="comp_range"> [...] </label>
 
-          <td><label>Resolution</label><input  id='resolution' type='range' step='1' min='0' step='1' max='33' style='width:100%' oninput='onResolutionChange(this.value);'>
-          <td><div><input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='toolbar_value'><label id="size_est"> ... KB </label></div>
-          <td><div><input type='button' value='View' onclick='onViewResolution()'/> <input type='button' value='Download' onclick='download()'/> <input type='button' value='Share' onclick='shareLink()'/></div>
+          <td id='resolution_panel'><label>Resolution</label><input  id='resolution' type='range' step='1' min='0' step='1' max='33' style='width:100%' oninput='onResolutionChange(this.value);'> 
+          <td id='edit_resolution_panel'><div><input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='toolbar_value'><label id="size_est"> ... KB </label></div>
+          <td><div><input id='view_btn' type='button' value='View' onclick='onViewResolution()'/> <input type='button' id='download_btn' value='Download' onclick='download()'/> <input type='button' value='Share' onclick='shareLink()'/></div>
         </tr>
       </table>
       </div>
@@ -336,6 +336,11 @@ function setDataset(value, presets=false)
       document.getElementById('2dCanvas').hidden=false
       document.getElementById('3dCanvas').hidden=true
 
+      document.getElementById('resolution_panel').hidden=true;
+      document.getElementById('edit_resolution_panel').hidden=true;
+      document.getElementById('view_btn').hidden=true;
+      document.getElementById('download_btn').hidden=true;
+
       console.log("USE 2D canvas")
       visus1=VisusOSD({
         id : '2dCanvas',
@@ -348,6 +353,11 @@ function setDataset(value, presets=false)
       console.log("USE 3D canvas")
       document.getElementById('2dCanvas').hidden=true
       document.getElementById('3dCanvas').hidden=false
+
+      document.getElementById('resolution_panel').hidden=false;
+      document.getElementById('edit_resolution_panel').hidden=false;
+      document.getElementById('view_btn').hidden=false;
+      document.getElementById('download_btn').hidden=false;
 
       visus1=VisusVR({
         id : '3dCanvas',
