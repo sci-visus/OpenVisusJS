@@ -148,9 +148,10 @@
 <!-- <details ontoggle="load_dataset(this, &#39;aneurism&#39;, {level: 24, width: 256, height: 256, depth: 256}, &#39;uint8&#39;, {width: 256.0, height: 256.0, depth: 256.0})"/> -->
 
 <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
-<script src="./src3d/colormaps.js"></script>
-<script src="./src3d/dvr.js"></script>
-<script src="./src3d/visus.js"></script>
+<script src="./src/colormaps.js"></script>
+<script src="./src/dvr.js"></script>
+<script src="./src/visus.js"></script>
+<script src="./src/config.js"></script>
 
 <script>
 
@@ -513,10 +514,9 @@ let pre_server = getParameterByName('server');
 let pre_dataset = getParameterByName('dataset'); 
 
 if(pre_server==null)
-  setServer('http://molniya.sci.utah.edu:80/mod_visus?');
-else{
-  setServer(pre_server, pre_dataset);
-}
+  setServer(DEFAULT_SERVER)
+else
+  setServer(pre_server, pre_dataset)
 
 function shareLink(){
 
