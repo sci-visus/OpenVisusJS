@@ -22,6 +22,8 @@ function visusAsyncGetListOfDatasets(url)
       item = arr.shift();
       if (item.name == "group" && 'childs' in item)
         arr = item.childs.concat(arr);
+      else if ('childs' in item)
+        arr = item.childs.concat(arr);
       else if (item.name == "dataset")
         ret.push(item.attributes.name);
       else
