@@ -159,8 +159,11 @@ var visus1;
 
 function notifyStatus(new_text)
 {
-  document.getElementById('status_bar').hidden=false
-  document.getElementById('status').innerHTML="  "+new_text
+  if(document.getElementById('2dCanvas').hidden==true){
+    document.getElementById('status_bar').hidden=false
+    document.getElementById('status').innerHTML="  "+new_text
+  }
+  else hideStatus();
 }
 
 function hideStatus(){ document.getElementById('status_bar').hidden=true }
@@ -439,7 +442,9 @@ function onPaletteChange(){
 
   updateColorMap(pal_min, pal_max);
   render();
-  //refreshAll(0);
+
+  if(document.getElementById('2dCanvas').hidden==false)
+    refreshAll(0);
 }
 
 function onViewResolution(){
