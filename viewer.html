@@ -389,7 +389,7 @@ function setDataset(value, presets=false)
 var intervalID;
 
 function onRefreshChange(){
-  if(document.getElementById('auto_refresh').checked==true)
+  if(document.getElementById('auto_refresh').checked)
     intervalID = setInterval(function(){refreshAll(0);}, 5000);
   else clearInterval(intervalID);
 }
