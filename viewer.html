@@ -39,6 +39,7 @@
           <td> <label>Dataset</label> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value'>
             
           <td><label>Field</label> <select id='field' onchange='onFieldChange(this.value);' class='toolbar_value' /> 
+          <td><input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);' class='toolbar_value'>auto</input> <input type='button' value='Refresh' onclick="refreshAll(0)"/> </td>
           <td id='range_panel'><label>Range</label> <label id="comp_range"> [...] </label>
 
           <td id='resolution_panel'><label>Resolution</label><input  id='resolution' type='range' step='1' min='0' step='1' max='33' style='width:100%' oninput='onResolutionChange(this.value);'> 
@@ -385,6 +386,13 @@ function setDataset(value, presets=false)
 
 }
 
+var intervalID;
+
+function onRefreshChange(){
+  if(document.getElementById('auto_refresh').checked==true)
+    intervalID = setInterval(function(){refreshAll(0);}, 5000);
+  else clearInterval(intervalID);
+}
 
 function onAxisChange(value){
   visus1.setAxis(value); refreshAll(0);
