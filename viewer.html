@@ -472,8 +472,8 @@ function onVRChange(){
 
 function onPaletteChange(){
   visus1.setPalette(document.getElementById('palette').value); 
-  visus1.setPaletteMin(parseInt(document.getElementById('palette_min').value)); 
-  visus1.setPaletteMax(parseInt(document.getElementById('palette_max').value)); 
+  visus1.setPaletteMin(parseFloat(document.getElementById('palette_min').value)); 
+  visus1.setPaletteMax(parseFloat(document.getElementById('palette_max').value)); 
   // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
 
   let pal_min= parseFloat(document.getElementById('palette_min').value)
