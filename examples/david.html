@@ -1,5 +1,5 @@
-﻿
 <html>
+
 <script>
 /*
  * Copyright (c) 2017 University of Utah 
@@ -33,32 +33,24 @@
 
 <head>
     <meta charset='utf-8'>
-    <title>Satellite Powered by Visus</title>
+    <title>David Powered by Visus</title>
     <script src="https://openseadragon.github.io/openseadragon/openseadragon.min.js"></script>
-    <script src="visus2.js"></script>
+    <script src="../src/VisusGetTileSources.js" ></script>
 </head>
+
 <body>
 
-    <div id="openseadragon1" class="openseadragon" style="width:100%; height:100%;background-color: black; "></div>
+    <div id="openseadragon1" class="openseadragon" style="width:100%; height:100%;background-color: black;"></div>
     <script type="text/javascript">
-     //server, dataset, w, h, maxh (==strlen(bitmask)-1), tile_size, bXRoad
-
-     var bXRoad=false;
-
-     OpenSeadragon({
-         id: "openseadragon1",
-         prefixUrl: "https://raw.githubusercontent.com/openseadragon/svg-overlay/master/openseadragon/images/",
-         showNavigator: true,
-         showReferenceStrip: true,
-         navigatorPosition: "TOP_RIGHT",
-         sequenceMode: true,
-         preserveViewport: true,
-         tileSources: [
-               getTileSources("http://atlantis.sci.utah.edu", "sandiego"    , 200000, 365000, 37, 512, bXRoad)
-             , getTileSources("http://atlantis.sci.utah.edu", "sanfrancisco", 225000, 330000, 37, 512, bXRoad)
-             , getTileSources("http://atlantis.sci.utah.edu", "neuquen"     , 119551 + 1, 119551 + 1, "V0101010101010101010101010101010101".length - 1, 256, bXRoad)
-         ]
-     });
+        var bXRoad=false;
+        OpenSeadragon({
+            id: "openseadragon1",
+            prefixUrl: "https://raw.githubusercontent.com/openseadragon/svg-overlay/master/openseadragon/images/",
+            showNavigator: true,
+            debugMode: false,
+            tileSources: getTileSources("http://atlantis.sci.utah.edu", "david_subsampled", 29280, 70416, 32, 512, bXRoad)
+        });
     </script>
+
 </body>
 </html>
