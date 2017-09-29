@@ -442,6 +442,7 @@ function loadPresets(){
   if(pre_slice!=null){
     document.getElementById('edit_slice').value=pre_slice;
     document.getElementById('slice').value=pre_slice;
+    onSliceChange(pre_slice);
   }
 
   if(pre_axis!=null){
