@@ -530,25 +530,9 @@ function get_data_extent(){
   return data_extent;
 }
 
-function updateColorMap(ext1, ext2)
-{
-  var palette_str = document.getElementById('palette').value;
-
-  if(!isNaN(ext1))
-    extent1 = ext1;
-  else
-    extent1 = data_extent[0]
-  if(!isNaN(ext2))
-    extent2 = ext2;
-  else
-    extent2 = data_extent[1]
-
-  gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
-  gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
-
+function get_palette_data(palette_str){
   var colormap;
-
-    if (palette_str == "gamma") 
+  if (palette_str == "gamma") 
     colormap = gamma_colormap;
   else if (palette_str == "rich") 
     colormap = rich_colormap;
@@ -598,8 +582,32 @@ function updateColorMap(ext1, ext2)
     colormap = gray_opaque_colormap();
   else if (palette_str == "hsl") 
     colormap = hsv_colormap;//hsl_colormap();
+  else if (palette_str == "scivis_magic_colormap") 
+    colormap = scivis_magic_colormap;
   else 
     colormap = smoothrich_colormap;
+
+  return colormap;
+
+}
+
+function updateColorMap(ext1, ext2)
+{
+  var palette_str = document.getElementById('palette').value;
+
+  if(!isNaN(ext1))
+    extent1 = ext1;
+  else
+    extent1 = data_extent[0]
+  if(!isNaN(ext2))
+    extent2 = ext2;
+  else
+    extent2 = data_extent[1]
+
+  gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
+  gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
+
+  var colormap = get_palette_data(palette_str)
 
   colormap_tex = gl.createTexture()
   /* WebGL does not support 1D textures directly */
