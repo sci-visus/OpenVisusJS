@@ -182,11 +182,8 @@ function setDataset(value, presets=false)
     if(dataset.dim==2){
       document.getElementById('2dCanvas').hidden=false
       document.getElementById('3dCanvas').hidden=true
-
-      document.getElementById('resolution_panel').hidden=true;
-      document.getElementById('edit_resolution_panel').hidden=true;
       document.getElementById('view_btn').hidden=true;
-      document.getElementById('download_btn').hidden=true;
+      
       document.getElementById('range_panel').hidden=true;
 
       console.log("USE 2D canvas")
@@ -201,11 +198,7 @@ function setDataset(value, presets=false)
       console.log("USE 3D canvas")
       document.getElementById('2dCanvas').hidden=true
       document.getElementById('3dCanvas').hidden=false
-
-      document.getElementById('resolution_panel').hidden=false;
-      document.getElementById('edit_resolution_panel').hidden=false;
       document.getElementById('view_btn').hidden=false;
-      document.getElementById('download_btn').hidden=false;
 
       visus1=VisusVR({
         id : '3dCanvas',
@@ -313,7 +306,12 @@ function onViewResolution(){
 
 function download(){
   sel_level = parseInt(document.getElementById('resolution').value)
-  data_url = visus1.refresh(sel_level)
+
+  data_url = ""
+  if(dataset.dim==2)
+    data_url = visus1.download_query(sel_level)
+  else
+    data_url = visus1.refresh(sel_level)
 
   out_size = []
   out_dtype = ""
@@ -324,8 +322,6 @@ function download(){
     data_url=data_url.split("compression=raw").join("compression=png");
     out_ext_file = ".png"
   }
-
-  //console.log("download req "+data_url)
 
   notifyStatus("Downloading data...");
 
