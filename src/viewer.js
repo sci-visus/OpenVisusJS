@@ -38,7 +38,7 @@ function fetch_and_draw(query_str, reset_view=1)
 
       dtype=response.headers.get('visus-dtype')
 
-      console.log(dtype)
+      //console.log(dtype)
 
       return response.arrayBuffer()
     }).then(data => {
@@ -79,7 +79,11 @@ function fetch_and_draw(query_str, reset_view=1)
 //refreshAll
 function refreshAll(reset_view=1)
 {
-  query_str = visus1.refresh(level);
+
+  if(dataset.dim==2)
+    query_str = visus1.refresh();
+  else
+    query_str = visus1.refresh(level);
 
   fetch_and_draw(query_str, reset_view)
   
@@ -469,7 +473,8 @@ function loadPresets(){
     document.getElementById('slice').disabled=ischecked
     document.getElementById('edit_slice').disabled=ischecked
 
-    visus1.setRenderType(ischecked);
+    if(dataset.dim>2)
+      visus1.setRenderType(ischecked);
   }
 
   if(pre_resolution!=null){
