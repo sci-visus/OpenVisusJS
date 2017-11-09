@@ -435,7 +435,7 @@ const BlueGreenDivergent_colormap=[
 0.850000,0.250980,0.419608,0.129412,
 0.900000,0.223529,0.349020,0.094118,
 0.950000,0.231373,0.321569,0.105882,
-1.000000,0.215686,0.278431,0.082353];
+1.000000,0.215686,0.278431,0.082353].map(function(x) { return x * 255; });
 
 const AsymmetricBlueGreenDivergent_colormap=[
 0.000000,0.098039,0.301961,0.211765,
@@ -475,7 +475,7 @@ const AsymmetricBlueGreenDivergent_colormap=[
 0.933000,0.227451,0.317647,0.521569,
 0.960000,0.203922,0.270588,0.490196,
 0.980000,0.188235,0.239216,0.458824,
-1.000000,0.172549,0.203922,0.431373];
+1.000000,0.172549,0.203922,0.431373].map(function(x) { return x * 255; });;
 
 const GreenGold_colormap=[
 0.000000,0.000000,0.000000,0.000000,
@@ -509,7 +509,7 @@ const GreenGold_colormap=[
 0.850000,0.419608,0.180392,0.007843,
 0.900000,0.278431,0.047059,0.003922,
 0.950000,0.141176,0.011765,0.000000,
-1.000000,0.000000,0.000000,0.000000];
+1.000000,0.000000,0.000000,0.000000].map(function(x) { return x * 255; });;
 
 
 const LinearGreen_colormap=[
@@ -533,7 +533,7 @@ const LinearGreen_colormap=[
 0.850000,0.878431,0.968627,0.631373,
 0.900000,0.949020,0.988235,0.694118,
 0.950000,0.992157,1.000000,0.800000,
-1.000000,1.000000,0.992157,0.901961];
+1.000000,1.000000,0.992157,0.901961].map(function(x) { return x * 255; });;
 
 
 const LinearTurquois_colormap=[
@@ -559,10 +559,8 @@ const LinearTurquois_colormap=[
 0.900000,0.098039,0.070588,0.301961,
 0.950000,0.113725,0.058824,0.258824,
 0.980000,0.121569,0.047059,0.219608,
-1.000000,0.058824,0.023529,0.101961];
+1.000000,0.058824,0.023529,0.101961].map(function(x) { return x * 255; });;
 
-
-  
 const MutedBlueGreen_colormap=[
 0.000000,0.109804,0.274510,0.301961,
 0.020000,0.129412,0.309804,0.341176,
@@ -590,7 +588,7 @@ const MutedBlueGreen_colormap=[
 0.850000,0.392157,0.560784,0.427451,
 0.900000,0.294118,0.450980,0.333333,
 0.950000,0.211765,0.349020,0.254902,
-1.000000,0.152941,0.278431,0.196078];
+1.000000,0.152941,0.278431,0.196078].map(function(x) { return x * 255; });;
 
 
 const ExtendedCoolWarm_colormap=[
@@ -610,7 +608,7 @@ const ExtendedCoolWarm_colormap=[
 109.626,0.817075,0.332174,0.281041,
 113.012,0.728496,0.155016,0.197391,
 116.189,0.576928,0.0553597,0.149248,
-119,0.403922,0,0.121569];
+119,0.403922,0,0.121569].map(function(x) { return x * 255; });;
 
 const AsymmetricBlueOrangeDivergent_colormap=[
 0.000000,0.521569,0.035294,0.211765,
@@ -655,7 +653,7 @@ const AsymmetricBlueOrangeDivergent_colormap=[
 0.894940,0.031373,0.192157,0.631373,
 0.929960,0.047059,0.152941,0.580392,
 0.964980,0.058824,0.117647,0.521569,
-1.000000,0.082353,0.094118,0.458824];
+1.000000,0.082353,0.094118,0.458824].map(function(x) { return x * 255; });;
 
 const LinearYellow_colormap=[
 0.000000,1.000000,1.000000,0.988235,
@@ -679,7 +677,7 @@ const LinearYellow_colormap=[
 0.850000,0.600000,0.121569,0.023529,
 0.900000,0.501961,0.054902,0.031373,
 0.950000,0.400000,0.039216,0.058824,
-1.000000,0.301961,0.047059,0.090196];
+1.000000,0.301961,0.047059,0.090196].map(function(x) { return x * 255; });;
 
 
 const LinearGray5_colormap=[
@@ -703,7 +701,7 @@ const LinearGray5_colormap=[
 0.850000,0.329412,0.282353,0.266667,
 0.900000,0.301961,0.250980,0.239216,
 0.950000,0.250980,0.203922,0.200000,
-1.000000,0.219608,0.180392,0.176471];
+1.000000,0.219608,0.180392,0.176471].map(function(x) { return x * 255; });;
 
 
 const LinearGray4_colormap=[
@@ -730,40 +728,7 @@ const LinearGray4_colormap=[
 0.850000,0.294118,0.352941,0.431373,
 0.900000,0.290196,0.325490,0.419608,
 0.950000,0.286275,0.298039,0.411765,
-1.000000,0.286275,0.282353,0.388235];
-
-const gray_scale_colormap=[-53.396511077880902, 0, 0, 0, -0.43301269412040699, 1, 1, 1];
-
-const hsv_colormap=[
-         -1,
-         1,
-         0,
-         0,
-         -0.66666599999999998,
-         1,
-         0,
-         1,
-         -0.33333299999999999,
-         0,
-         0,
-         1,
-         0,
-         0,
-         1,
-         1,
-         0.33333000000000002,
-         0,
-         1,
-         0,
-         0.66666000000000003,
-         1,
-         1,
-         0,
-         1,
-         1,
-         0,
-         0
-      ];
+1.000000,0.286275,0.282353,0.388235].map(function(x) { return x * 255; });;
 
 const scivis_magic_colormap=[
   0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3b,0x83,0x12,0x6f,
@@ -1289,10 +1254,10 @@ function gray_opaque_colormap(){
   {
     var alpha=I/(N-1.0);
 
-    colormap.push(alpha);
-    colormap.push(alpha);
-    colormap.push(alpha);
-    colormap.push(1.0);
+    colormap.push(alpha*255);
+    colormap.push(alpha*255);
+    colormap.push(alpha*255);
+    colormap.push(1.0*255);
   }
 
   //console.log(colormap);
@@ -1310,10 +1275,10 @@ function gray_transparent_colormap(){
   {
     var alpha=I/(N-1.0);
 
-    colormap.push(alpha);
-    colormap.push(alpha);
-    colormap.push(alpha);
-    colormap.push(alpha*alpha);
+    colormap.push(alpha*255);
+    colormap.push(alpha*255);
+    colormap.push(alpha*255);
+    colormap.push(alpha*alpha*255);
   }
 
   //console.log(colormap);
@@ -1328,10 +1293,10 @@ function hsl_colormap(){
   for (var I=0;I<N;I++)
   {
     var alpha=I/(N-1.0);
-    colormap.push(0.5);
-    colormap.push(1.0);
-    colormap.push(1.0);
-    colormap.push(alpha);
+    colormap.push(0.5*255);
+    colormap.push(1.0*255);
+    colormap.push(1.0*255);
+    colormap.push(alpha*255);
   }
 
   return colormap;

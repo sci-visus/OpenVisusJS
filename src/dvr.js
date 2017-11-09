@@ -577,11 +577,11 @@ function get_palette_data(palette_str){
   else if (palette_str == "LinearGray4") 
     colormap = LinearGray4_colormap;
   else if (palette_str == "graytransparent") 
-    colormap = hsv_colormap;//gray_transparent_colormap();
+    colormap = gray_transparent_colormap();
   else if (palette_str == "grayopaque") 
     colormap = gray_opaque_colormap();
   else if (palette_str == "hsl") 
-    colormap = hsv_colormap;//hsl_colormap();
+    colormap = hsl_colormap();
   else if (palette_str == "scivis_magic_colormap") 
     colormap = scivis_magic_colormap;
   else 
