@@ -40,7 +40,7 @@ function visusAsyncGetListOfDatasets(url)
     return response.json();
   })
   .then(function(obj) {
-    console.log("url " + url + " response.json(): " + obj);
+    //console.log("url " + url + " response.json(): " + obj);
     
     var arr=obj.childs;
     var ret=[];
@@ -358,7 +358,6 @@ function VisusOSD(params)
           	    +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)
           	  +'&toh='+toh;
 
-            console.log("return "+ret)
           }
           else
           {
@@ -397,7 +396,7 @@ function VisusOSD(params)
       +'&palette_max='+self.palette_max
       +'&palette_interp='+self.palette_interp;
     
-      toh=clamp(req_lev,0,self.maxLevel);
+      toh=clamp(req_lev,0,self.maxLevel*2);
       
       ret = base_url +'&action=boxquery&box=0%20'+self.dataset.dims[0]+'%200%20'+((self.dataset.dims[1])-1)+'&toh='+toh;
 
@@ -422,6 +421,25 @@ function VisusOSD(params)
     self.maxLevel=5;
   }
   
+  self.getDataSize=function(level){
+    var sample_size = 1;
+    
+    sd=[1,1,1];
+    for (I=0;I<level;I++) 
+      sd[self.dataset.bitmask[self.dataset.maxh-I]]*=2;
+
+    for(d=0;d<3;d++)
+      if(sd[d]>dataset.dims[d])
+        sd[d]=dataset.dims[d]
+
+    sd[axis] = 1
+
+    mag=sd[0]*sd[1]*sd[2]
+    //console.log("level "+level+" nsamples "+mag+"="+sd)
+
+    return (mag*sample_size)/1024.0/1024.0
+
+  }
   //getAxis
   self.getAxis=function() {
     return self.axis; 

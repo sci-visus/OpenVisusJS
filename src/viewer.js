@@ -183,7 +183,7 @@ function setDataset(value, presets=false)
       document.getElementById('2dCanvas').hidden=false
       document.getElementById('3dCanvas').hidden=true
       document.getElementById('view_btn').hidden=true;
-      
+
       document.getElementById('range_panel').hidden=true;
 
       console.log("USE 2D canvas")
@@ -318,7 +318,12 @@ function download(){
 
   out_ext_file = ".raw"
 
-  if(visus1.dtype.includes("int8") && !document.getElementById('vr_cb').checked){
+  if(dataset.dim==3 && visus1.dtype.includes("int8") && !document.getElementById('vr_cb').checked){
+    data_url=data_url.split("compression=raw").join("compression=png");
+    out_ext_file = ".png"
+  }
+  else if(dataset.dim==2){
+    //TODO use dtype also for 2D
     data_url=data_url.split("compression=raw").join("compression=png");
     out_ext_file = ".png"
   }
