@@ -729,6 +729,18 @@ const to_half = (() => {
         }
 })()
 
+function rgb_to_half(i, buffer){
+        const floatView = new Float32Array(1);
+        const int32View = new Int32Array(floatView.buffer);
+
+        const R=0.2990*buffer[i];
+        const G=0.5870*buffer[i+1];
+        const B=0.1140*buffer[i+2];
+        let val=R+G+B;
+
+        return to_half(val)
+}
+
 function
 compute_extent(array)
 {
@@ -745,7 +757,20 @@ to_array(buffer, data_type)
             const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
             const extent = compute_extent(view)
             return {extent, array}
-        } else if (data_type === "uint16") {
+        }
+        else if (data_type === "uint8[3]") {
+            const view = new Uint8Array(buffer)
+            const array = new Uint16Array(view.length/3).map((_, i) => rgb_to_half(i*3, view))
+            const extent = compute_extent(view)
+            return {extent, array}
+        }
+        else if (data_type === "uint8[4]") {
+            const view = new Uint8Array(buffer)
+            const array = new Uint16Array(view.length/4).map((_, i) => rgb_to_half(i*4, view))
+            const extent = compute_extent(view)
+            return {extent, array}
+        }
+        else if (data_type === "uint16") {
             const view = new Uint16Array(buffer)
             const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
             const extent = compute_extent(view)
@@ -770,6 +795,8 @@ to_array(buffer, data_type)
             const extent = compute_extent(array)
             return {extent, array}
         }
+        else 
+            console.log("datatype not supported")
 }
 
 
