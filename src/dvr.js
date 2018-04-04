@@ -224,8 +224,8 @@ main(void)
                 //if (color.a > 0.95)
                 //        return;
                 /* TODO: could be rescaled on CPU */
-                float ext= extent2-extent1;
-                if(color.a < 1.0 && value >=extent1/ext && value <= extent2/ext){
+                //float ext= extent2-extent1;
+                if(color.a < 1.0 && value >=extent1 && value <= extent2){
                 //  vec4 sample_color = texture(transfer_function_sampler, vec2(clamp((value-extent1)/(extent2-extent1),0.0,1.0), 0.0));
                   vec4 sample_color = texture(transfer_function_sampler, vec2(value, 0.0));
                   color.xyz += (1.0 - color.a)*sample_color.a*sample_color.xyz;
@@ -652,8 +652,8 @@ dvr(canvas, renderingMode)
                 /* update isovalue slider and shader uniform */
                 data_extent = typedArray.reduce(([min, max], d) => [Math.min(d, min), Math.max(d, max)], [typedArray[0], typedArray[0]])
 
-                gl.uniform1f(gl.getUniformLocation(program, "extent1"), data_extent[0]);
-                gl.uniform1f(gl.getUniformLocation(program, "extent2"), data_extent[1]);
+                gl.uniform1f(gl.getUniformLocation(program, "extent1"), 0.0)//data_extent[0]);
+                gl.uniform1f(gl.getUniformLocation(program, "extent2"), 1.0)//data_extent[1]);
 
                 gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
                 if (typedArray instanceof Int8Array || typedArray instanceof Int16Array || typedArray instanceof Uint8Array || typedArray instanceof Uint16Array) {
@@ -752,13 +752,13 @@ dvr(canvas, renderingMode)
           var colormap = get_palette_data(palette_str)
 
            if(!isNaN(ext1))
-                extent1 = ext1;
+                extent1 = ext1/data_extent[0];
               else
-                extent1 = data_extent[0]
+                extent1 = 0.0 //data_extent[0]
               if(!isNaN(ext2))
-                extent2 = ext2;
+                extent2 = ext2/data_extent[1];
               else
-                extent2 = data_extent[1]
+                extent2 = 1.0 //data_extent[1]
 
               gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
               gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
