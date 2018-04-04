@@ -750,18 +750,20 @@ dvr(canvas, renderingMode)
         dvr.updateColorMap = (ext1, ext2) =>  {
           var palette_str = document.getElementById('palette').value;
           var colormap = get_palette_data(palette_str)
+          var extent = data_extent[1]-data_extent[0]
 
            if(!isNaN(ext1))
-                extent1 = ext1/data_extent[0];
+                extent1 = parseFloat(ext1)/extent;
               else
                 extent1 = 0.0 //data_extent[0]
               if(!isNaN(ext2))
-                extent2 = ext2/data_extent[1];
+                extent2 = parseFloat(ext2)/extent;
               else
                 extent2 = 1.0 //data_extent[1]
 
-              gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
-              gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
+             //console.log ("using ext ["+extent1+","+extent2+"]")
+          gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
+          gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
 
           transferFunctionTex = gl.createTexture()
             gl.bindTexture(gl.TEXTURE_2D, transferFunctionTex)
