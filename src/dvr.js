@@ -26,11 +26,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
- 
-'use strict'
+
+const vertSrcBox = `
+#version 300 es
+
+layout (location = 0) in vec4 pos;
+layout (std140) uniform Matrices {
+        mat4 model;
+        mat4 view;
+        mat4 projection;
+} matrices;
+
+void
+main(void)
+{
+        gl_Position = matrices.projection*matrices.view*matrices.model*pos;
+}
+`.trim()
 
 
-const vert_src = `
+const fragSrcBox = `
+#version 300 es
+
+precision highp float;
+
+layout (location = 0) out vec4 color;
+
+void
+main(void)
+{
+        color = vec4(0.0, 0.0, 0.0, 1.0);
+}
+`.trim()
+
+
+
+
+function
+mkVertSrc(renderingMode)
+{
+        return `
 #version 300 es
 
 layout (location = 0) in vec4 pos;
@@ -42,36 +77,42 @@ layout (std140) uniform Matrices {
 
 out vec3 v_pos;
 out vec3 v_world_pos;
-out vec4 v_color;
 out vec3 eye;
 out mat4 to_world;
 out mat3 to_worldn;
+out float zScaling;
 
 void
 main(void)
 {
+        // needed to scale tFar in fragment shader as we have to use the insane GL projection matrix
+        zScaling = matrices.projection[2][2];
+
         /* TODO: precompute inverse */
         to_world = matrices.view*matrices.model;
         mat4 inv = inverse(to_world);
         to_worldn = transpose(mat3(inv));
         eye = (inv*vec4(0.0, 0.0, 0.0, 1.0)).xyz;
-        v_color = pos;
         vec4 position = pos;
         v_pos = position.xyz;
         v_world_pos = (matrices.view*matrices.model*position).xyz;
         gl_Position = matrices.projection*matrices.view*matrices.model*position;
 }
-`
+`.trim()
+}
 
 
 
 
-const frag_src = `
+function
+mkFragSrc(renderingMode)
+{
+        return `
 #version 300 es
 
-#define ISOSURFACE 0
-#define DVR 1
-#define METHOD DVR //ISOSURFACE
+#define SURFACE 0
+#define VOLUME 1
+#define METHOD ${(renderingMode === 'surface') ? 'SURFACE' : 'VOLUME'}
 
 #define NORMAL 0
 #define BLINN_PHONG 1
@@ -80,21 +121,30 @@ const frag_src = `
 precision highp float;
 
 uniform highp sampler3D volume_sampler;
-uniform highp sampler2D colormap_sampler;
+uniform highp sampler2D transfer_function_sampler;
+uniform highp sampler2D depth_sampler;
 
 uniform float isovalue;
 
 in vec3 v_pos;
 in vec3 v_world_pos;
-in vec4 v_color;
 in vec3 eye;
 in mat4 to_world;
 in mat3 to_worldn;
+in float zScaling;
+
+layout (location = 0) out vec4 color;
 
 uniform float extent1;
 uniform float extent2;
 
-layout (location = 0) out vec4 color;
+/* from internet (unknown original source) */
+/* TODO: use one of these? https://github.com/ashima/webgl-noise */
+float
+rand(vec2 co)
+{
+        return fract(sin(dot(co.xy, vec2(12.9898, 78.233)))*43758.5453);
+}
 
 
 /* central difference */
@@ -104,79 +154,91 @@ gradient(in sampler3D s, vec3 p, float dt)
         vec2 e = vec2(dt, 0.0);
 
         return vec3(texture(s, p - e.xyy).r - texture(s, p + e.xyy).r,
-                    texture(s, p - e.yxy).r - texture(s, p + e.yxy).r,
-                    texture(s, p - e.yyx).r - texture(s, p + e.yyx).r);
+                texture(s, p - e.yxy).r - texture(s, p + e.yxy).r,
+                texture(s, p - e.yyx).r - texture(s, p + e.yyx).r);
 }
 
 
 void
 main(void)
 {
-        vec3 light_pos = vec3(1.0, 1.0, 1.0);
-        vec3 d = normalize(v_pos - eye);
+        float depth = texelFetch(depth_sampler, ivec2(gl_FragCoord.xy), 0).r;
+
+        const vec3 light_pos = vec3(1.0, 1.0, 1.0);
+        vec3 o = eye;
+        vec3 d = normalize(v_pos - o);
 
         /* intersect aabb */
-        vec3 near = min(-eye/d, (vec3(1.0) - eye)/d);
-        //vec3 near_dt = min((1.0/256.0-eye)/d, (vec3(1.0) - eye)/d);
-        vec3 far = max(-eye/d, (vec3(1.0) - eye)/d);
+        vec3 near = min(-o/d, (vec3(1.0) - o)/d);
+        vec3 far = max(-o/d, (vec3(1.0) - o)/d);
 
         float tnear = max(near.x, max(near.y, near.z));
-        //float tnear_dt = max(near_dt.x, max(near_dt.y, near_dt.z));
         float tfar  = min(far.x, min(far.y, far.z));
+
+        /* stop at geometry if there is any (do ratio of z coordinate depth and z coordinate of current fragment) */
+        tfar *= min((zScaling + gl_FragCoord.z)/(zScaling + depth), 1.0);
 
         ivec3 size = textureSize(volume_sampler, 0);
         /* TODO: step in correct dts along x, y, and z */
-        //vec3 dts = vec3(size)*abs(d);
-        //float dt = 1.0/float(max(dts.x, max(dts.y, dts.z)));
         float dt = 1.0/float(max(size.x, max(size.y, size.z)));
 
-        color = vec4(0.0, 0.0, 0.0, 0.0);
+        /* create safe bubble close to head if it is inside the volume */
+        const float head_bubble_radius = 0.2;
+        if (tnear < head_bubble_radius)
+                tnear = floor((head_bubble_radius - tnear)/dt)*dt + tnear;
 
-        for (float t = tnear; t <= tfar; t += dt) {
-                vec3 p = eye + t*d;
+        color = vec4(0.0, 0.0, 0.0, 0.0);
+        float prev_value = 0.0;
+
+        for (float t = tnear + dt*rand(gl_FragCoord.xy); t <= tfar; t += dt) {
+                vec3 p = o + t*d;
                 float value = texture(volume_sampler, p).r;
-#if (METHOD == ISOSURFACE)
-                if (value > isovalue) {
-                        color = texture(colormap_sampler, vec2(value, 0.0));
+#if (METHOD == SURFACE)
+                if (sign(value - isovalue) != sign(prev_value - isovalue)) {
+                        color = vec4(0.9, 0.4, 0.4, 1.0);
 
                         /* linear approximation of intersection point */
                         vec3 prev_p = p - dt*d;
-                        float prev_value = texture(volume_sampler, prev_p).r;
                         float a = (isovalue - prev_value)/(value - prev_value);
                         vec3 inter_p = (1.0 - a)*(p - dt*d) + a*p;
                         /* TODO: sample at different dt for each axis to avoid having undo scaling */
                         vec3 nn = gradient(volume_sampler, inter_p, dt);
 #if (SHADING == NORMAL)
-                        color = vec4(n, 1.0);
+                                color = vec4(n, 1.0);
 #elif (SHADING == BLINN_PHONG)
                         /* TODO: can we optimize somehow? */
                         vec3 world_p = (to_world*vec4(inter_p, 1.0)).xyz;
                         vec3 n = normalize(to_worldn*nn);
                         vec3 light_dir = normalize(light_pos - world_p);
                         vec3 h = normalize(light_dir - world_p); /* eye is at origin */
-                        const float ambient = 0.2;
+                                const float ambient = 0.2;
                         float diffuse = 0.6*clamp(dot(light_dir, n), 0.0, 1.0);
                         float specular = 0.2*pow(clamp(dot(h, n), 0.0, 1.0), 100.0);
                         float distance = length(world_p); /* eye is at origin */
-                        color = vec4(color.xyz*(ambient + (diffuse + specular)/distance), 1.0);
+                                color = vec4(color.xyz*(ambient + (diffuse + specular)/distance), 1.0);
 #endif
                         return;
                 }
-#elif (METHOD == DVR)
-                if(color.a < 255.0 && value >=extent1 && value <= extent2){
-                  vec4 sample_color = texture(colormap_sampler, vec2(clamp((value-extent1)/(extent2-extent1),0.0,1.0), 0.0));
-                  color.xyz += (1.0 - color.a)*sample_color.xyz*sample_color.a;
+                prev_value = value;
+#elif (METHOD == VOLUME)
+                //if (color.a > 0.95)
+                //        return;
+                /* TODO: could be rescaled on CPU */
+                float ext= extent2-extent1;
+                if(color.a < 1.0 && value >=extent1/ext && value <= extent2/ext){
+                //  vec4 sample_color = texture(transfer_function_sampler, vec2(clamp((value-extent1)/(extent2-extent1),0.0,1.0), 0.0));
+                  vec4 sample_color = texture(transfer_function_sampler, vec2(value, 0.0));
+                  color.xyz += (1.0 - color.a)*sample_color.a*sample_color.xyz;
                   color.a += (1.0 - color.a)*sample_color.a;
-                //  color = vec4(t, 0.0, 0.0, 1.0);
-                 //color = vec4(clamp((value-extent1)/(extent2-extent1),0.0,1.0), 0.0, 0.0, 1.0);
-                 // return;
                 }
 #endif
         }
-        if (color.a == 0.0) 
-          discard;
+        /* TODO: or use blending */
+        if (color.a == 0.0)
+                discard;
 }
-`
+`.trim()
+}
 
 /* quaternion algebra */
 function vec2(x, y)
@@ -219,7 +281,6 @@ mat4_scale(x, y, z)
                     0, 0, z, 0,
                     0, 0, 0, 1)
 }
-
 
 function
 mat4_translate(x, y, z)
@@ -276,9 +337,6 @@ function look_at(position, target, up)
 {
 }
 
-
-
-
 /* Shoemake's arcball */
 /* it is nice to have it independent on input from vec */
 function arcball_screen_to_sphere(circle, screen_x, screen_y)
@@ -301,233 +359,544 @@ function arcball_quat(start_point, end_point)
         return quat(angle, axis.x, axis.y, axis.z)
 }
 
+async function
+dvr(canvas, renderingMode)
+{
+        const width = canvas.width
+        const height = canvas.height
+
+        const arcball_circle = {
+                center: vec2(width/2, height/2),
+                radius: Math.min(width/2, height/2),
+        }
+
+        let viewDistance = 1.5 
+
+        const near_plane = 0.01
+        const far_plane = 1000.0
+        const matrices = {
+                model:      mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -0.5, -0.5, 1.0),
+                view:       mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0),
+                projection: mat4(1.0, 0.0, 0.0, 0.0,
+                                 0.0, 1.0, 0.0, 0.0,
+                                 0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
+                                 0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0),
+        }
+
+        let p0
+        let q = quat(1.0, 0.0, 0.0, 0.0)
+        let q_down
+
+        let data_extent
+
+        canvas.addEventListener('mousedown', e => {
+                if (!(e.buttons & 1))
+                        return
+
+                q_down = q
+                const rect = canvas.getBoundingClientRect()
+                p0 = arcball_screen_to_sphere(arcball_circle, e.clientX - rect.left, e.clientY - rect.top)
+        })
+        canvas.addEventListener('mousemove', e => {
+                if (!(e.buttons & 1))
+                        return
+
+                const rect = canvas.getBoundingClientRect()
+                const p1 = arcball_screen_to_sphere(arcball_circle, e.clientX - rect.left, e.clientY - rect.top)
+                const q_move = arcball_quat(p0, p1)
+
+                q = quat_mul(q_move, q_down)
+
+                matrices.view = quat_to_mat4(q)
+                /* translate camera */
+                /* TODO: bit error prone as we have it in another place (`present` function) */
+                matrices.view[14] = -viewDistance;
+
+                render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+        })
+        canvas.addEventListener('wheel', e => {
+                e.preventDefault()
+
+                viewDistance = Math.max(1, viewDistance + 0.1*Math.sign(e.deltaY))
+
+                matrices.view[14] = -viewDistance;
+
+                render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+        })
+
+        const gl = canvas.getContext('webgl2', {alpha: false, antialias: false, depth: false, stencil: false})
+        if (!gl) {
+                console.log('WebGL: version 2 not available')
+                alert('WebGL 2 is not available')
+        }
+
+        /* necessary for linear filtering of float textures */
+        if (!gl.getExtension('OES_texture_float_linear'))
+                console.log('WebGL: no linear filtering for float textures')
 
 
-const viewer = document.querySelector('#viewer')
+        gl.enable(gl.DEPTH_TEST)
+        gl.enable(gl.CULL_FACE)
+        gl.cullFace(gl.FRONT)
 
-const canvas = viewer.querySelector('canvas')
-canvas.width  = window.innerWidth-100;
-canvas.height = window.innerHeight-100;
-const width = canvas.width
-const height = canvas.height
+        const program = createProgram(gl, mkVertSrc(renderingMode), mkFragSrc(renderingMode))
+        gl.uniformBlockBinding(program, gl.getUniformBlockIndex(program, 'Matrices'), 0)
 
-const arcball_circle = {
-        center: vec2(width/2, height/2),
-        radius: Math.min(width/2, height/2),
-}
+        const programBox = createProgram(gl, vertSrcBox, fragSrcBox)
+        gl.uniformBlockBinding(programBox, gl.getUniformBlockIndex(programBox, 'Matrices'), 0)
 
-var view_distance = 1.0
-
-const near_plane = 0.01
-const far_plane = 100000.0
-const matrices = {
-        model:      mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -0.5, -0.5, 1.0),
-        view:       mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -view_distance, 1.0),
-        projection: mat4(1.0, 0.0, 0.0, 0.0,
-                         0.0, 1.0, 0.0, 0.0,
-                         0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
-                         0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0),
-}
-
-let p0
-var q = quat(1.0, 0.0, 0.0, 0.0)
-let q_down
-
-canvas.addEventListener('mousedown', e => {
-        if (!(e.buttons & 1))
-                return
-
-        q_down = q
-        const rect = canvas.getBoundingClientRect()
-        p0 = arcball_screen_to_sphere(arcball_circle, e.clientX - rect.left, e.clientY - rect.top)
-})
-canvas.addEventListener('mousemove', e => {
-        if (!(e.buttons & 1))
-                return
-
-        const rect = canvas.getBoundingClientRect()
-        const p1 = arcball_screen_to_sphere(arcball_circle, e.clientX - rect.left, e.clientY - rect.top)
-        const q_move = arcball_quat(p0, p1)
         
-        q = quat_mul(q_move, q_down)
+        const positions = new Float32Array([
+                0.0, 0.0, 0.0,
+                1.0, 0.0, 0.0,
+                0.0, 1.0, 0.0,
+                1.0, 1.0, 0.0,
+                0.0, 0.0, 1.0,
+                1.0, 0.0, 1.0,
+                0.0, 1.0, 1.0,
+                1.0, 1.0, 1.0,
+        ])
+        const indices = new Uint8Array([
+                /* bottom */
+                0, 2, 1,
+                2, 3, 1,
+                /* top */
+                4, 5, 6,
+                6, 5, 7,
+                /* left */
+                2, 0, 6,
+                6, 0, 4,
+                /* right */
+                1, 3, 5,
+                5, 3, 7,
+                /* back */
+                3, 2, 7,
+                7, 2, 6,
+                /* front */
+                0, 1, 4,
+                4, 1, 5,
+        ])
+        const indicesBox = new Uint8Array([
+                0, 1,
+                0, 2,
+                1, 3,
+                2, 3,
+                0, 4,
+                1, 5,
+                2, 6,
+                3, 7,
+                4, 5,
+                4, 6,
+                5, 7,
+                6, 7,
 
-        matrices.view = quat_to_mat4(q)
-        /* translate camera */
-        /* TODO: bit error prone as we have it in another place (`present` function) */
-        matrices.view[14] = -view_distance;
+        ])
 
-        gl.bufferSubData(gl.UNIFORM_BUFFER, matrices.model.length*4, new Float32Array(matrices.view))
-        render()
-})
-canvas.addEventListener('wheel', e => {
-        e.preventDefault()
+        const vbo = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+        gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW)
 
-        view_distance = Math.max(1, view_distance + 0.1*e.deltaY)
+        const ebo = gl.createBuffer()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
 
-        matrices.view[14] = -view_distance;
-        gl.bufferSubData(gl.UNIFORM_BUFFER, matrices.model.length*4, new Float32Array(matrices.view))
-        render()
-})
+        const vao = gl.createVertexArray()
+        gl.bindVertexArray(vao)
+        gl.enableVertexAttribArray(0)
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+        gl.bindVertexArray(null)
 
-const gl = canvas.getContext('webgl2')
-if (!gl) {
-        console.log('WebGL: version 2 not available')
-        alert('WebGL 2 is not available')
+
+        // bounding box wireframe
+        const eboBox = gl.createBuffer()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesBox, gl.STATIC_DRAW)
+
+        const vaoBox = gl.createVertexArray()
+        gl.bindVertexArray(vaoBox)
+        gl.enableVertexAttribArray(0)
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
+        gl.bindVertexArray(null)
+
+
+        const fbos = createFbos(gl, width, height)
+
+        let volumeTex
+
+        let transferFunctionTex
+
+        /* create sampler objects for each texture */
+        const volumeSampler = gl.createSampler()
+        gl.samplerParameteri(volumeSampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+        gl.samplerParameteri(volumeSampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+        gl.samplerParameteri(volumeSampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+        gl.samplerParameteri(volumeSampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+        gl.samplerParameteri(volumeSampler, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
+
+        const transferFunctionSampler = gl.createSampler()
+        gl.samplerParameteri(transferFunctionSampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+        gl.samplerParameteri(transferFunctionSampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+        gl.samplerParameteri(transferFunctionSampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+        const depthSampler = gl.createSampler()
+        gl.samplerParameteri(depthSampler, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        gl.samplerParameteri(depthSampler, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+
+        ubo = gl.createBuffer()
+        gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
+        gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
+
+        gl.useProgram(program)
+        gl.uniform1i(gl.getUniformLocation(program, 'volume_sampler'), 0)
+        gl.uniform1i(gl.getUniformLocation(program, 'transfer_function_sampler'), 1)
+        gl.uniform1i(gl.getUniformLocation(program, 'depth_sampler'), 2)
+        gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), 0.0)//isovalue_select.value)
+
+        /* inline as it is more convenient */
+        function
+        render(view_matrix, projection_matrix, fbos, x, y, width, height)
+        {
+                gl.viewport(0, 0, fbos.width, fbos.height)
+
+                gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
+                gl.bufferSubData(gl.UNIFORM_BUFFER, 16*4, view_matrix)
+                gl.bufferSubData(gl.UNIFORM_BUFFER, 32*4, projection_matrix)
+
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fbos.fbo)
+                gl.clearBufferfv(gl.COLOR, fbos.fbo, [255/255, 255/255, 255/255, 1.0])
+                gl.clearBufferfv(gl.DEPTH, fbos.fbo, [1.0])
+                
+                gl.useProgram(programBox)
+                gl.bindVertexArray(vaoBox)
+                gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
+                gl.drawElements(gl.LINES, indicesBox.length, gl.UNSIGNED_BYTE, 0)
+                gl.bindVertexArray(null)
+
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+
+
+                // volume/surface rendering goes last as it needs to read depth from previous passes
+                gl.disable(gl.DEPTH_TEST) 
+                gl.bindFramebuffer(gl.FRAMEBUFFER, fbos.volumeFbo)
+
+                gl.activeTexture(gl.TEXTURE0)
+                gl.bindTexture(gl.TEXTURE_3D, volumeTex)
+                gl.bindSampler(0, volumeSampler)
+
+                if (renderingMode === 'volume') {
+                        gl.activeTexture(gl.TEXTURE1)
+                        gl.bindTexture(gl.TEXTURE_2D, transferFunctionTex)
+                        gl.bindSampler(1, transferFunctionSampler)
+                }
+
+                // depth buffer texture
+                gl.activeTexture(gl.TEXTURE2)
+                gl.bindTexture(gl.TEXTURE_2D, fbos.depthTexture)
+                gl.bindSampler(2, depthSampler)
+
+                gl.useProgram(program)
+                gl.bindVertexArray(vao)
+                gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
+                gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, 0)
+                gl.bindVertexArray(null)
+
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+                gl.enable(gl.DEPTH_TEST)
+
+                // copy to canvas framebuffer
+                gl.bindFramebuffer(gl.READ_FRAMEBUFFER, fbos.volumeFbo)
+                gl.blitFramebuffer(0, 0, fbos.width, fbos.height,
+                                   x, y, x + width, y + height,
+                                   gl.COLOR_BUFFER_BIT, gl.LINEAR)
+        }
+
+        /* VR code */
+        let vr_display
+        let frame_data
+        const vrFbos = {}
+
+        const dvr = {}
+
+        /* setup scene for 2D view and render it */
+        dvr.present = () => {
+                /* shutdown VR */
+                if (vr_display && vr_display.isPresenting)
+                        vr_display.exitPresent()
+
+                viewDistance = 1.5
+                q = quat(1.0, 0.0, 0.0, 0.0)
+                matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0)
+                matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,
+                                 0.0, 1.0, 0.0, 0.0,
+                                 0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
+                                 0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0)
+
+                canvas.width = width
+                canvas.height = height
+
+                render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+
+                return dvr
+        }
+
+        /* 8 and 16 bit integers are converted to float16 */
+        dvr.uploadData = (typedArray, width, height, depth, boxWidth, boxHeight, boxDepth) => {
+                /* TODO: dealloc or if same size then reuse */
+                volumeTex = gl.createTexture()
+                gl.bindTexture(gl.TEXTURE_3D, volumeTex)
+
+                /* update isovalue slider and shader uniform */
+                data_extent = typedArray.reduce(([min, max], d) => [Math.min(d, min), Math.max(d, max)], [typedArray[0], typedArray[0]])
+
+                gl.uniform1f(gl.getUniformLocation(program, "extent1"), data_extent[0]);
+                gl.uniform1f(gl.getUniformLocation(program, "extent2"), data_extent[1]);
+
+                gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
+                if (typedArray instanceof Int8Array || typedArray instanceof Int16Array || typedArray instanceof Uint8Array || typedArray instanceof Uint16Array) {
+                        const converted = new Uint16Array(typedArray.length).map((_, i) => to_half((typedArray[i] - data_extent[0])/(data_extent[1] - data_extent[0])))
+                        gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R16F, width, height, depth)
+                        gl.texSubImage3D(gl.TEXTURE_3D, 0,
+                                         0, 0, 0,
+                                         width, height, depth,
+                                         gl.RED, gl.HALF_FLOAT, converted)
+
+                } else if (typedArray instanceof Float32Array) {
+                        const converted = typedArray.map(d => (d - data_extent[0])/(data_extent[1] - data_extent[0]))
+                        gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R32F, width, height, depth)
+                        gl.texSubImage3D(gl.TEXTURE_3D, 0,
+                                         0, 0, 0,
+                                         width, height, depth,
+                                         gl.RED, gl.FLOAT, converted)
+                } else
+                        console.log('Unsupported array type')
+
+                const max = Math.max(boxWidth, boxHeight, boxDepth)
+                matrices.model = mat4_mul(mat4_scale(boxWidth/max, boxHeight/max, boxDepth/max), mat4_translate(-0.5, -0.5, -0.5))
+                gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
+                gl.bufferSubData(gl.UNIFORM_BUFFER, 0, new Float32Array(matrices.model))
+
+                return dvr
+        }
+
+
+
+        if (renderingMode === 'surface')
+                /* isovalue must be within range [0,1] */
+                dvr.isovalue = (value) => {
+                        gl.useProgram(program)
+                        gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), value)
+                        if (vr_display && vr_display.isPresenting)
+                                return dvr
+
+                        render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+                        return dvr
+                }
+
+
+        if (renderingMode === 'volume')
+                dvr.transferFunction = (array) => {
+                        /* WebGL does not support 1D textures directly */
+                        transferFunctionTex = gl.createTexture()
+                        gl.bindTexture(gl.TEXTURE_2D, transferFunctionTex)
+                        gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, array.length/4, 1)
+                        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, array.length/4, 1, gl.RGBA,
+                        gl.UNSIGNED_BYTE, new Uint8Array(array))
+
+                        if (vr_display && vr_display.isPresenting)
+                                return dvr
+
+                        render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+                        return dvr
+                }
+
+        if (navigator.getVRDisplays) {
+                return new Promise((resolve, reject) => {
+                        frame_data = new VRFrameData()
+
+                        navigator.getVRDisplays().then(displays => {
+                                if (!displays.length) {
+                                        console.log('VR: No device connected')
+                                        resolve(dvr)
+                                        return
+                                }
+
+                                vr_display = displays[displays.length - 1]
+
+                                vr_display.depthNear = 0.1
+                                vr_display.depthFar = 100
+
+                                if (vr_display.capabilities.canPresent)
+                                        /* TODO: add button */
+                                        console.log('device can present')
+
+
+                                window.addEventListener('vrdisplaypresentchange', () => vr_display_present_change(vr_display, canvas, gl, vrFbos), false)
+                                window.addEventListener('vrdisplayactivate', vr_display_activate, false)
+                                window.addEventListener('vrdisplaydeactivate', vr_display_deactivate, false)
+
+                                dvr.vr = () => {
+                                        vr_request_present(vr_display, frame_data, canvas, gl, vrFbos, render)
+                                }
+
+                                resolve(dvr)
+                        })
+                })
+        }
+
+        dvr.updateColorMap = (ext1, ext2) =>  {
+          var palette_str = document.getElementById('palette').value;
+          var colormap = get_palette_data(palette_str)
+
+           if(!isNaN(ext1))
+                extent1 = ext1;
+              else
+                extent1 = data_extent[0]
+              if(!isNaN(ext2))
+                extent2 = ext2;
+              else
+                extent2 = data_extent[1]
+
+              gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
+              gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
+
+          transferFunctionTex = gl.createTexture()
+            gl.bindTexture(gl.TEXTURE_2D, transferFunctionTex)
+            gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
+            gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
+            gl.UNSIGNED_BYTE, new Uint8Array(colormap))
+
+            if (vr_display && vr_display.isPresenting)
+                    return dvr
+
+            render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+
+          // if(!isNaN(ext1))
+          //   extent1 = ext1;
+          // else
+          //   extent1 = data_extent[0]
+          // if(!isNaN(ext2))
+          //   extent2 = ext2;
+          // else
+          //   extent2 = data_extent[1]
+
+          // gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
+          // gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
+
+          // var colormap = get_palette_data(palette_str)
+
+          // colormap_tex = gl.createTexture()
+          // /* WebGL does not support 1D textures directly */
+          // gl.bindTexture(gl.TEXTURE_2D, colormap_tex)
+          // gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
+          // gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
+          //                  gl.UNSIGNED_BYTE, new Uint8Array(colormap))
+
+          /* create sampler objects for each texture */
+          // volume_sampler = gl.createSampler()
+          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
+
+          // colormap_sampler = gl.createSampler()
+          // gl.samplerParameteri(colormap_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+          // gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+          // gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+          // ubo = gl.createBuffer()
+          // gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
+          // gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
+
+          // gl.clearColor(1.0,1.0,1.0,1.0)
+
+          // gl.uniform1i(gl.getUniformLocation(program, 'volume_sampler'), 0)
+          // gl.uniform1i(gl.getUniformLocation(program, 'colormap_sampler'), 1)
+
+        }
+
+        /* setup scene for 2D view */
+        dvr.resetView = () =>{
+            q = quat(1.0, 0.0, 0.0, 0.0)
+            matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0)
+            matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
+                             0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0)
+
+            gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
+            gl.bufferSubData(gl.UNIFORM_BUFFER, matrices.model.length*4, new Float32Array([...matrices.view, ...matrices.projection]))
+
+            dvr.present()
+        }
+
+        dvr.getDataExtent = () =>{
+          return data_extent;
+        }
+
+        return new Promise((resolve, reject) => resolve(dvr))
 }
 
-/* necessary for linear filtering of float textures */
-if (!gl.getExtension('OES_texture_float_linear'))
-        console.log('WebGL: no linear filtering for float textures')
+/* utilities */
+function
+createProgram(gl, vertSrc, fragSrc)
+{
+        /* create program from two shaders */
+        const vertexShader = gl.createShader(gl.VERTEX_SHADER)
+        gl.shaderSource(vertexShader, vertSrc)
+        gl.compileShader(vertexShader)
+        if (gl.getShaderInfoLog(vertexShader))
+                console.log('WebGL:', gl.getShaderInfoLog(vertexShader))
 
-/*
-const isovalue_select = document.getElementById('isovalue_select')
-isovalue_select.addEventListener('input', e => {
-        console.log('isovalue', e.target.value)
-        gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), e.target.value)
-        render()
-})
-*/
+        const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)
+        gl.shaderSource(fragmentShader, fragSrc)
+        gl.compileShader(fragmentShader)
+        if (gl.getShaderInfoLog(fragmentShader))
+                console.log('WebGL:', gl.getShaderInfoLog(fragmentShader))
 
-gl.enable(gl.CULL_FACE)
-gl.cullFace(gl.FRONT)
+        const program = gl.createProgram()
+        gl.attachShader(program, vertexShader)
+        gl.attachShader(program, fragmentShader)
+        gl.linkProgram(program)
 
+        gl.deleteShader(vertexShader)
+        gl.deleteShader(fragmentShader)
 
-/* create program from two shaders */
-const vertex_shader = gl.createShader(gl.VERTEX_SHADER)
-gl.shaderSource(vertex_shader, vert_src.trim())
-gl.compileShader(vertex_shader)
-console.log(gl.getShaderInfoLog(vertex_shader))
-
-const fragment_shader = gl.createShader(gl.FRAGMENT_SHADER)
-gl.shaderSource(fragment_shader, frag_src.trim())
-gl.compileShader(fragment_shader)
-console.log(gl.getShaderInfoLog(fragment_shader))
-
-const program = gl.createProgram()
-gl.attachShader(program, vertex_shader)
-gl.attachShader(program, fragment_shader)
-gl.linkProgram(program)
-
-gl.deleteShader(vertex_shader)
-gl.deleteShader(fragment_shader)
-
-gl.useProgram(program)
-
-const uniform_matrices_location = gl.getUniformBlockIndex(program, 'Matrices')
-gl.uniformBlockBinding(program, uniform_matrices_location, 0)
+        return program
+}
 
 
-/* TODO: can use one triangle strip */
-var positions = new Float32Array([
-        0.0, 0.0, 0.0,
-        1.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
-        1.0, 1.0, 0.0,
-        0.0, 0.0, 1.0,
-        1.0, 0.0, 1.0,
-        0.0, 1.0, 1.0,
-        1.0, 1.0, 1.0,
-])
+function
+createFbos(gl, width, height)
+{
+        const colorRenderbuffer = gl.createRenderbuffer()
+        gl.bindRenderbuffer(gl.RENDERBUFFER, colorRenderbuffer)
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.SRGB8_ALPHA8, width, height)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, null)
 
-const indices = new Uint8Array([
-        /* bottom */
-        0, 2, 1,
-        2, 3, 1,
-        /* top */
-        4, 5, 6,
-        6, 5, 7,
-        /* left */
-        2, 0, 6,
-        6, 0, 4,
-        /* right */
-        1, 3, 5,
-        5, 3, 7,
-        /* back */
-        3, 2, 7,
-        7, 2, 6,
-        /* front */
-        0, 1, 4,
-        4, 1, 5,
-])
+        const depthTexture = gl.createTexture()
+        gl.bindTexture(gl.TEXTURE_2D, depthTexture)
+        gl.texStorage2D(gl.TEXTURE_2D, 1, gl.DEPTH_COMPONENT32F, width, height)
+        gl.bindTexture(gl.TEXTURE_2D, null)
 
-const vbo = gl.createBuffer()
-gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW)
+        // framebuffer for rendering geometry
+        const fbo = gl.createFramebuffer()
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo)
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, colorRenderbuffer)
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depthTexture, 0)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
-const ebo = gl.createBuffer()
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
+        // framebuffer for rendering volume/surface
+        const volumeFbo = gl.createFramebuffer()
+        gl.bindFramebuffer(gl.FRAMEBUFFER, volumeFbo)
+        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, colorRenderbuffer)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
-
-const vao = gl.createVertexArray()
-gl.bindVertexArray(vao)
-gl.enableVertexAttribArray(0)
-gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-gl.bindVertexArray(null)
-
-let volume_tex
-
-const test_colormap = [
-    255, 255, 0, 0,
-    0, 255, 0, 0,
-    0, 255, 255, 255,
-    0,0,0,0
-]
-
-var colormap_tex = gl.createTexture()
-var volume_sampler = gl.createSampler()
-var colormap_sampler = gl.createSampler()
-var ubo = gl.createBuffer()
-var extent1=0.0;
-var extent2=255.0;
-var data_extent=[];
-
-updateColorMap(NaN, NaN);
-
-// const test_colormap = [
-//     255, 255, 0, 5,
-//     0, 255, 0, 200,
-//     0, 255, 255, 255,
-//     0,0,0,0
-// ]
-
-// const colormap = gamma_colormap;
-
-// const colormap_tex = gl.createTexture()
-// /* WebGL does not support 1D textures directly */
-// gl.bindTexture(gl.TEXTURE_2D, colormap_tex)
-// gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
-// gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
-//                  gl.UNSIGNED_BYTE, new Uint8Array(colormap))
-
-// /* create sampler objects for each texture */
-// const volume_sampler = gl.createSampler()
-// gl.samplerParameteri(volume_sampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-// gl.samplerParameteri(volume_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-// gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-// gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-// gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
-
-// const colormap_sampler = gl.createSampler()
-// gl.samplerParameteri(colormap_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-// gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-// gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
-// const ubo = gl.createBuffer()
-// gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
-// gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
-
-// gl.clearColor(1.0,1.0,1.0,1.0)
-
-// gl.uniform1i(gl.getUniformLocation(program, 'volume_sampler'), 0)
-// gl.uniform1i(gl.getUniformLocation(program, 'colormap_sampler'), 1)
-
-// gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), isovalue_select.value)
-
-function get_data_extent(){
-  return data_extent;
+        return {fbo, volumeFbo, depthTexture, width, height}
 }
 
 function get_palette_data(palette_str){
@@ -589,95 +958,6 @@ function get_palette_data(palette_str){
 
   return colormap;
 
-}
-
-function updateColorMap(ext1, ext2)
-{
-  var palette_str = document.getElementById('palette').value;
-
-  if(!isNaN(ext1))
-    extent1 = ext1;
-  else
-    extent1 = data_extent[0]
-  if(!isNaN(ext2))
-    extent2 = ext2;
-  else
-    extent2 = data_extent[1]
-
-  gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
-  gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
-
-  var colormap = get_palette_data(palette_str)
-
-  colormap_tex = gl.createTexture()
-  /* WebGL does not support 1D textures directly */
-  gl.bindTexture(gl.TEXTURE_2D, colormap_tex)
-  gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
-  gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
-                   gl.UNSIGNED_BYTE, new Uint8Array(colormap))
-
-  /* create sampler objects for each texture */
-  volume_sampler = gl.createSampler()
-  gl.samplerParameteri(volume_sampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-  gl.samplerParameteri(volume_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-  gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-  gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-  gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
-
-  // colormap_sampler = gl.createSampler()
-  gl.samplerParameteri(colormap_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-  gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-  gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
-  ubo = gl.createBuffer()
-  gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
-  gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
-
-  gl.clearColor(1.0,1.0,1.0,1.0)
-
-  gl.uniform1i(gl.getUniformLocation(program, 'volume_sampler'), 0)
-  gl.uniform1i(gl.getUniformLocation(program, 'colormap_sampler'), 1)
-
-}
-
-function
-render()
-{
-        gl.clear(gl.COLOR_BUFFER_BIT)
-
-        gl.activeTexture(gl.TEXTURE0)
-        gl.bindTexture(gl.TEXTURE_3D, volume_tex)
-        gl.bindSampler(0, volume_sampler)
-
-        gl.activeTexture(gl.TEXTURE1)
-        gl.bindTexture(gl.TEXTURE_2D, colormap_tex)
-        gl.bindSampler(1, colormap_sampler)
-
-        gl.bindVertexArray(vao)
-        gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, 0)
-        gl.bindVertexArray(null)
-
-}
-
-
-
-
-/* setup scene for 2D view */
-function
-resetView()
-{
-        q = quat(1.0, 0.0, 0.0, 0.0)
-        matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -view_distance, 1.0)
-        matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,
-                         0.0, 1.0, 0.0, 0.0,
-                         0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
-                         0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0)
-
-        gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
-        gl.bufferSubData(gl.UNIFORM_BUFFER, matrices.model.length*4, new Float32Array([...matrices.view, ...matrices.projection]))
-
-        render()
 }
 
 
@@ -801,168 +1081,3 @@ to_array(buffer, data_type)
 
 
 
-/* 8 and 16 bit integers are converted to float16 */
-function
-upload_data(gl, buffer, size, data_type, box_size)//, min_extent, max_extent)
-{
-        /* TODO: dealloc or if same size then reuse */
-        volume_tex = gl.createTexture()
-        gl.bindTexture(gl.TEXTURE_3D, volume_tex)
-
-        const {array, extent} = to_array(buffer, data_type)
-        console.log('extent', extent)
-        
-        data_extent = extent;
-
-        gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent[0]);
-        gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent[1]);
-
-        /* update isovalue slider and shader uniform */
-        // isovalue_select.min = extent[0]
-        // isovalue_select.max = extent[1]
-        // isovalue_select.value = 0.5*(extent[0] + extent[1])
-        // gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), isovalue_select.value)
-
-        gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
-        if (array.BYTES_PER_ELEMENT === 2) {
-                gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R16F, size.width, size.height, size.depth)
-                gl.texSubImage3D(gl.TEXTURE_3D, 0,
-                                 0, 0, 0,
-                                 size.width, size.height, size.depth,
-                                 gl.RED, gl.HALF_FLOAT, array)
-
-        } else {
-                gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R32F, size.width, size.height, size.depth)
-                gl.texSubImage3D(gl.TEXTURE_3D, 0,
-                                 0, 0, 0,
-                                 size.width, size.height, size.depth,
-                                 gl.RED, gl.FLOAT, array)
-        }
-
-        const max = Math.max(box_size.width, box_size.height, box_size.depth)
-        matrices.model = mat4_mul(mat4_scale(box_size.width/max, box_size.height/max, box_size.depth/max), mat4_translate(-0.5, -0.5, -0.5))
-        gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
-        gl.bufferSubData(gl.UNIFORM_BUFFER, 0, new Float32Array(matrices.model))
-}
-
-
-/* WebVR code */
-let vr_display
-let frame_data
-
-
-// function
-// vr_init()
-// {
-//         if (!navigator.getVRDisplays)
-//                 console.log('Missing VR support')
-
-//                         frame_data = new VRFrameData()
-
-//         navigator.getVRDisplays().then(displays => {
-//                 if (!displays.length) {
-//                         console.log('VR: No device connected')
-//                         return
-//                 }
-
-//                 vr_display = displays[displays.length - 1]
-
-//                 vr_display.depthNear = 0.1
-//                 vr_display.depthFar = 100
-
-//                 if (vr_display.capabilities.canPresent)
-//                         /* TODO: add button */
-//                         console.log('device can present')
-
-//                 window.addEventListener('vrdisplaypresentchange', vr_display_present_change_cb, false)
-//                 window.addEventListener('vrdisplayactivate', vr_display_activate_cb, false)
-//                 window.addEventListener('vrdisplaydeactivate', vr_display_deactivate_cb, false)
-//         })
-// }
-
-
-function
-vr_display_present_change_cb()
-{
-        console.log('present change')
-
-        if (vr_display.isPresenting) {
-                const left_eye = vr_display.getEyeParameters('left')
-                const right_eye = vr_display.getEyeParameters('right')
-
-                /* TODO: two buffers? instancing? */
-                canvas.width = 2*Math.max(left_eye.renderWidth, right_eye.renderWidth)
-                canvas.height = Math.max(left_eye.renderHeight, right_eye.renderHeight)
-        }
-}
-
-
-
-function
-vr_display_activate_cb()
-{
-        console.log('display activate')
-}
-
-
-function
-vr_display_deactivate_cb()
-{
-        console.log('display deactivate')
-}
-
-
-function
-vr_request_present_cb()
-{
-        vr_display.requestPresent([{source: canvas}]).then(() => {
-                console.log('User requested VR view')
-                vr_request_animation_frame_cb(0)
-        }, err => {
-                if (err && err.message)
-                        console.log('Request present failed:', err.message)
-        })
-}
-
-
-
-function
-vr_request_animation_frame_cb(time)
-{
-        vr_display.requestAnimationFrame(vr_request_animation_frame_cb)
-
-        /* TODO: how to do room scale with fixed origin? */
-        vr_display.getFrameData(frame_data)
-
-        if (vr_display.isPresenting) {
-                gl.clear(gl.COLOR_BUFFER_BIT)
-
-                /* left eye */
-                gl.viewport(0, 0, 0.5*canvas.width, canvas.height)
-                /* TODO: pack into single draw call? */
-                gl.bufferSubData(gl.UNIFORM_BUFFER, matrices.model.length*4, frame_data.leftViewMatrix)
-                gl.bufferSubData(gl.UNIFORM_BUFFER, 2*matrices.model.length*4, frame_data.leftProjectionMatrix)
-                render()
-
-                /* right eye */
-                gl.viewport(0.5*canvas.width, 0, 0.5*canvas.width, canvas.height)
-                gl.bufferSubData(gl.UNIFORM_BUFFER, matrices.model.length*4, frame_data.rightViewMatrix) 
-                gl.bufferSubData(gl.UNIFORM_BUFFER, 2*matrices.model.length*4, frame_data.rightProjectionMatrix)
-                render()
-
-                vr_display.submitFrame()
-        }
-}
-
-
-function
-vr_present()
-{
-        if (!vr_display) {
-                console.log('VR: not available')
-                return
-        }
-        vr_request_present_cb()
-}
-
-//vr_init()

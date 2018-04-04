@@ -1,5 +1,23 @@
 
 var visus1;
+let renderer;
+
+function
+toArray(buffer, dataType)
+{
+        switch (dataType) {
+        case 'uint8':
+                return new Uint8Array(buffer)
+        case 'uint16':
+                return new Uint16Array(buffer)
+        case 'int8':
+                return new Int8Array(buffer)
+        case 'int16':
+                return new Int16Array(buffer)
+        case 'float32':
+                return new Float32Array(buffer)
+        }
+}
 
 function notifyStatus(new_text)
 {
@@ -45,27 +63,38 @@ function fetch_and_draw(query_str, reset_view=1)
       
       notifyStatus("Rendering...");
 
-      upload_data(gl, data, {level: level, width: data_size[0], height: data_size[1], depth: data_size[2]}, dtype, 
-                  {width: data_size[0], height: data_size[1], depth: data_size[2]})
+      const start = async function() {
+        if (!renderer)
+          renderer = await dvr(document.getElementById('3dCanvas'), 'volume')
 
-      viewer.style.display = 'block'
+        var palette_str = document.getElementById('palette').value;
 
-      let pal_min= parseFloat(document.getElementById('palette_min').value)
-      let pal_max= parseFloat(document.getElementById('palette_max').value)
+        var colormap = get_palette_data(palette_str)
+        
+        var array = toArray(data, visus1.dtype)
+        renderer.uploadData(array, data_size[0], data_size[1], data_size[2], data_size[0], data_size[1], data_size[2]);
 
-      //console.log("update color map "+pal_min+" "+pal_max)
-      updateColorMap(pal_min, pal_max);
+        viewer.style.display = 'block'
 
-      var range=get_data_extent();
-      //console.log("R:"+range[0]+", "+range[1])
-      document.getElementById('comp_range').innerHTML="["+parseFloat(range[0]).toFixed(3)+", "+parseFloat(range[1]).toFixed(3)+"]"
-      
-      if(reset_view==1)
-        resetView()
+        let pal_min= parseFloat(document.getElementById('palette_min').value)
+        let pal_max= parseFloat(document.getElementById('palette_max').value)
 
-      render();
+        //console.log("update color map "+pal_min+" "+pal_max)
+        renderer.updateColorMap(pal_min, pal_max);
 
-      hideStatus();
+        var range=renderer.getDataExtent();
+        //console.log("R:"+range[0]+", "+range[1])
+        document.getElementById('comp_range').innerHTML="["+parseFloat(range[0]).toFixed(3)+", "+parseFloat(range[1]).toFixed(3)+"]"
+        
+        if(reset_view==1)
+          renderer.resetView()
+
+        renderer.present();
+
+        hideStatus();
+      }
+
+      start()
 
     }).catch(e => {
       console.log(e);
@@ -289,8 +318,10 @@ function onPaletteChange(){
   let pal_min= parseFloat(document.getElementById('palette_min').value)
   let pal_max= parseFloat(document.getElementById('palette_max').value)
 
-  updateColorMap(pal_min, pal_max);
-  render();
+  var colormap = get_palette_data(document.getElementById('palette').value)
+
+  renderer.updateColorMap(pal_min, pal_max);
+  //renderer.render();
 
   if(document.getElementById('2dCanvas').hidden==false)
     refreshAll(0);
