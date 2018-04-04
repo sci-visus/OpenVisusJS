@@ -27,6 +27,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+const SLICE_RENDER_MODE = '0'
+const VOLUME_RENDER_MODE = '1'
+const ISOCONTOUR_RENDER_MODE = '2'
+
 //////////////////////////////////////////////////////////////////////
 //example http://atlantis.sci.utah.edu/mod_visus?action=list&format=json
 function visusAsyncGetListOfDatasets(url) 
@@ -572,7 +576,7 @@ function VisusVR(params)
   self.minLevel=0;
   self.maxLevel=33;
   self.compression='raw'
-  self.isVolumeRender=true
+  self.render_type=SLICE_RENDER_MODE
   self.nsamples=[]
 
   // var div=document.getElementById(self.id);
@@ -589,7 +593,7 @@ function VisusVR(params)
     Y = 1;//permutation[self.axis][1];
     Z = 2;//permutation[self.axis][2];
    
-    // if(!self.isVolumeRender && req_lev==self.level)
+    // if(!self.render_type && req_lev==self.level)
     //   req_lev=level=24 > self.maxLevel ? self.maxLevel : 24
 
     base_url=self.dataset.base_url
@@ -609,7 +613,7 @@ function VisusVR(params)
       h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
       d=self.tile_size[2] * vs; z1=z * d; z2=z1 + d;
       
-      if(!isVolumeRender){
+      if(render_type==SLICE_RENDER_MODE){
         //console.log("slice "+self.slice+" axis "+self.axis);
         if(self.axis=='0'){
           x1=Math.floor(self.dataset.dims[0]*(self.slice/100.0))
@@ -649,7 +653,7 @@ function VisusVR(params)
   }; 
   
   self.setRenderType=function(value){
-    self.isVolumeRender=value;
+    self.render_type=value;
   };
 
   //getAxis

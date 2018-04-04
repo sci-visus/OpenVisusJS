@@ -515,12 +515,12 @@ dvr(canvas, renderingMode)
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesBox, gl.STATIC_DRAW)
 
         const vaoBox = gl.createVertexArray()
-        gl.bindVertexArray(vaoBox)
-        gl.enableVertexAttribArray(0)
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
-        gl.bindVertexArray(null)
+        // gl.bindVertexArray(vaoBox)
+        // gl.enableVertexAttribArray(0)
+        // gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+        // gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
+        // gl.bindVertexArray(null)
 
 
         const fbos = createFbos(gl, width, height)
@@ -627,13 +627,13 @@ dvr(canvas, renderingMode)
                 if (vr_display && vr_display.isPresenting)
                         vr_display.exitPresent()
 
-                viewDistance = 1.5
-                q = quat(1.0, 0.0, 0.0, 0.0)
-                matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0)
-                matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,
-                                 0.0, 1.0, 0.0, 0.0,
-                                 0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
-                                 0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0)
+                // viewDistance = 1.5
+                // q = quat(1.0, 0.0, 0.0, 0.0)
+                // matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0)
+                // matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,
+                //                  0.0, 1.0, 0.0, 0.0,
+                //                  0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
+                //                  0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0)
 
                 canvas.width = width
                 canvas.height = height
@@ -775,49 +775,6 @@ dvr(canvas, renderingMode)
                     return dvr
 
             render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
-
-          // if(!isNaN(ext1))
-          //   extent1 = ext1;
-          // else
-          //   extent1 = data_extent[0]
-          // if(!isNaN(ext2))
-          //   extent2 = ext2;
-          // else
-          //   extent2 = data_extent[1]
-
-          // gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
-          // gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
-
-          // var colormap = get_palette_data(palette_str)
-
-          // colormap_tex = gl.createTexture()
-          // /* WebGL does not support 1D textures directly */
-          // gl.bindTexture(gl.TEXTURE_2D, colormap_tex)
-          // gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
-          // gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
-          //                  gl.UNSIGNED_BYTE, new Uint8Array(colormap))
-
-          /* create sampler objects for each texture */
-          // volume_sampler = gl.createSampler()
-          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-          // gl.samplerParameteri(volume_sampler, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
-
-          // colormap_sampler = gl.createSampler()
-          // gl.samplerParameteri(colormap_sampler, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-          // gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-          // gl.samplerParameteri(colormap_sampler, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
-          // ubo = gl.createBuffer()
-          // gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
-          // gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
-
-          // gl.clearColor(1.0,1.0,1.0,1.0)
-
-          // gl.uniform1i(gl.getUniformLocation(program, 'volume_sampler'), 0)
-          // gl.uniform1i(gl.getUniformLocation(program, 'colormap_sampler'), 1)
 
         }
 

@@ -62,7 +62,12 @@
               <table width='100%'>
                 <tr>
                   <td> <label>Server</label> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'/>
-                  <td> <label>Volume render</label> <input id='vr_cb' type='checkbox' size=32 onchange='onVRChange(this.value);' class='toolbar_value'/>
+                  <td> <label>Render</label> 
+                    <select id='render_type' onchange='onVRChange(this.value);' class='toolbar_value'>
+                      <option value="0">Slice</option>
+                      <option value="1">Volume</option>
+                      <option value="2">Iso Contour</option>
+                    </select>
                   <td> <label>Dataset</label> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value' />
                   <td><label>Field</label> <select id='field' onchange='onFieldChange(this.value);' class='toolbar_value' /> 
                   <td><input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);' class='toolbar_value'>auto</input> <input type='button' value='Refresh' onclick="refreshAll(0)"/> </td>
@@ -80,7 +85,7 @@
             <div class="datagrid">
               <table width='100%' >
                 <tr>
-                  <td><label>Axis</label>
+                  <td><label id="axis_label">Axis</label>
                   <td>
                     <select id='axis' onchange='onAxisChange(this.value);' class='toolbar_value'>
                       <option value='2'>Z</option>
@@ -88,7 +93,7 @@
                       <option value='0'>X</option>
                     </select>
                     
-                  <td><label>Slice</label>
+                  <td><label id='render_slider_lbl'>Slice</label>
                   <td width='50%'>
                     <table width='100%'>
                       <tr width='100%'>

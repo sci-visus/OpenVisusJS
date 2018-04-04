@@ -2,6 +2,7 @@
 var visus1;
 let renderer;
 
+
 function
 toArray(buffer, dataType)
 {
@@ -52,7 +53,7 @@ function fetch_and_draw(query_str, reset_view=1)
         data_size[2]=1
 
       visus1.setNSamples(data_size)
-      console.log(data_size)
+      //console.log(data_size)
 
       dtype=response.headers.get('visus-dtype')
 
@@ -64,7 +65,10 @@ function fetch_and_draw(query_str, reset_view=1)
       notifyStatus("Rendering...");
 
       const start = async function() {
-        if (!renderer)
+        //if (!renderer)
+        if(visus1.render_type==ISOCONTOUR_RENDER_MODE)
+          renderer = await dvr(document.getElementById('3dCanvas'), 'surface')
+        else
           renderer = await dvr(document.getElementById('3dCanvas'), 'volume')
 
         var palette_str = document.getElementById('palette').value;
@@ -89,7 +93,11 @@ function fetch_and_draw(query_str, reset_view=1)
         if(reset_view==1)
           renderer.resetView()
 
-        renderer.present();
+        if(visus1.render_type!=ISOCONTOUR_RENDER_MODE)
+          renderer.present();
+        else{
+          renderer.present().isovalue(0.5);
+        }
 
         hideStatus();
       }
@@ -99,8 +107,6 @@ function fetch_and_draw(query_str, reset_view=1)
     }).catch(e => {
       console.log(e);
     });
-
-
 
 }
 
@@ -178,7 +184,7 @@ function setDataset(value, presets=false)
   // document.getElementById('palette_min').value="";
   // document.getElementById('palette_max').value="";
 
-  //document.getElementById('vr_cb').checked=true
+  //document.getElementById('render_type').checked=true
   //document.getElementById('axis').disabled=true
   //document.getElementById('axis').value='2'
   //document.getElementById('slice').disabled=true
@@ -241,7 +247,7 @@ function setDataset(value, presets=false)
         debugMode : false
       }); 
 
-      visus1.setRenderType(document.getElementById('vr_cb').checked)
+      visus1.setRenderType(document.getElementById('render_type').value)
     }
     
     if(presets)
@@ -269,9 +275,18 @@ function onAxisChange(value){
 
 function onSliceChange(value){
   visus1.setSlice(value); 
-  document.getElementById('edit_slice').value=value;
+  var range=renderer.getDataExtent();
+  ext = range[1]-range[0]
+
+  console.log("get value "+value+" set value "+range[0]+(value/100)*ext)
+  document.getElementById('edit_slice').value=range[0]+(value/100)*ext;
   document.getElementById('slice').value=value;
-  refreshAll(0);
+
+  if(visus1.render_type==ISOCONTOUR_RENDER_MODE && renderer){
+    renderer.present().isovalue(value/100);
+  }
+  else
+    refreshAll(0);
 }
 
 function onFieldChange(value){
@@ -294,16 +309,33 @@ function onResolutionChange(value){
 
 }
 
-function onVRChange(){
+function onVRChange(ren_type){
 
-  ischecked=document.getElementById('vr_cb').checked
+  if(ren_type==SLICE_RENDER_MODE){
+    document.getElementById('slice').disabled=false
+    document.getElementById('render_slider_lbl').innerHTML="Slice"
+    document.getElementById('axis').disabled=false
+    document.getElementById('edit_slice').disabled=false
+    console.log("using slice")
+  }
+  else if(ren_type==VOLUME_RENDER_MODE){
+    document.getElementById('axis').disabled=true
+    document.getElementById('slice').disabled=true
+    document.getElementById('edit_slice').disabled=true
+  }
+  else if(ren_type==ISOCONTOUR_RENDER_MODE){
+    document.getElementById('slice').disabled=false
+    document.getElementById('render_slider_lbl').innerHTML="IsoValue"
+    document.getElementById('axis').disabled=true
+    document.getElementById('axis').hidden=true
+    document.getElementById('axis_label').hidden=true
+    document.getElementById('edit_slice').disabled=false
+    document.getElementById('edit_slice').hidden=false
+  }
 
-  document.getElementById('axis').disabled=ischecked
-  document.getElementById('slice').disabled=ischecked
-  document.getElementById('edit_slice').disabled=ischecked
+  visus1.setRenderType(ren_type);
 
-  visus1.setRenderType(ischecked);
-  if(!ischecked)
+  if(ren_type == SLICE_RENDER_MODE)
     onSliceChange(50);
   else
     refreshAll(0)
@@ -353,7 +385,7 @@ function download(){
 
   out_ext_file = ".raw"
 
-  if(dataset.dim==3 && visus1.dtype.includes("int8") && !document.getElementById('vr_cb').checked){
+  if(dataset.dim==3 && visus1.dtype.includes("int8") && !document.getElementById('render_type').value==VOLUME_RENDER_MODE){
     data_url=data_url.split("compression=raw").join("compression=png");
     out_ext_file = ".png"
   }
@@ -437,7 +469,7 @@ function shareLink(){
   pmin=isNaN(visus1.palette_min) ? "NaN" : visus1.palette_min
   pmax=isNaN(visus1.palette_max) ? "NaN" : visus1.palette_max
 
-  vr_status=(document.getElementById('vr_cb').checked)?"1":"0"
+  vr_status=(document.getElementById('render_type').value==VOLUME_RENDER_MODE)?"1":"0"
   link = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
     +"&field="+encodeURIComponent(visus1.field)+"&slice="+visus1.slice+"&axis="+document.getElementById('axis').value+"&time="+visus1.time+"&vr="+vr_status+"&res="+level
     +"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
@@ -498,14 +530,14 @@ function loadPresets(){
   }
 
   if(pre_vr!=null){
-    ischecked=(pre_vr=='1')
-    document.getElementById('vr_cb').checked=ischecked
+    ischecked=(pre_vr==VOLUME_RENDER_MODE)
+    document.getElementById('render_type').value=VOLUME_RENDER_MODE
     document.getElementById('axis').disabled=ischecked
     document.getElementById('slice').disabled=ischecked
     document.getElementById('edit_slice').disabled=ischecked
 
     if(dataset.dim>2)
-      visus1.setRenderType(ischecked);
+      visus1.setRenderType(pre_vr);
   }
 
   if(pre_resolution!=null){
