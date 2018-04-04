@@ -374,7 +374,7 @@ dvr(canvas, renderingMode)
 
         const near_plane = 0.01
         const far_plane = 1000.0
-        const matrices = {
+        let matrices = {
                 model:      mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, -0.5, -0.5, -0.5, 1.0),
                 view:       mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0),
                 projection: mat4(1.0, 0.0, 0.0, 0.0,
@@ -621,6 +621,30 @@ dvr(canvas, renderingMode)
 
         const dvr = {}
 
+        dvr.getMatrices = () => {
+            return matrices;
+        }
+
+        dvr.setMatrices = (mat) => {
+            matrices = mat;
+        }
+
+        dvr.setQuaternion = (_q) => {
+            q = _q;
+        }
+
+        dvr.getQuaternion = () => {
+            return q;
+        }
+
+        dvr.getViewDistance = () => {
+            return viewDistance;
+        }
+
+        dvr.setViewDistance = (dist) => {
+            viewDistance = dist;
+        }
+
         /* setup scene for 2D view and render it */
         dvr.present = () => {
                 /* shutdown VR */
@@ -780,6 +804,7 @@ dvr(canvas, renderingMode)
 
         /* setup scene for 2D view */
         dvr.resetView = () =>{
+            console.log("RESET VIEW")
             q = quat(1.0, 0.0, 0.0, 0.0)
             matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0)
             matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,

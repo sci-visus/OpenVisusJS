@@ -1,7 +1,7 @@
 
 var visus1;
 let renderer;
-
+let curr_render_type;
 
 function
 toArray(buffer, dataType)
@@ -65,11 +65,16 @@ function fetch_and_draw(query_str, reset_view=1)
       notifyStatus("Rendering...");
 
       const start = async function() {
-        //if (!renderer)
-        if(visus1.render_type==ISOCONTOUR_RENDER_MODE)
-          renderer = await dvr(document.getElementById('3dCanvas'), 'surface')
-        else
-          renderer = await dvr(document.getElementById('3dCanvas'), 'volume')
+        if (!renderer || (visus1.render_type != curr_render_type)){
+          //console.log("creating renderer type "+visus1.render_type)
+          if(visus1.render_type==ISOCONTOUR_RENDER_MODE){
+            renderer = await dvr(document.getElementById('3dCanvas'), 'surface')
+          }
+          else
+            renderer = await dvr(document.getElementById('3dCanvas'), 'volume')
+        }
+        
+        curr_render_type = visus1.render_type;
 
         var palette_str = document.getElementById('palette').value;
 
@@ -93,6 +98,9 @@ function fetch_and_draw(query_str, reset_view=1)
         if(reset_view==1)
           renderer.resetView()
 
+        if(visus1.usePresets)
+          loadPresets();
+
         if(visus1.render_type!=ISOCONTOUR_RENDER_MODE)
           renderer.present();
         else{
@@ -112,7 +120,7 @@ function fetch_and_draw(query_str, reset_view=1)
 
 
 //refreshAll
-function refreshAll(reset_view=1)
+async function refreshAll(reset_view=1)
 {
 
   if(dataset.dim==2)
@@ -250,8 +258,10 @@ function setDataset(value, presets=false)
       visus1.setRenderType(document.getElementById('render_type').value)
     }
     
-    if(presets)
-      loadPresets();
+    if(presets){
+      loadRenderingTypePreset();
+      visus1.usePresets=true;
+     }
 
     refresh();
 
@@ -275,11 +285,22 @@ function onAxisChange(value){
 
 function onSliceChange(value){
   visus1.setSlice(value); 
-  var range=renderer.getDataExtent();
-  ext = range[1]-range[0]
 
-  console.log("get value "+value+" set value "+range[0]+(value/100)*ext)
-  document.getElementById('edit_slice').value=range[0]+(value/100)*ext;
+  // if(!renderer){
+  //   refreshAll(0)
+  //   return
+  // }
+
+  //console.log("get value "+value+" set value "+range[0]+(value/100)*ext)
+  if(visus1.render_type==ISOCONTOUR_RENDER_MODE){
+    var range=renderer.getDataExtent();
+    ext = range[1]-range[0]
+
+    document.getElementById('edit_slice').value=range[0]+(value/100)*ext;
+  }
+  else
+    document.getElementById('edit_slice').value=value;
+
   document.getElementById('slice').value=value;
 
   if(visus1.render_type==ISOCONTOUR_RENDER_MODE && renderer){
@@ -352,8 +373,8 @@ function onPaletteChange(){
 
   var colormap = get_palette_data(document.getElementById('palette').value)
 
-  renderer.updateColorMap(pal_min, pal_max);
-  //renderer.render();
+  if(renderer)
+    renderer.updateColorMap(pal_min, pal_max);
 
   if(document.getElementById('2dCanvas').hidden==false)
     refreshAll(0);
@@ -457,6 +478,10 @@ function shareLink(){
 
   base_url=window.location.href.split('?')[0]
 
+  matrices = renderer.getMatrices()
+  q = renderer.getQuaternion()
+  view_distance = renderer.getViewDistance()
+
   vp=matrices.view[0]
   for(i=1;i<16;i++)
     vp+=","+matrices.view[i]
@@ -469,7 +494,7 @@ function shareLink(){
   pmin=isNaN(visus1.palette_min) ? "NaN" : visus1.palette_min
   pmax=isNaN(visus1.palette_max) ? "NaN" : visus1.palette_max
 
-  vr_status=(document.getElementById('render_type').value==VOLUME_RENDER_MODE)?"1":"0"
+  vr_status=document.getElementById('render_type').value
   link = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
     +"&field="+encodeURIComponent(visus1.field)+"&slice="+visus1.slice+"&axis="+document.getElementById('axis').value+"&time="+visus1.time+"&vr="+vr_status+"&res="+level
     +"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
@@ -493,8 +518,20 @@ function onCopy(){
 
 }
 
-function loadPresets(){
+
+function loadRenderingTypePreset(){
   let pre_vr = getParameterByName('vr')
+
+  if(pre_vr!=null){
+    document.getElementById('render_type').value=pre_vr
+
+    if(dataset.dim>2)
+      visus1.setRenderType(pre_vr);
+  }
+}
+
+function loadPresets(){
+  
   let pre_slice = getParameterByName('slice')
   let pre_time = getParameterByName('time')
   let pre_palette = getParameterByName('palette')
@@ -529,17 +566,6 @@ function loadPresets(){
     visus1.setTime(parseInt(pre_time))
   }
 
-  if(pre_vr!=null){
-    ischecked=(pre_vr==VOLUME_RENDER_MODE)
-    document.getElementById('render_type').value=VOLUME_RENDER_MODE
-    document.getElementById('axis').disabled=ischecked
-    document.getElementById('slice').disabled=ischecked
-    document.getElementById('edit_slice').disabled=ischecked
-
-    if(dataset.dim>2)
-      visus1.setRenderType(pre_vr);
-  }
-
   if(pre_resolution!=null){
     level=parseInt(pre_resolution)
     document.getElementById('resolution').value=level
@@ -562,18 +588,27 @@ function loadPresets(){
   }
 
   if(pre_vpoint!=null){
-    matrices.view = pre_vpoint.split(',').map(parseFloat);
+    mat = renderer.getMatrices()
+    mat.view = pre_vpoint.split(',').map(parseFloat);
+    renderer.setMatrices(mat)
   }
 
   if(pre_q != null){
+    q = renderer.getQuaternion()
     qv = pre_q.split(',').map(parseFloat);
 
     q.w=qv[0]
     q.x=qv[1]
     q.y=qv[2]
     q.z=qv[3]
+
+    renderer.setQuaternion(q)
   }
 
-  if(pre_view_distance != null)
-    view_distance = parseFloat(pre_view_distance)
+  if(pre_view_distance != null){
+    renderer.setViewDistance(parseFloat(pre_view_distance))
+  }
+
+  visus1.usePresets=false;
+
 }
