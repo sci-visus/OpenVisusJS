@@ -195,7 +195,7 @@ main(void)
                 float value = texture(volume_sampler, p).r;
 #if (METHOD == SURFACE)
                 if (sign(value - isovalue) != sign(prev_value - isovalue)) {
-                        color = vec4(0.9, 0.4, 0.4, 1.0);
+                        color = vec4(0.9, 0.8, 0.7, 1.0);
 
                         /* linear approximation of intersection point */
                         vec3 prev_p = p - dt*d;
@@ -668,7 +668,7 @@ dvr(canvas, renderingMode)
         }
 
         /* 8 and 16 bit integers are converted to float16 */
-        dvr.uploadData = (typedArray, width, height, depth, boxWidth, boxHeight, boxDepth) => {
+        dvr.uploadData = (typedArray, datatype, width, height, depth, boxWidth, boxHeight, boxDepth) => {
                 /* TODO: dealloc or if same size then reuse */
                 volumeTex = gl.createTexture()
                 gl.bindTexture(gl.TEXTURE_3D, volumeTex)
@@ -681,12 +681,26 @@ dvr(canvas, renderingMode)
 
                 gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1)
                 if (typedArray instanceof Int8Array || typedArray instanceof Int16Array || typedArray instanceof Uint8Array || typedArray instanceof Uint16Array) {
-                        const converted = new Uint16Array(typedArray.length).map((_, i) => to_half((typedArray[i] - data_extent[0])/(data_extent[1] - data_extent[0])))
+                        let converted;
+                        cidx = datatype.indexOf("[")
+                        components = 1
+                        if(cidx!=-1){
+                            end = datatype.indexOf("]", cidx)
+                            components = parseInt(datatype.substr(cidx+1, end-1))
+                        }
+                        
+                        //console.log("components " + components)
+
+                        if(components > 1)
+                          converted = new Uint16Array(typedArray.length/components).map((_, i) => rgb_to_half(i*components, typedArray, data_extent))
+                        else
+                          converted = new Uint16Array(typedArray.length).map((_, i) => to_half((typedArray[i] - data_extent[0])/(data_extent[1] - data_extent[0])))
                         gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R16F, width, height, depth)
                         gl.texSubImage3D(gl.TEXTURE_3D, 0,
                                          0, 0, 0,
                                          width, height, depth,
                                          gl.RED, gl.HALF_FLOAT, converted)
+                        
 
                 } else if (typedArray instanceof Float32Array) {
                         const converted = typedArray.map(d => (d - data_extent[0])/(data_extent[1] - data_extent[0]))
@@ -804,7 +818,6 @@ dvr(canvas, renderingMode)
 
         /* setup scene for 2D view */
         dvr.resetView = () =>{
-            console.log("RESET VIEW")
             q = quat(1.0, 0.0, 0.0, 0.0)
             matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0)
             matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,
@@ -993,13 +1006,14 @@ const to_half = (() => {
         }
 })()
 
-function rgb_to_half(i, buffer){
+function rgb_to_half(i, buffer, data_extent){
         const floatView = new Float32Array(1);
         const int32View = new Int32Array(floatView.buffer);
 
-        const R=0.2990*buffer[i];
-        const G=0.5870*buffer[i+1];
-        const B=0.1140*buffer[i+2];
+
+        const R=0.2990*(buffer[i] - data_extent[0])/(data_extent[1] - data_extent[0]);
+        const G=0.5870*(buffer[i+1] - data_extent[0])/(data_extent[1] - data_extent[0]);
+        const B=0.1140*(buffer[i+2] - data_extent[0])/(data_extent[1] - data_extent[0]);
         let val=R+G+B;
 
         return to_half(val)
@@ -1013,55 +1027,55 @@ compute_extent(array)
 
 
 /* TODO: refactor to share code between cases */
-function
-to_array(buffer, data_type)
-{
-        if (data_type === "uint8") {
-            const view = new Uint8Array(buffer)
-            const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
-            const extent = compute_extent(view)
-            return {extent, array}
-        }
-        else if (data_type === "uint8[3]") {
-            const view = new Uint8Array(buffer)
-            const array = new Uint16Array(view.length/3).map((_, i) => rgb_to_half(i*3, view))
-            const extent = compute_extent(view)
-            return {extent, array}
-        }
-        else if (data_type === "uint8[4]") {
-            const view = new Uint8Array(buffer)
-            const array = new Uint16Array(view.length/4).map((_, i) => rgb_to_half(i*4, view))
-            const extent = compute_extent(view)
-            return {extent, array}
-        }
-        else if (data_type === "uint16") {
-            const view = new Uint16Array(buffer)
-            const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
-            const extent = compute_extent(view)
-            return {extent, array}
-        } else if (data_type === "int16") {
-            const view = new Int16Array(buffer)
-            const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
-            const extent = compute_extent(view)
-            return {extent, array}
-        } else if (data_type === "int32") {
-            const view = new Int32Array(buffer)
-            const array = new Float32Array(view.length).map((_, i) => view[i])
-            const extent = compute_extent(array)
-            return {extent, array}
-        } else if (data_type === "float32") {
-            const array = new Float32Array(buffer)
-            const extent = compute_extent(array)
-            return {extent, array}
-        } else if (data_type === "float64") {
-            const view = new Float64Array(buffer)
-            const array = new Float32Array(view.length).map((_, i) => view[i])
-            const extent = compute_extent(array)
-            return {extent, array}
-        }
-        else 
-            console.log("datatype not supported")
-}
+// function
+// to_array(buffer, data_type)
+// {
+//         if (data_type === "uint8") {
+//             const view = new Uint8Array(buffer)
+//             const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
+//             const extent = compute_extent(view)
+//             return {extent, array}
+//         }
+//         else if (data_type === "uint8[3]") {
+//             const view = new Uint8Array(buffer)
+//             const array = new Uint16Array(view.length/3).map((_, i) => rgb_to_half(i*3, view))
+//             const extent = compute_extent(view)
+//             return {extent, array}
+//         }
+//         else if (data_type === "uint8[4]") {
+//             const view = new Uint8Array(buffer)
+//             const array = new Uint16Array(view.length/4).map((_, i) => rgb_to_half(i*4, view))
+//             const extent = compute_extent(view)
+//             return {extent, array}
+//         }
+//         else if (data_type === "uint16") {
+//             const view = new Uint16Array(buffer)
+//             const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
+//             const extent = compute_extent(view)
+//             return {extent, array}
+//         } else if (data_type === "int16") {
+//             const view = new Int16Array(buffer)
+//             const array = new Uint16Array(view.length).map((_, i) => to_half(view[i]))
+//             const extent = compute_extent(view)
+//             return {extent, array}
+//         } else if (data_type === "int32") {
+//             const view = new Int32Array(buffer)
+//             const array = new Float32Array(view.length).map((_, i) => view[i])
+//             const extent = compute_extent(array)
+//             return {extent, array}
+//         } else if (data_type === "float32") {
+//             const array = new Float32Array(buffer)
+//             const extent = compute_extent(array)
+//             return {extent, array}
+//         } else if (data_type === "float64") {
+//             const view = new Float64Array(buffer)
+//             const array = new Float32Array(view.length).map((_, i) => view[i])
+//             const extent = compute_extent(array)
+//             return {extent, array}
+//         }
+//         else 
+//             console.log("datatype not supported")
+// }
 
 
 

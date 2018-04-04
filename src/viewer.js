@@ -6,8 +6,12 @@ let curr_render_type;
 function
 toArray(buffer, dataType)
 {
-        switch (dataType) {
+   switch (dataType) {
         case 'uint8':
+                return new Uint8Array(buffer)
+        case 'uint8[3]':
+                return new Uint8Array(buffer)
+        case 'uint8[4]':
                 return new Uint8Array(buffer)
         case 'uint16':
                 return new Uint16Array(buffer)
@@ -17,7 +21,11 @@ toArray(buffer, dataType)
                 return new Int16Array(buffer)
         case 'float32':
                 return new Float32Array(buffer)
-        }
+        case 'float64':
+                return new Float32Array(buffer)
+        default:
+           console.err("Data type not supported")
+    }
 }
 
 function notifyStatus(new_text)
@@ -81,7 +89,7 @@ function fetch_and_draw(query_str, reset_view=1)
         var colormap = get_palette_data(palette_str)
         
         var array = toArray(data, visus1.dtype)
-        renderer.uploadData(array, data_size[0], data_size[1], data_size[2], data_size[0], data_size[1], data_size[2]);
+        renderer.uploadData(array, visus1.dtype, data_size[0], data_size[1], data_size[2], data_size[0], data_size[1], data_size[2]);
 
         viewer.style.display = 'block'
 
