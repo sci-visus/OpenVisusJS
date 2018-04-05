@@ -1,5 +1,32 @@
 
 var visus1;
+let renderer;
+let curr_render_type;
+
+function
+toArray(buffer, dataType)
+{
+   switch (dataType) {
+        case 'uint8':
+                return new Uint8Array(buffer)
+        case 'uint8[3]':
+                return new Uint8Array(buffer)
+        case 'uint8[4]':
+                return new Uint8Array(buffer)
+        case 'uint16':
+                return new Uint16Array(buffer)
+        case 'int8':
+                return new Int8Array(buffer)
+        case 'int16':
+                return new Int16Array(buffer)
+        case 'float32':
+                return new Float32Array(buffer)
+        case 'float64':
+                return new Float32Array(buffer)
+        default:
+           console.err("Data type not supported")
+    }
+}
 
 function notifyStatus(new_text)
 {
@@ -34,7 +61,7 @@ function fetch_and_draw(query_str, reset_view=1)
         data_size[2]=1
 
       visus1.setNSamples(data_size)
-      console.log(data_size)
+      //console.log(data_size)
 
       dtype=response.headers.get('visus-dtype')
 
@@ -45,39 +72,63 @@ function fetch_and_draw(query_str, reset_view=1)
       
       notifyStatus("Rendering...");
 
-      upload_data(gl, data, {level: level, width: data_size[0], height: data_size[1], depth: data_size[2]}, dtype, 
-                  {width: data_size[0], height: data_size[1], depth: data_size[2]})
+      const start = async function() {
+        if (!renderer || (visus1.render_type != curr_render_type)){
+          //console.log("creating renderer type "+visus1.render_type)
+          if(visus1.render_type==ISOCONTOUR_RENDER_MODE){
+            renderer = await dvr(document.getElementById('3dCanvas'), 'surface')
+          }
+          else
+            renderer = await dvr(document.getElementById('3dCanvas'), 'volume')
+        }
+        
+        curr_render_type = visus1.render_type;
 
-      viewer.style.display = 'block'
+        var palette_str = document.getElementById('palette').value;
 
-      let pal_min= parseFloat(document.getElementById('palette_min').value)
-      let pal_max= parseFloat(document.getElementById('palette_max').value)
+        var colormap = get_palette_data(palette_str)
+        
+        var array = toArray(data, visus1.dtype)
+        renderer.uploadData(array, visus1.dtype, data_size[0], data_size[1], data_size[2], data_size[0], data_size[1], data_size[2]);
 
-      //console.log("update color map "+pal_min+" "+pal_max)
-      updateColorMap(pal_min, pal_max);
+        viewer.style.display = 'block'
 
-      var range=get_data_extent();
-      //console.log("R:"+range[0]+", "+range[1])
-      document.getElementById('comp_range').innerHTML="["+parseFloat(range[0]).toFixed(3)+", "+parseFloat(range[1]).toFixed(3)+"]"
-      
-      if(reset_view==1)
-        resetView()
+        let pal_min= parseFloat(document.getElementById('palette_min').value)
+        let pal_max= parseFloat(document.getElementById('palette_max').value)
 
-      render();
+        //console.log("update color map "+pal_min+" "+pal_max)
+        renderer.updateColorMap(pal_min, pal_max);
 
-      hideStatus();
+        var range=renderer.getDataExtent();
+        //console.log("R:"+range[0]+", "+range[1])
+        document.getElementById('comp_range').innerHTML="["+parseFloat(range[0]).toFixed(3)+", "+parseFloat(range[1]).toFixed(3)+"]"
+        
+        if(reset_view==1)
+          renderer.resetView()
+
+        if(visus1.usePresets)
+          loadPresets();
+
+        if(visus1.render_type!=ISOCONTOUR_RENDER_MODE)
+          renderer.present();
+        else{
+          renderer.present().isovalue(0.5);
+        }
+
+        hideStatus();
+      }
+
+      start()
 
     }).catch(e => {
       console.log(e);
     });
 
-
-
 }
 
 
 //refreshAll
-function refreshAll(reset_view=1)
+async function refreshAll(reset_view=1)
 {
 
   if(dataset.dim==2)
@@ -149,7 +200,7 @@ function setDataset(value, presets=false)
   // document.getElementById('palette_min').value="";
   // document.getElementById('palette_max').value="";
 
-  //document.getElementById('vr_cb').checked=true
+  //document.getElementById('render_type').checked=true
   //document.getElementById('axis').disabled=true
   //document.getElementById('axis').value='2'
   //document.getElementById('slice').disabled=true
@@ -212,11 +263,13 @@ function setDataset(value, presets=false)
         debugMode : false
       }); 
 
-      visus1.setRenderType(document.getElementById('vr_cb').checked)
+      visus1.setRenderType(document.getElementById('render_type').value)
     }
     
-    if(presets)
-      loadPresets();
+    if(presets){
+      loadRenderingTypePreset();
+      visus1.usePresets=true;
+     }
 
     refresh();
 
@@ -240,9 +293,29 @@ function onAxisChange(value){
 
 function onSliceChange(value){
   visus1.setSlice(value); 
-  document.getElementById('edit_slice').value=value;
+
+  // if(!renderer){
+  //   refreshAll(0)
+  //   return
+  // }
+
+  //console.log("get value "+value+" set value "+range[0]+(value/100)*ext)
+  if(visus1.render_type==ISOCONTOUR_RENDER_MODE){
+    var range=renderer.getDataExtent();
+    ext = range[1]-range[0]
+
+    document.getElementById('edit_slice').value=range[0]+(value/100)*ext;
+  }
+  else
+    document.getElementById('edit_slice').value=value;
+
   document.getElementById('slice').value=value;
-  refreshAll(0);
+
+  if(visus1.render_type==ISOCONTOUR_RENDER_MODE && renderer){
+    renderer.present().isovalue(value/100);
+  }
+  else
+    refreshAll(0);
 }
 
 function onFieldChange(value){
@@ -265,16 +338,33 @@ function onResolutionChange(value){
 
 }
 
-function onVRChange(){
+function onVRChange(ren_type){
 
-  ischecked=document.getElementById('vr_cb').checked
+  if(ren_type==SLICE_RENDER_MODE){
+    document.getElementById('slice').disabled=false
+    document.getElementById('render_slider_lbl').innerHTML="Slice"
+    document.getElementById('axis').disabled=false
+    document.getElementById('edit_slice').disabled=false
+    console.log("using slice")
+  }
+  else if(ren_type==VOLUME_RENDER_MODE){
+    document.getElementById('axis').disabled=true
+    document.getElementById('slice').disabled=true
+    document.getElementById('edit_slice').disabled=true
+  }
+  else if(ren_type==ISOCONTOUR_RENDER_MODE){
+    document.getElementById('slice').disabled=false
+    document.getElementById('render_slider_lbl').innerHTML="IsoValue"
+    document.getElementById('axis').disabled=true
+    document.getElementById('axis').hidden=true
+    document.getElementById('axis_label').hidden=true
+    document.getElementById('edit_slice').disabled=false
+    document.getElementById('edit_slice').hidden=false
+  }
 
-  document.getElementById('axis').disabled=ischecked
-  document.getElementById('slice').disabled=ischecked
-  document.getElementById('edit_slice').disabled=ischecked
+  visus1.setRenderType(ren_type);
 
-  visus1.setRenderType(ischecked);
-  if(!ischecked)
+  if(ren_type == SLICE_RENDER_MODE)
     onSliceChange(50);
   else
     refreshAll(0)
@@ -289,8 +379,10 @@ function onPaletteChange(){
   let pal_min= parseFloat(document.getElementById('palette_min').value)
   let pal_max= parseFloat(document.getElementById('palette_max').value)
 
-  updateColorMap(pal_min, pal_max);
-  render();
+  var colormap = get_palette_data(document.getElementById('palette').value)
+
+  if(renderer)
+    renderer.updateColorMap(pal_min, pal_max);
 
   if(document.getElementById('2dCanvas').hidden==false)
     refreshAll(0);
@@ -322,7 +414,7 @@ function download(){
 
   out_ext_file = ".raw"
 
-  if(dataset.dim==3 && visus1.dtype.includes("int8") && !document.getElementById('vr_cb').checked){
+  if(dataset.dim==3 && visus1.dtype.includes("int8") && !document.getElementById('render_type').value==VOLUME_RENDER_MODE){
     data_url=data_url.split("compression=raw").join("compression=png");
     out_ext_file = ".png"
   }
@@ -394,6 +486,10 @@ function shareLink(){
 
   base_url=window.location.href.split('?')[0]
 
+  matrices = renderer.getMatrices()
+  q = renderer.getQuaternion()
+  view_distance = renderer.getViewDistance()
+
   vp=matrices.view[0]
   for(i=1;i<16;i++)
     vp+=","+matrices.view[i]
@@ -406,7 +502,7 @@ function shareLink(){
   pmin=isNaN(visus1.palette_min) ? "NaN" : visus1.palette_min
   pmax=isNaN(visus1.palette_max) ? "NaN" : visus1.palette_max
 
-  vr_status=(document.getElementById('vr_cb').checked)?"1":"0"
+  vr_status=document.getElementById('render_type').value
   link = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
     +"&field="+encodeURIComponent(visus1.field)+"&slice="+visus1.slice+"&axis="+document.getElementById('axis').value+"&time="+visus1.time+"&vr="+vr_status+"&res="+level
     +"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
@@ -430,8 +526,20 @@ function onCopy(){
 
 }
 
-function loadPresets(){
+
+function loadRenderingTypePreset(){
   let pre_vr = getParameterByName('vr')
+
+  if(pre_vr!=null){
+    document.getElementById('render_type').value=pre_vr
+
+    if(dataset.dim>2)
+      visus1.setRenderType(pre_vr);
+  }
+}
+
+function loadPresets(){
+  
   let pre_slice = getParameterByName('slice')
   let pre_time = getParameterByName('time')
   let pre_palette = getParameterByName('palette')
@@ -466,17 +574,6 @@ function loadPresets(){
     visus1.setTime(parseInt(pre_time))
   }
 
-  if(pre_vr!=null){
-    ischecked=(pre_vr=='1')
-    document.getElementById('vr_cb').checked=ischecked
-    document.getElementById('axis').disabled=ischecked
-    document.getElementById('slice').disabled=ischecked
-    document.getElementById('edit_slice').disabled=ischecked
-
-    if(dataset.dim>2)
-      visus1.setRenderType(ischecked);
-  }
-
   if(pre_resolution!=null){
     level=parseInt(pre_resolution)
     document.getElementById('resolution').value=level
@@ -499,18 +596,27 @@ function loadPresets(){
   }
 
   if(pre_vpoint!=null){
-    matrices.view = pre_vpoint.split(',').map(parseFloat);
+    mat = renderer.getMatrices()
+    mat.view = pre_vpoint.split(',').map(parseFloat);
+    renderer.setMatrices(mat)
   }
 
   if(pre_q != null){
+    q = renderer.getQuaternion()
     qv = pre_q.split(',').map(parseFloat);
 
     q.w=qv[0]
     q.x=qv[1]
     q.y=qv[2]
     q.z=qv[3]
+
+    renderer.setQuaternion(q)
   }
 
-  if(pre_view_distance != null)
-    view_distance = parseFloat(pre_view_distance)
+  if(pre_view_distance != null){
+    renderer.setViewDistance(parseFloat(pre_view_distance))
+  }
+
+  visus1.usePresets=false;
+
 }
