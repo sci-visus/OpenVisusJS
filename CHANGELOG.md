@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+###Added
+- menu for rendering type selection
+- iso contour control
+- unlimited zoom in
+
+###Updated
+- parsing of presets
+- volume render code
+
+###Fixed
+- volume rendering circles effect
+
 ## Released [0.1.0]
 ### Added
 - 2D viewer
