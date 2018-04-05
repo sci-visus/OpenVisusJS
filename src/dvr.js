@@ -162,7 +162,8 @@ gradient(in sampler3D s, vec3 p, float dt)
 void
 main(void)
 {
-        float depth = texelFetch(depth_sampler, ivec2(gl_FragCoord.xy), 0).r;
+        // float depth = texelFetch(depth_sampler, ivec2(gl_FragCoord.xy), 0).r;
+        float depth= 1.0;
 
         const vec3 light_pos = vec3(1.0, 1.0, 1.0);
         vec3 o = eye;
@@ -176,16 +177,16 @@ main(void)
         float tfar  = min(far.x, min(far.y, far.z));
 
         /* stop at geometry if there is any (do ratio of z coordinate depth and z coordinate of current fragment) */
-        tfar *= min((zScaling + gl_FragCoord.z)/(zScaling + depth), 1.0);
+        // tfar *= min((zScaling + gl_FragCoord.z)/(zScaling + depth), 1.0);
 
         ivec3 size = textureSize(volume_sampler, 0);
         /* TODO: step in correct dts along x, y, and z */
         float dt = 1.0/float(max(size.x, max(size.y, size.z)));
 
         /* create safe bubble close to head if it is inside the volume */
-        const float head_bubble_radius = 0.2;
-        if (tnear < head_bubble_radius)
-                tnear = floor((head_bubble_radius - tnear)/dt)*dt + tnear;
+        // const float head_bubble_radius = 0.2;
+        // if (tnear < head_bubble_radius)
+        //          tnear = floor((head_bubble_radius - tnear)/dt)*dt + tnear;
 
         color = vec4(0.0, 0.0, 0.0, 0.0);
         float prev_value = 0.0;
@@ -417,7 +418,8 @@ dvr(canvas, renderingMode)
         canvas.addEventListener('wheel', e => {
                 e.preventDefault()
 
-                viewDistance = Math.max(1, viewDistance + 0.1*Math.sign(e.deltaY))
+                viewDistance = viewDistance + 0.1*Math.sign(e.deltaY)
+                //Math.max(1, viewDistance + 0.1*Math.sign(e.deltaY))
 
                 matrices.view[14] = -viewDistance;
 
