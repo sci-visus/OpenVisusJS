@@ -594,7 +594,8 @@ function VisusVR(params)
     Z = 2;//permutation[self.axis][2];
    
     // if(!self.render_type && req_lev==self.level)
-    //   req_lev=level=24 > self.maxLevel ? self.maxLevel : 24
+    req_lev=level= 24 > self.dataset.maxh ? self.dataset.maxh : level
+    //console.log("using level "+level+" with maxh "+self.dataset.maxh)
 
     base_url=self.dataset.base_url
       +'&dataset='+self.dataset.name
@@ -712,7 +713,7 @@ function VisusVR(params)
       if(sd[d]>dataset.dims[d])
         sd[d]=dataset.dims[d]
 
-    if(!isVolumeRender)
+    if(self.render_type==SLICE_RENDER_MODE)
       sd[axis] = 1
 
     mag=sd[0]*sd[1]*sd[2]
