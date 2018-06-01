@@ -360,6 +360,11 @@ function arcball_quat(start_point, end_point)
         return quat(angle, axis.x, axis.y, axis.z)
 }
 
+var pointDist = function(a, b) {
+    var v = [b[0] - a[0], b[1] - a[1]];
+    return Math.sqrt(Math.pow(v[0], 2.0) + Math.pow(v[1], 2.0));
+}
+
 async function
 dvr(canvas, renderingMode)
 {
@@ -425,6 +430,90 @@ dvr(canvas, renderingMode)
 
                 render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
         })
+
+        // Add a bit touch 
+        var touches = {};
+        canvas.addEventListener("touchstart", function(evt) {
+            evt.preventDefault();
+            q_down = q
+            const rect = canvas.getBoundingClientRect()
+            e=evt.changedTouches[0]
+            p0 = arcball_screen_to_sphere(arcball_circle, e.clientX - rect.left, e.clientY - rect.top)
+
+            for (var i = 0; i < evt.changedTouches.length; ++i) {
+                var t = evt.changedTouches[i];
+                touches[t.identifier] = [t.clientX, t.clientY];
+            }
+        });
+
+        canvas.addEventListener("touchmove", function(evt) {
+            evt.preventDefault();
+            var numTouches = Object.keys(touches).length;
+            // Single finger to rotate the camera
+            if (numTouches == 1) {
+                var t = evt.changedTouches[0];
+                var prevTouch = touches[t.identifier];
+
+                const rect = canvas.getBoundingClientRect()
+                //const p0 = arcball_screen_to_sphere(arcball_circle, prevTouch.x - rect.left, prevTouch.y - rect.top)
+                const p1 = arcball_screen_to_sphere(arcball_circle, t.clientX - rect.left, t.clientY - rect.top)
+                const q_move = arcball_quat(p0, p1)
+
+                q = quat_mul(q_move, q_down)
+
+                matrices.view = quat_to_mat4(q)
+                /* translate camera */
+                /* TODO: bit error prone as we have it in another place (`present` function) */
+                matrices.view[14] = -viewDistance;
+
+                //camera.rotate(prevTouch, [t.clientX, t.clientY]);
+
+            } else {
+                var curTouches = {};
+                for (var i = 0; i < evt.changedTouches.length; ++i) {
+                    var t = evt.changedTouches[i];
+                    curTouches[t.identifier] = [t.clientX, t.clientY];
+                }
+                // If some touches didn't change make sure we have them in
+                // our curTouches list to compute the pinch distance
+                // Also get the old touch points to compute the distance here
+                var oldTouches = [];
+                for (t in touches) {
+                    if (!(t in curTouches)) {
+                        curTouches[t] = touches[t];
+                    }
+                    oldTouches.push(touches[t]);
+                }
+                var oldDist = pointDist(oldTouches[0], oldTouches[1]);
+
+                var newTouches = [];
+                for (t in curTouches) {
+                    newTouches.push(curTouches[t]);
+                }
+                var newDist = pointDist(newTouches[0], newTouches[1]);
+
+                viewDistance = viewDistance - 0.05*(newDist - oldDist);
+                matrices.view[14] = -viewDistance 
+            }
+
+            render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+
+            // Update the existing list of touches with the current positions
+            for (var i = 0; i < evt.changedTouches.length; ++i) {
+                var t = evt.changedTouches[i];
+                touches[t.identifier] = [t.clientX, t.clientY];
+            }
+        });
+
+        var touchEnd = function(evt) {
+            evt.preventDefault();
+            for (var i = 0; i < evt.changedTouches.length; ++i) {
+                var t = evt.changedTouches[i];
+                delete touches[t.identifier];
+            }
+        }
+        canvas.addEventListener("touchcancel", touchEnd);
+        canvas.addEventListener("touchend", touchEnd);
 
         const gl = canvas.getContext('webgl2', {alpha: false, antialias: false, depth: false, stencil: false})
         if (!gl) {
