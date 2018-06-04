@@ -8,7 +8,7 @@ http://visus.org/viewer/examples/example.html
 
 3D Viewer example:
 
-http://visus.org/viewer/examples/example3d.html
+http://visus.org/viewer
 
 Other examples (uses visus2.js):
 
