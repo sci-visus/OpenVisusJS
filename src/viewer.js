@@ -486,27 +486,35 @@ function shareLink(){
 
   base_url=window.location.href.split('?')[0]
 
-  matrices = renderer.getMatrices()
-  q = renderer.getQuaternion()
-  view_distance = renderer.getViewDistance()
+  link = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
+    +"&field="+encodeURIComponent(visus1.field)
 
-  vp=matrices.view[0]
-  for(i=1;i<16;i++)
-    vp+=","+matrices.view[i]
+  vp=qs=""
 
-  qs=q.w+","+q.x+","+q.y+","+q.z;
+  if(dataset.dim>2){
+    matrices = renderer.getMatrices()
+    q = renderer.getQuaternion()
+    view_distance = renderer.getViewDistance()
 
-  vp=encodeURIComponent(vp)
-  qs=encodeURIComponent(qs)
+    vp=matrices.view[0]
+    for(i=1;i<16;i++)
+      vp+=","+matrices.view[i]
+
+    qs=q.w+","+q.x+","+q.y+","+q.z;
+
+    vp=encodeURIComponent(vp)
+    qs=encodeURIComponent(qs)
+
+    vr_status=document.getElementById('render_type').value
+
+    link=link+"&slice="+visus1.slice+"&axis="+document.getElementById('axis').value+"&time="+visus1.time+"&vr="+vr_status+"&res="+level
+    +"&vp="+vp+"&vd="+view_distance+"&q="+qs;
+  }
 
   pmin=isNaN(visus1.palette_min) ? "NaN" : visus1.palette_min
   pmax=isNaN(visus1.palette_max) ? "NaN" : visus1.palette_max
 
-  vr_status=document.getElementById('render_type').value
-  link = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
-    +"&field="+encodeURIComponent(visus1.field)+"&slice="+visus1.slice+"&axis="+document.getElementById('axis').value+"&time="+visus1.time+"&vr="+vr_status+"&res="+level
-    +"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
-    +"&vp="+vp+"&vd="+view_distance+"&q="+qs;
+  link=link+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
 
   document.getElementById('link_text').value = link;
 
