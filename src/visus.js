@@ -318,7 +318,7 @@ function VisusOSD(params)
     
     self.osd=OpenSeadragon({
       id: osd_id, 
-      prefixUrl: 'https://raw.githubusercontent.com/openseadragon/svg-overlay/master/openseadragon/images/', 
+      prefixUrl: 'https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/', 
       showNavigator: self.showNavigator, 
       debugMode: self.debugMode, 
       tileSources: {
