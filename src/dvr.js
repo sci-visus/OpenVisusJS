@@ -48,7 +48,7 @@ main(void)
 const fragSrcBox = `
 #version 300 es
 
-precision highp float;
+precision mediump float;
 
 layout (location = 0) out vec4 color;
 
@@ -85,7 +85,7 @@ out float zScaling;
 void
 main(void)
 {
-        // needed to scale tFar in fragment shader as we have to use the insane GL projection matrix
+        /* needed to scale tFar in fragment shader as we have to use the insane GL projection matrix */
         zScaling = matrices.projection[2][2];
 
         /* TODO: precompute inverse */
@@ -114,15 +114,11 @@ mkFragSrc(renderingMode)
 #define VOLUME 1
 #define METHOD ${(renderingMode === 'surface') ? 'SURFACE' : 'VOLUME'}
 
-#define NORMAL 0
-#define BLINN_PHONG 1
-#define SHADING BLINN_PHONG
+precision mediump float;
 
-precision highp float;
-
-uniform highp sampler3D volume_sampler;
-uniform highp sampler2D transfer_function_sampler;
-uniform highp sampler2D depth_sampler;
+uniform mediump sampler3D volume_sampler;
+uniform mediump sampler2D transfer_function_sampler;
+uniform mediump sampler2D depth_sampler;
 
 uniform float isovalue;
 
@@ -159,12 +155,19 @@ gradient(in sampler3D s, vec3 p, float dt)
 }
 
 
+float
+linear_to_srgb(float linear)
+{
+        if (linear <= 0.0031308)
+                return 12.92*linear;
+        else
+                return (1.0 + 0.055)*pow(linear, 1.0/2.4) - 0.055;
+}
+
+
 void
 main(void)
 {
-        // float depth = texelFetch(depth_sampler, ivec2(gl_FragCoord.xy), 0).r;
-        float depth= 1.0;
-
         const vec3 light_pos = vec3(1.0, 1.0, 1.0);
         vec3 o = eye;
         vec3 d = normalize(v_pos - o);
@@ -172,26 +175,36 @@ main(void)
         /* intersect aabb */
         vec3 near = min(-o/d, (vec3(1.0) - o)/d);
         vec3 far = max(-o/d, (vec3(1.0) - o)/d);
-
         float tnear = max(near.x, max(near.y, near.z));
         float tfar  = min(far.x, min(far.y, far.z));
+        if (tnear > tfar)
+                discard;
 
         /* stop at geometry if there is any (do ratio of z coordinate depth and z coordinate of current fragment) */
-        // tfar *= min((zScaling + gl_FragCoord.z)/(zScaling + depth), 1.0);
+        float depth = texelFetch(depth_sampler, ivec2(gl_FragCoord.xy), 0).r;
+        tfar *= min((zScaling + gl_FragCoord.z)/(zScaling + depth), 1.0);
 
         ivec3 size = textureSize(volume_sampler, 0);
-        /* TODO: step in correct dts along x, y, and z */
-        float dt = 1.0/float(max(size.x, max(size.y, size.z)));
+        int max_size = max(size.x, max(size.y, size.z));
+
+        /* compute step size (3D DDA) */
+        vec3 cell_size = 1.0/vec3(size);
+        vec3 dts = cell_size/abs(d);
+        float dt = min(dts.x, min(dts.y, dts.z));
 
         /* create safe bubble close to head if it is inside the volume */
-        // const float head_bubble_radius = 0.2;
-        // if (tnear < head_bubble_radius)
-        //          tnear = floor((head_bubble_radius - tnear)/dt)*dt + tnear;
+        const float head_bubble_radius = 0.2;
+        if (tnear < head_bubble_radius)
+                tnear = floor((head_bubble_radius - tnear)/dt)*dt + tnear;
 
         color = vec4(0.0, 0.0, 0.0, 0.0);
         float prev_value = 0.0;
+        float t = tnear + dt*rand(gl_FragCoord.xy);
 
-        for (float t = tnear + dt*rand(gl_FragCoord.xy); t <= tfar; t += dt) {
+        for (int i = 0; i < max_size; ++i) {
+                if (t >= tfar)
+                        break;
+
                 vec3 p = o + t*d;
                 float value = texture(volume_sampler, p).r;
 #if (METHOD == SURFACE)
@@ -204,21 +217,18 @@ main(void)
                         vec3 inter_p = (1.0 - a)*(p - dt*d) + a*p;
                         /* TODO: sample at different dt for each axis to avoid having undo scaling */
                         vec3 nn = gradient(volume_sampler, inter_p, dt);
-#if (SHADING == NORMAL)
-                                color = vec4(n, 1.0);
-#elif (SHADING == BLINN_PHONG)
+
                         /* TODO: can we optimize somehow? */
                         vec3 world_p = (to_world*vec4(inter_p, 1.0)).xyz;
                         vec3 n = normalize(to_worldn*nn);
                         vec3 light_dir = normalize(light_pos - world_p);
                         vec3 h = normalize(light_dir - world_p); /* eye is at origin */
-                                const float ambient = 0.2;
+                        const float ambient = 0.2;
                         float diffuse = 0.6*clamp(dot(light_dir, n), 0.0, 1.0);
                         float specular = 0.2*pow(clamp(dot(h, n), 0.0, 1.0), 100.0);
                         float distance = length(world_p); /* eye is at origin */
-                                color = vec4(color.xyz*(ambient + (diffuse + specular)/distance), 1.0);
-#endif
-                        return;
+                        color = vec4(color.xyz*(ambient + (diffuse + specular)/distance), 1.0);
+                        break;
                 }
                 prev_value = value;
 #elif (METHOD == VOLUME)
@@ -233,10 +243,13 @@ main(void)
                   color.a += (1.0 - color.a)*sample_color.a;
                 }
 #endif
+                t += dt;
         }
         /* TODO: or use blending */
         if (color.a == 0.0)
                 discard;
+
+        color.rgb = vec3(linear_to_srgb(color.r), linear_to_srgb(color.g), linear_to_srgb(color.b));
 }
 `.trim()
 }
@@ -332,11 +345,6 @@ function quat_to_mat4(q)
 }
 
 
-/* utility functions */
-/* TODO: use quaternion to represent camera */
-function look_at(position, target, up)
-{
-}
 
 /* Shoemake's arcball */
 /* it is nice to have it independent on input from vec */
@@ -547,7 +555,8 @@ dvr(canvas, renderingMode)
                 0.0, 1.0, 1.0,
                 1.0, 1.0, 1.0,
         ])
-        const indices = new Uint8Array([
+        /* some GPUs have lower performance if uint8 is used */
+        const indices = new Uint16Array([
                 /* bottom */
                 0, 2, 1,
                 2, 3, 1,
@@ -567,7 +576,8 @@ dvr(canvas, renderingMode)
                 0, 1, 4,
                 4, 1, 5,
         ])
-        const indicesBox = new Uint8Array([
+        /* some GPUs have lower performance if uint8 is used */
+        const indicesBox = new Uint16Array([
                 0, 1,
                 0, 2,
                 1, 3,
@@ -591,28 +601,14 @@ dvr(canvas, renderingMode)
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
 
+        /* dummy vao */
         const vao = gl.createVertexArray()
         gl.bindVertexArray(vao)
-        gl.enableVertexAttribArray(0)
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
-        gl.bindVertexArray(null)
 
-
-        // bounding box wireframe
+        /* bounding box wireframe */
         const eboBox = gl.createBuffer()
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesBox, gl.STATIC_DRAW)
-
-        const vaoBox = gl.createVertexArray()
-        // gl.bindVertexArray(vaoBox)
-        // gl.enableVertexAttribArray(0)
-        // gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-        // gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
-        // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
-        // gl.bindVertexArray(null)
-
 
         const fbos = createFbos(gl, width, height)
 
@@ -637,7 +633,9 @@ dvr(canvas, renderingMode)
         gl.samplerParameteri(depthSampler, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
         gl.samplerParameteri(depthSampler, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
 
-        ubo = gl.createBuffer()
+
+
+        const ubo = gl.createBuffer()
         gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
         gl.bufferData(gl.UNIFORM_BUFFER, new Float32Array(matrices.model.concat(matrices.view, matrices.projection)), gl.DYNAMIC_DRAW)
 
@@ -660,14 +658,15 @@ dvr(canvas, renderingMode)
                 gl.bindFramebuffer(gl.FRAMEBUFFER, fbos.fbo)
                 gl.clearBufferfv(gl.COLOR, fbos.fbo, [255/255, 255/255, 255/255, 1.0])
                 gl.clearBufferfv(gl.DEPTH, fbos.fbo, [1.0])
+
+                gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
                 
                 gl.useProgram(programBox)
-                gl.bindVertexArray(vaoBox)
-                gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
-                gl.drawElements(gl.LINES, indicesBox.length, gl.UNSIGNED_BYTE, 0)
-                gl.bindVertexArray(null)
-
-                gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+                gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
+                gl.enableVertexAttribArray(0)
+                gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+                gl.drawElements(gl.LINES, indicesBox.length, gl.UNSIGNED_SHORT, 0)
 
 
                 // volume/surface rendering goes last as it needs to read depth from previous passes
@@ -684,22 +683,23 @@ dvr(canvas, renderingMode)
                         gl.bindSampler(1, transferFunctionSampler)
                 }
 
-                // depth buffer texture
+                /* depth buffer texture */
                 gl.activeTexture(gl.TEXTURE2)
                 gl.bindTexture(gl.TEXTURE_2D, fbos.depthTexture)
                 gl.bindSampler(2, depthSampler)
 
                 gl.useProgram(program)
-                gl.bindVertexArray(vao)
-                gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
-                gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_BYTE, 0)
-                gl.bindVertexArray(null)
+                gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ebo)
+                gl.enableVertexAttribArray(0)
+                gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+                gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0)
 
-                gl.bindFramebuffer(gl.FRAMEBUFFER, null)
                 gl.enable(gl.DEPTH_TEST)
 
-                // copy to canvas framebuffer
+                /* copy to canvas framebuffer */
                 gl.bindFramebuffer(gl.READ_FRAMEBUFFER, fbos.volumeFbo)
+                gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null)
                 gl.blitFramebuffer(0, 0, fbos.width, fbos.height,
                                    x, y, x + width, y + height,
                                    gl.COLOR_BUFFER_BIT, gl.LINEAR)
