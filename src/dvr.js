@@ -2,6 +2,8 @@
  * Copyright (c) 2017 University of Utah 
  * All rights reserved.
  *
+ * This renderer is based on "pk-dvr.js - v0.7" Pavol Klacansky
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
