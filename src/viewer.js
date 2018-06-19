@@ -172,8 +172,13 @@ async function setServer(value,pre_dataset=null)
     {
       var value = datasets[i];
       var item = document.createElement("option");
-      item.textContent = value;
-      item.value=item.value = value;
+      var n = value.indexOf("/");
+      //console.log("found / at position "+n+" for string "+ value)
+      if(n > 0)
+        item.textContent = "m"+value.substring(n,value.length)
+      else
+        item.textContent = value;
+      item.value = value;
       dataset_widget.appendChild(item);
     }     
     
