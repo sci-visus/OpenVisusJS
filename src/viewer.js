@@ -174,8 +174,9 @@ async function setServer(value,pre_dataset=null)
       var item = document.createElement("option");
       var n = value.indexOf("/");
       //console.log("found / at position "+n+" for string "+ value)
+      // trimming prefix of the midx to first 3 characters(too long for the menu)
       if(n > 0)
-        item.textContent = "m"+value.substring(n,value.length)
+        item.textContent = value.substring(0,Math.min(3,value.length))+value.substring(n,value.length)
       else
         item.textContent = value;
       item.value = value;
