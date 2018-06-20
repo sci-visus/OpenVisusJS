@@ -46,7 +46,7 @@ function fetch_and_draw(query_str, reset_view=1)
 
   notifyStatus("Streaming...");
 
-  fetch(query_str, {method:'get'})
+  if(query_str) fetch(query_str, {method:'get'})
     .then(response => {
       if (!response.ok)
         throw new Error('Response not ok: ' + response.statusText)
@@ -271,11 +271,14 @@ function setDataset(value, presets=false)
 
       visus1.setRenderType(document.getElementById('render_type').value)
     }
-    
+
+    onPaletteChange()
+
     if(presets){
       loadRenderingTypePreset();
       visus1.usePresets=true;
-     }
+      loadPresets();
+    }
 
     refresh();
 
@@ -377,6 +380,7 @@ function onVRChange(ren_type){
 }
 
 function onPaletteChange(){
+
   visus1.setPalette(document.getElementById('palette').value); 
   visus1.setPaletteMin(parseFloat(document.getElementById('palette_min').value)); 
   visus1.setPaletteMax(parseFloat(document.getElementById('palette_max').value)); 
