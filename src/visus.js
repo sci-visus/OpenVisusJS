@@ -274,7 +274,7 @@ function clamp(value,a,b) {
 
 
 //////////////////////////////////////////////////////////////////////
-function VisusOSD(params) 
+function VisusOSD(params,bPreserveViewport) 
 {
   var self=this;
   
@@ -300,95 +300,64 @@ function VisusOSD(params)
     self.tile_size=self.dataset.dims;     
   }
 
-  var div=document.getElementById(self.id);
-
-  var osd_id=self.id+"_osd";
-
-  div.innerHTML="<div id='"+osd_id+"' style='width: 100%;height: 100%'></div>"; 
-
-  //refresh
-  self.refresh=function() 
-  { 
-    permutation=[[1,2,0],[0,2,1],[0,1,2]];
-    X = permutation[self.axis][0];
-    Y = permutation[self.axis][1];
-    Z = permutation[self.axis][2];
-   
-    document.getElementById(osd_id).innerHTML=""; 
+  //getTileUrl
+  self.getTileUrl=function(level,x,y) {  
+    base_url=self.dataset.base_url
+  	  +'&dataset='+self.dataset.name
+  	  +'&compression='+self.compression          	  
+  	  +'&maxh='+ self.dataset.maxh
+    	+'&time='+self.time
+    	+'&field='+self.field
+      +'&palette='+self.palette
+      +'&palette_min='+self.palette_min
+      +'&palette_max='+self.palette_max
+      +'&palette_interp='+self.palette_interp;
     
-    self.osd=OpenSeadragon({
-      id: osd_id, 
-      prefixUrl: 'https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/', 
-      showNavigator: self.showNavigator, 
-      debugMode: self.debugMode, 
-      tileSources: {
-        width:      self.dataset.dims[X],
-        height:     self.dataset.dims[Y],  
-        tileWidth:  self.tile_size[X], 
-        tileHeight: self.tile_size[Y],
-        minLevel:   self.minLevel, 
-        maxLevel:   self.maxLevel, 
-        getTileUrl: function(level,x,y)
-        {  
-          base_url=self.dataset.base_url
-        	  +'&dataset='+self.dataset.name
-        	  +'&compression='+self.compression          	  
-        	  +'&maxh='+ self.dataset.maxh
-          	+'&time='+self.time
-          	+'&field='+self.field
-            +'&palette='+self.palette
-            +'&palette_min='+self.palette_min
-            +'&palette_max='+self.palette_max
-            +'&palette_interp='+self.palette_interp;
-          
-          if (self.dataset.dim==2)
-          {
-            toh=level*2;
-            vs = Math.pow(2, self.maxLevel-level); 
-            w=self.tile_size[0] * vs; x1=x * w; x2=x1 + w;
-            h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
-            
-            //mirror y
-          	{
-          	  yt = y1; 
-          	  y1 = self.dataset.dims[1] - y2; 
-          	  y2 = self.dataset.dims[1] - yt;
-          	}
-  
-          	ret = base_url
-          	  +'&action=boxquery'
-          	  +'&box='
-          	    +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
-          	    +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)
-          	  +'&toh='+toh;
+    if (self.dataset.dim==2)
+    {
+      toh=level*2;
+      vs = Math.pow(2, self.maxLevel-level); 
+      w=self.tile_size[0] * vs; x1=x * w; x2=x1 + w;
+      h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
+      
+      //mirror y
+    	{
+    	  yt = y1; 
+    	  y1 = self.dataset.dims[1] - y2; 
+    	  y2 = self.dataset.dims[1] - yt;
+    	}
 
-          }
-          else
-          {
-            toh=self.dataset.maxh-(self.maxLevel-level)*3;
-  
-            box=[];
-            box[X]=[0,self.dataset.dims[X]];
-            box[Y]=[0,self.dataset.dims[Y]];
-            box[Z]=[self.slice,self.slice];      	
-            
-            ret = base_url
-              +'&action=pointquery' 
-          	  +'&box='
-          	    +box[0][0]+'%20'+box[1][0]+'%20'+box[2][0]+'%20'
-          	    +box[0][1]+'%20'+box[1][1]+'%20'+box[2][1]
-          	  +'&toh='+toh;    
-          }
-          
-          //console.log(ret);
-          return ret;
-        }
-      }
-    });    
+    	ret = base_url
+    	  +'&action=boxquery'
+    	  +'&box='
+    	    +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
+    	    +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)
+    	  +'&toh='+toh;
+
+    }
+    else
+    {
+      toh=self.dataset.maxh-(self.maxLevel-level)*3;
+
+      box=[];
+      box[X]=[0,self.dataset.dims[X]];
+      box[Y]=[0,self.dataset.dims[Y]];
+      box[Z]=[self.slice,self.slice];      	
+      
+      ret = base_url
+        +'&action=pointquery' 
+    	  +'&box='
+    	    +box[0][0]+'%20'+box[1][0]+'%20'+box[2][0]+'%20'
+    	    +box[0][1]+'%20'+box[1][1]+'%20'+box[2][1]
+    	  +'&toh='+toh;    
+    }
+    
+    //console.log(ret);
+    return ret;
   }; 
-
-  self.download_query=function(req_lev=self.level) 
-  { 
+  
+  //download_query
+  self.download_query=function(req_lev=self.level)  { 
     base_url=self.dataset.base_url
       +'&dataset='+self.dataset.name
       +'&compression='+self.compression             
@@ -524,7 +493,7 @@ function VisusOSD(params)
   self.setPaletteInterp=function(value) {
     self.palette_interp=value;
   }; 
-   
+  
   self.setAxis(2);
   self.setSlice(0);
   self.setField(self.dataset.fields[0].name);
@@ -532,9 +501,74 @@ function VisusOSD(params)
   self.setPalette("");
   self.setPaletteMin(0);
   self.setPaletteMax(0);
-  self.setPaletteInterp("Default");
+  self.setPaletteInterp("Default");   
   
-  self.refresh();
+  permutation=[[1,2,0],[0,2,1],[0,1,2]];
+  X = permutation[self.axis][0];
+  Y = permutation[self.axis][1];
+  Z = permutation[self.axis][2];  
+  
+  self.tileSource= {
+      width:      self.dataset.dims[X],
+      height:     self.dataset.dims[Y],  
+      tileWidth:  self.tile_size[X], 
+      tileHeight: self.tile_size[Y],
+      minLevel:   self.minLevel, 
+      maxLevel:   self.maxLevel, 
+      getTileUrl: self.getTileUrl
+    };
+  
+  //here I'm tring to preserve the viewort
+  var bRecycleOSD=false;
+  if (self.osd && self.osd.world.getItemAt(0))
+  {
+    var source=self.osd.world.getItemAt(0).source;
+    bRecycleOSD=
+      source.width==self.dataset.dims[X]   &&
+      source.height==self.dataset.dims[Y]  && 
+      source.tileWidth==self.tile_size[X]  &&
+      source.tileHeight==self.tile_size[Y] && 
+      source.minLevel==self.minLevel       &&
+      source.maxLevel==self.maxLevel;
+  }
+  
+  if (bRecycleOSD)
+  {
+    console.log("Using existing OpenSeadragon instance");
+  }
+  else
+  {
+    console.log("Creating OpenSeadragon instance");
+    var osd_id=self.id+"_osd";
+    document.getElementById(self.id).innerHTML="<div id='"+osd_id+"' style='width: 100%;height: 100%'></div>";     
+    
+    self.osd=OpenSeadragon({
+      id : osd_id,
+      prefixUrl : 'https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/',
+      tileSources: self.tileSource
+    }); 
+  }
+  
+  self.osd.showNavigator=self.showNavigator;
+  self.osd.preserveViewport= true;
+  self.osd.debugMode=self.debugMode;
+    
+  //see https://github.com/openseadragon/openseadragon/issues/866
+  self.refresh=function() 
+  { 
+    var oldImage=self.osd.world.getItemAt(0);
+    self.osd.addTiledImage({
+      tileSource : self.tileSource,
+      success : function() {
+        if (oldImage)
+          self.osd.world.removeItem(oldImage);
+      }    
+    });  
+  };
+  
+  if (bRecycleOSD) {
+    self.refresh();
+  }
   
   return self;
 };
