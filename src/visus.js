@@ -274,7 +274,7 @@ function clamp(value,a,b) {
 
 
 //////////////////////////////////////////////////////////////////////
-function VisusOSD(params,bPreserveViewport) 
+function VisusOSD(params) 
 {
   var self=this;
   
