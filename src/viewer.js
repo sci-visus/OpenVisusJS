@@ -424,7 +424,7 @@ function download(){
 
   out_ext_file = ".raw"
 
-  if(dataset.dim==3 && visus1.dtype.includes("int8") && !document.getElementById('render_type').value==VOLUME_RENDER_MODE){
+  if(dataset.dim==3 && visus1.dtype.includes("int8") && document.getElementById('render_type').value==SLICE_RENDER_MODE){
     data_url=data_url.split("compression=raw").join("compression=png");
     out_ext_file = ".png"
   }
