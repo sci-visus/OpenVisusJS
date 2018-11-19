@@ -142,7 +142,7 @@ if ($handle = opendir($mydir)) {
     $size = fgets ( $io, 4096);
     $size = substr ( $size, 0, strpos ( $size, "\t" ) );
     pclose ( $io );
-    echo 'Cache Size: ' . $size/1024 . 'KB';
+    echo 'Cache Size: ' . $size/1024 . ' MB';
 ?>
   <body>
   </body>

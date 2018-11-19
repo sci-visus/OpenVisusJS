@@ -493,6 +493,20 @@ function VisusOSD(params)
   self.setPaletteInterp=function(value) {
     self.palette_interp=value;
   }; 
+
+  self.getBounds=function() {
+    return self.osd.viewport.getBounds();
+  }
+
+  self.setBounds=function(new_bounds) {
+    self.osd.viewport.fitBounds(new_bounds,true);
+    self.pre_bounds = new_bounds;
+    //self.refresh()
+  }
+
+  self.selfpresetbounds=function(){
+    self.osd.viewport.fitBounds(self.pre_bounds,true);
+  }
   
   self.setAxis(2);
   self.setSlice(0);
@@ -552,6 +566,7 @@ function VisusOSD(params)
   self.osd.showNavigator=self.showNavigator;
   self.osd.preserveViewport= true;
   self.osd.debugMode=self.debugMode;
+  self.pre_bounds = null;
     
   //see https://github.com/openseadragon/openseadragon/issues/866
   self.refresh=function() 
@@ -564,6 +579,11 @@ function VisusOSD(params)
           self.osd.world.removeItem(oldImage);
       }    
     });  
+
+    if(self.pre_bounds != null){
+      self.setBounds(self.pre_bounds)
+      setTimeout(self.selfpresetbounds, 2000)
+    }
   };
   
   if (bRecycleOSD) {

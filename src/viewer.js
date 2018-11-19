@@ -517,14 +517,18 @@ function shareLink(){
 
     vr_status=document.getElementById('render_type').value
 
-    link=link+"&slice="+visus1.slice+"&axis="+document.getElementById('axis').value+"&time="+visus1.time+"&vr="+vr_status+"&res="+level
+    link=link+"&slice="+visus1.slice+"&axis="+document.getElementById('axis').value+"&vr="+vr_status+"&res="+level
     +"&vp="+vp+"&vd="+view_distance+"&q="+qs;
+  }
+  else{
+    bounds=visus1.getBounds();
+    link=link+"&bH="+bounds.height+"&bW="+bounds.width+"&bX="+bounds.x+"&bY="+bounds.y+"&bD="+bounds.degrees;
   }
 
   pmin=isNaN(visus1.palette_min) ? "NaN" : visus1.palette_min
   pmax=isNaN(visus1.palette_max) ? "NaN" : visus1.palette_max
 
-  link=link+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
+  link=link+"&time="+visus1.time+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
 
   document.getElementById('link_text').value = link;
 
@@ -558,6 +562,7 @@ function loadRenderingTypePreset(){
 
 function loadPresets(){
   
+  // 3D params
   let pre_slice = getParameterByName('slice')
   let pre_time = getParameterByName('time')
   let pre_palette = getParameterByName('palette')
@@ -569,6 +574,24 @@ function loadPresets(){
   let pre_resolution = getParameterByName('res')
   let pre_axis = getParameterByName('axis')
   let pre_field = getParameterByName('field')
+
+  // 2D params
+  let pre_bh = getParameterByName('bH')
+  let pre_bw = getParameterByName('bW')
+  let pre_bx = getParameterByName('bX')
+  let pre_by = getParameterByName('bY')
+  let pre_bd = getParameterByName('bD')
+
+  if(pre_bh!=null && pre_bw!=null && pre_bx!=null && pre_by!=null && pre_bd!=null){
+    bounds = visus1.getBounds()
+    bounds.height=parseFloat(pre_bh)
+    bounds.width=parseFloat(pre_bw)
+    bounds.x=parseFloat(pre_bx)
+    bounds.y=parseFloat(pre_by)
+    bounds.degrees=parseFloat(pre_bd)
+    visus1.setBounds(bounds)
+    //console.log(visus1.getBounds())
+  }
 
   if(pre_slice!=null){
     document.getElementById('edit_slice').value=pre_slice;
