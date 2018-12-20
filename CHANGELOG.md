@@ -6,14 +6,19 @@ All notable changes to this project will be documented in this file.
 - menu for rendering type selection
 - iso contour control
 - unlimited zoom in
-
+- demo for climate
+- loadScenePresets function (see climate demo)
+  
 ###Updated
 - parsing of presets
 - volume render code
 
 ###Fixed
 - volume rendering circles effect
-
+* forced use of default server specified in config.js
+* maintaining viewport when timestep changes 
+* don't show palette for rgb datasets
+  
 ## Released [0.1.0]
 ### Added
 - 2D viewer

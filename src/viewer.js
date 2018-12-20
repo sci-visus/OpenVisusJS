@@ -151,6 +151,7 @@ async function refreshAll(reset_view=1)
   // document.getElementById('palette_max').value=visus1.getPaletteMax();
   // document.getElementById('palette_interp').value=visus1.getPaletteInterp();
 
+  //want to set bounds here, but they're not part of document, only visus1
 }
 
 ///////////////////////////////////////////////////////
@@ -234,10 +235,14 @@ function setDataset(value, presets=false)
 
     //update time range
     {
-      time_widget=document.getElementById('time');
-      time_widget.min=dataset.timesteps[0];
-      time_widget.max=dataset.timesteps[1];
-      time_widget.step=1;
+      time_slider=document.getElementById('time');
+      time_slider.min=dataset.timesteps[0];
+      time_slider.max=dataset.timesteps[1];
+      time_slider.step=1;
+      time_edit=document.getElementById('edit_time');
+      time_edit.min=dataset.timesteps[0];
+      time_edit.max=dataset.timesteps[1];
+      time_edit.step=1;
     }   
 
     if(dataset.dim==2){

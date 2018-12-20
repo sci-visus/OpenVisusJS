@@ -69,7 +69,7 @@
                       <option value='BLUE_MARBLE_NIGHT'>BlueMarble night</option>
                     </select> 
                   </td>
-                  <td disabled> <label>Server</label> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'/>
+                  <td> <label>Server</label> <input disabled id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'/>
                   <td hidden> <label>Render</label> 
                     <select id='render_type' onchange='onVRChange(this.value);' class='toolbar_value'>
                       <option value="0">Slice</option>
@@ -113,17 +113,17 @@
                     </table>
                     
                   <td><label>Time</label>       
-                  <td width='50%'>
+                  <td width='33%'>
                     <table width='100%'>
                       <tr width='100%'>            
                         <td width='100%'><input  id='time' type='range' step='1' style='width:100%' oninput='onTimeChange(this.value);'>
-                        <td><input id='edit_time' size=2 onchange='onTimeChange(this.value);' class='toolbar_value'>
+                        <td><input id='edit_time' style="width:50px" step="1" type="number" onchange='onTimeChange(this.value);' class='toolbar_value'>
                       </tr>
                     </table>                  
                     
                   <td><label>Palette</label>     
                   <td>
-                    <select id='palette' onchange='onPaletteChange();' class='toolbar_value'>
+                    <select id='palette' onchange='onPaletteChange();' class='toolbar_value' style='width:100%' >
                       <option value=''></option>
                       <option value='rich' selected="selected">rich</option>
                       <option value='hsl'>hsl</option>
@@ -154,10 +154,10 @@
                     </select>
                     
                   <td><label>Min</label>
-                  <td><input id='palette_min' size=2 onchange='onPaletteChange();' class='toolbar_value'>
+                  <td><input id='palette_min' style="width:50px" onchange='onPaletteChange();' class='toolbar_value'>
                     
                   <td><label>Max</label> 
-                  <td><input id='palette_max' size=2 onchange='onPaletteChange();' class='toolbar_value'>
+                  <td><input id='palette_max' style="width:50px" onchange='onPaletteChange();' class='toolbar_value'>
                     
                     <!-- <td><label>Interpolation</label>    
                          <td>
@@ -189,7 +189,7 @@
   <script src="../../src/colormaps.js"></script>
   <script src="../../src/dvr.js"></script>
   <script src="../../src/visus.js"></script>
-  <script src="../../config.js"></script>
+  <script src="./config.js"></script>
   <script src="../../src/viewer.js"></script>
 
   <script>
@@ -200,8 +200,9 @@
         config_str='server=https%3A%2F%2Faims2.llnl.gov%3A8080%2Fmod_visus%3F&dataset=nature_2007_aer1_hourly&field=SUANGSTR&palette=AsymmetricBlueGreenDivergent&palette_min=0.14&palette_max=2.2'
 
       else if(preset_name=="NATURE_2007_MET_TAULOW")
-        config_str='server=https%3A%2F%2Faims2.llnl.gov%3A8080%2Fmod_visus%3F&dataset=nature_2007_met1_hourly&field=TAULOW&bH=0.5001736111111111&bW=1.1166666666666667&bX=-0.05833333333333335&bY=0&bD=0&time=0&palette=GreenGold&palette_min=0&palette_max=305'
-        
+        config_str='server=https%3A%2F%2Faims2.llnl.gov%3A8080%2Fmod_visus%3F&dataset=nature_2007_met1_hourly&field=TAULOW&palette=GreenGold&palette_min=0&palette_max=305'
+<!--        &bH=0.5001736111111111&bW=1.1166666666666667&bX=-0.05833333333333335&bY=0&bD=0&time=0   -->
+
       else if(preset_name=="BLUE_MARBLE_DAY")
         config_str='server=http%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=1_BlueMarble&field=data&bH=0.5&bW=1.0843373493975903&bX=-0.04216867469879515&bY=0&bD=0&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
         
