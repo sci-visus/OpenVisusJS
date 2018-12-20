@@ -218,8 +218,10 @@
 
     if(demo_id!=null)
       document.getElementById('preset_select').value=demo_id
-    else
+    else{
       document.getElementById('preset_select').value="BLUE_MARBLE_DAY"
+      loadScenePreset("BLUE_MARBLE_DAY")
+    }
   </script>
 
 </body>

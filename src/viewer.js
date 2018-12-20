@@ -37,7 +37,7 @@ function notifyStatus(new_text)
   else hideStatus();
 }
 
-function hideStatus(){ document.getElementById('status_bar').hidden=true }
+function hideStatus(){ if(document.getElementById('status_bar')) document.getElementById('status_bar').hidden=true }
 
 function fetch_and_draw(query_str, reset_view=1)
 {
@@ -260,6 +260,13 @@ function setDataset(value, presets=false)
         showNavigator : false,
         debugMode : false
       }); 
+
+      if(dataset.pow2dims[0] < dataset.pow2dims[1])
+        document.getElementById('resolution').min=3
+      else
+        document.getElementById('resolution').min=2
+      document.getElementById('resolution').step=2
+
     }else {
       console.log("USE 3D canvas")
       document.getElementById('2dCanvas').hidden=true
@@ -303,6 +310,10 @@ function onRefreshChange(){
 
 function onAxisChange(value){
   visus1.setAxis(value); refreshAll(0);
+}
+
+function setDefaultResolution(){
+  onResolutionChange(document.getElementById('resolution').min*1.0+14);
 }
 
 function onSliceChange(value){
@@ -349,6 +360,9 @@ function onResolutionChange(value){
   level=value
   size=visus1.getDataSize(value);
   document.getElementById('size_est').innerHTML="~"+parseFloat(size).toFixed(1)+"MB";
+
+  if(document.getElementById('res_lbl'))
+    document.getElementById('res_lbl').innerHTML = value
 
 }
 
@@ -595,7 +609,7 @@ function loadPresets(){
     bounds.y=parseFloat(pre_by)
     bounds.degrees=parseFloat(pre_bd)
     visus1.setBounds(bounds)
-    //console.log(visus1.getBounds())
+    console.log(visus1.getBounds())
   }
 
   if(pre_slice!=null){
