@@ -261,16 +261,18 @@ function setDataset(value, presets=false)
         debugMode : false
       }); 
 
+      document.getElementById('resolution').step=2;
+
       if(dataset.pow2dims[0] < dataset.pow2dims[1])
         document.getElementById('resolution').min=3
       else
         document.getElementById('resolution').min=2
-      document.getElementById('resolution').step=2
+
 
     }else {
       console.log("USE 3D canvas")
-      document.getElementById('2dCanvas').hidden=true
-      document.getElementById('3dCanvas').hidden=false
+      document.getElementById('2dCanvas').hidden=true;
+      document.getElementById('3dCanvas').hidden=false;
       document.getElementById('view_btn').hidden=false;
 
       visus1=VisusVR({
@@ -281,7 +283,37 @@ function setDataset(value, presets=false)
         debugMode : false
       }); 
 
+      var bits = dataset.bitmask;
+
+      var bvals=[0,0,0];
+      var rcount=0;
+      var minres=9000;
+      for(var  b= 0; b < bits.length; b++) {
+        if(isNaN(bits[b]))
+          continue;
+
+        bvals[parseInt(bits[b])] = bvals[parseInt(bits[b])]+1;
+
+        console.log(rcount, bvals);
+
+        rcount++;
+
+        // min resolution that maintains the aspect ratio
+        if(rcount<minres && bvals[0]>=1 && bvals[1]>=1 && bvals[2]>=1)
+          minres=rcount;
+
+        // default resolution maintatining aspect ratio
+        if(bvals[0]>=7 && bvals[1]>=7 && bvals[2]>=7)
+          break;
+      }
+      //console.log(rcount, bvals);
+      
+      document.getElementById('resolution').min=minres;
+      onResolutionChange(rcount);
+
       visus1.setRenderType(document.getElementById('render_type').value)
+      
+      document.getElementById('resolution').step=3;
     }
 
     onPaletteChange()
