@@ -309,7 +309,8 @@ function setDataset(value, presets=false)
       //console.log(rcount, bvals);
       
       document.getElementById('resolution').min=minres;
-      onResolutionChange(rcount);
+      
+      if(!presets) onResolutionChange(rcount);
 
       visus1.setRenderType(document.getElementById('render_type').value)
       
