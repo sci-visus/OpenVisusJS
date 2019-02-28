@@ -358,7 +358,7 @@ function onSliceChange(value){
   // }
 
   //console.log("get value "+value+" set value "+range[0]+(value/100)*ext)
-  if(visus1.render_type==ISOCONTOUR_RENDER_MODE){
+  if(visus1.render_type==ISOCONTOUR_RENDER_MODE && renderer){
     var range=renderer.getDataExtent();
     ext = range[1]-range[0]
 
@@ -670,8 +670,8 @@ function loadPresets(){
   if(pre_resolution!=null){
     level=parseInt(pre_resolution)
     document.getElementById('resolution').value=level
-  }else
-    level=24
+    onResolutionChange(level)
+  }
   
   if(pre_palette!=null){
     document.getElementById('palette').value=pre_palette
@@ -711,5 +711,7 @@ function loadPresets(){
   }
 
   visus1.usePresets=false;
+
+  setTimeout(function(){ onSliceChange(pre_slice); onViewResolution(); }, 3000);
 
 }
