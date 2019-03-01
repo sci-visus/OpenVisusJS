@@ -105,17 +105,17 @@
                     </table>
                     
                   <td><label>Time</label>       
-                  <td width='50%'>
+                  <td width='33%'>
                     <table width='100%'>
                       <tr width='100%'>            
                         <td width='100%'><input  id='time' type='range' step='1' style='width:100%' oninput='onTimeChange(this.value);'>
-                        <td><input id='edit_time' size=2 onchange='onTimeChange(this.value);' class='toolbar_value'>
+                        <td><input id='edit_time' style="width:50px" step="1" type="number" onchange='onTimeChange(this.value);' class='toolbar_value'>
                       </tr>
                     </table>                  
                     
                   <td><label>Palette</label>     
                   <td>
-                    <select id='palette' onchange='onPaletteChange();' class='toolbar_value'>
+                    <select id='palette' onchange='onPaletteChange();' class='toolbar_value' style='width:100%' >
                       <option value=''></option>
                       <option value='rich' selected="selected">rich</option>
                       <option value='hsl'>hsl</option>
@@ -146,10 +146,10 @@
                     </select>
                     
                   <td><label>Min</label>
-                  <td><input id='palette_min' size=2 onchange='onPaletteChange();' class='toolbar_value'>
+                  <td><input id='palette_min' style="width:50px" onchange='onPaletteChange();' class='toolbar_value'>
                     
                   <td><label>Max</label> 
-                  <td><input id='palette_max' size=2 onchange='onPaletteChange();' class='toolbar_value'>
+                  <td><input id='palette_max' style="width:50px" onchange='onPaletteChange();' class='toolbar_value'>
                     
                     <!-- <td><label>Interpolation</label>    
                          <td>
@@ -181,7 +181,7 @@
   <script src="./src/colormaps.js"></script>
   <script src="./src/dvr.js"></script>
   <script src="./src/visus.js"></script>
-  <script src="config.js"></script>
+  <script src="./config.js"></script>
   <script src="./src/viewer.js"></script>
 
 </body>
