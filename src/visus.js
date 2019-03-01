@@ -122,7 +122,7 @@ function visusAsyncLoadDataset(url)
     
     parse_url= parseUrl(ret.url);  
     ret.name=parse_url.getSearchVariable("dataset");
-    ret.base_url = parse_url.protocol+'//'+parse_url.hostname+':'+parse_url.port+'/mod_visus?';    
+    ret.base_url = parse_url.protocol+'//'+parse_url.hostname+':'+parse_url.port+parse_url.pathname+'?';
     
     ret.timesteps=[0,0];
   
