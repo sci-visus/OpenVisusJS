@@ -126,7 +126,7 @@ body{
                 </div>
                 
               <div class="modal-footer">
-                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='download(selection_box)'>Download</button>
+                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='callDownload()'>Download</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               </div>
             </div>
@@ -365,6 +365,13 @@ body{
   <script src="../../src/viewer.js"></script>
 
   <script>
+    function callDownload(){
+      if(selection_box.length == 0)
+        download()
+      else
+        download(selection_box)
+    }
+
     function loadScenePreset(preset_name){
       config_str=''
 
