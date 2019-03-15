@@ -462,12 +462,12 @@ function onViewResolution(){
   fetch_and_draw(data_url,0)
 }
 
-function download(){
+function download(box=null){
   sel_level = parseInt(document.getElementById('resolution').value)
 
   data_url = ""
   if(dataset.dim==2)
-    data_url = visus1.download_query(sel_level)
+    data_url = visus1.download_query(sel_level, box)
   else
     data_url = visus1.refresh(sel_level)
 

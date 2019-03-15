@@ -97,6 +97,9 @@ body{
 
 </head>
 
+<script>
+  var selection_box= new Array();
+</script>
 <body>
   <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
           <div class="modal-dialog">
@@ -123,7 +126,7 @@ body{
                 </div>
                 
               <div class="modal-footer">
-                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='download()'>Download</button>
+                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='download(selection_box)'>Download</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               </div>
             </div>
@@ -217,7 +220,7 @@ body{
   <div id="viewer">
     <div class="container">
       <div class="row row-centered pos">
-        <div class="col-lg h-100" id='2dCanvas' style='background: black'></div>
+        <div class="col-lg h-100" id='2dCanvas' style='background: black; margin-top:50px'></div>
         <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px'></canvas></div>
       </div>
     </div>
@@ -354,6 +357,7 @@ body{
   <!-- <details ontoggle="load_dataset(this, &#39;aneurism&#39;, {level: 24, width: 256, height: 256, depth: 256}, &#39;uint8&#39;, {width: 256.0, height: 256.0, depth: 256.0})"/> -->
 
   <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
+  <script src="../../src/selection/openseadragonselection.js"></script>
   <script src="../../src/colormaps.js"></script>
   <script src="../../src/dvr.js"></script>
   <script src="../../src/visus.js"></script>
@@ -407,6 +411,43 @@ body{
     }
   };
 
+  setTimeout(function () {
+      var selection = visus1.osd.selection({
+        onSelection:  function(rect) { 
+          console.log(rect); 
+          selection_box[0]=rect.x;
+          selection_box[1]=selection_box[0]+rect.width-1;
+          selection_box[2]=visus1.osd.tileSources.height-(rect.y+rect.height);
+          selection_box[3]=visus1.osd.tileSources.height-rect.y;
+        },
+        keyboardShortcut:        's',
+        prefixUrl:               null, 
+        allowRotation:           false,
+        navImages:               { // overwrites OpenSeadragon's options
+          selection: {
+              REST:   '../images/selection_rest.png',
+              GROUP:  '../images/selection_grouphover.png',
+              HOVER:  '../images/selection_hover.png',
+              DOWN:   '../images/selection_pressed.png'
+          },
+          selectionConfirm: {
+              REST:   '../images/selection_confirm_rest.png',
+              GROUP:  '../images/selection_confirm_grouphover.png',
+              HOVER:  '../images/selection_confirm_hover.png',
+              DOWN:   '../images/selection_confirm_pressed.png'
+          },
+          selectionCancel: {
+              REST:   '../images/selection_cancel_rest.png',
+              GROUP:  '../images/selection_cancel_grouphover.png',
+              HOVER:  '../images/selection_cancel_hover.png',
+              DOWN:   '../images/selection_cancel_pressed.png'
+          },
+        }
+
+      });
+      //selection.enable();
+    }, 3000);
+  
   </script>
 
 </body>

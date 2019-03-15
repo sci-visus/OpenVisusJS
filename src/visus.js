@@ -357,7 +357,7 @@ function VisusOSD(params)
   }; 
   
   //download_query
-  self.download_query=function(req_lev=self.level)  { 
+  self.download_query=function(req_lev=self.level, box=null)  { 
     base_url=self.dataset.base_url
       +'&dataset='+self.dataset.name
       +'&compression='+self.compression             
@@ -371,8 +371,10 @@ function VisusOSD(params)
     
       toh=clamp(req_lev,0,self.maxLevel*2);
       
-      ret = base_url +'&action=boxquery&box=0%20'+self.dataset.dims[0]+'%200%20'+((self.dataset.dims[1])-1)+'&toh='+toh;
-
+      if(box==null)
+        ret = base_url +'&action=boxquery&box=0%20'+self.dataset.dims[0]+'%200%20'+((self.dataset.dims[1])-1)+'&toh='+toh;
+      else
+        ret = base_url +'&action=boxquery&box='+box[0]+'%20'+box[1]+'%20'+box[2]+'%20'+box[3]+'&toh='+toh;
       //console.log("download query"+ret);
 
       self.query_str = ret;
@@ -558,7 +560,7 @@ function VisusOSD(params)
     
     self.osd=OpenSeadragon({
       id : osd_id,
-      prefixUrl : 'https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/',
+      prefixUrl : 'https://raw.githubusercontent.com/sci-visus/OpenVisusJS/master/images/', //'https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/',
       tileSources: self.tileSource
     }); 
   }
