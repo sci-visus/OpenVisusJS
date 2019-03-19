@@ -208,6 +208,14 @@ body{
       <li>
         <button type="button" class="btn btn-info navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()">Share</button>
       </li>
+      <li>
+        <div class="form-group" style="margin-top:15px">
+          <input class="slider form-control-sm navbar-btn" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/> 
+        </div>
+      </li>
+      <li>
+         <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn'/>
+      </li>
     </ul>
   
     <ul class="nav navbar-nav navbar-right">
@@ -283,15 +291,7 @@ body{
                           <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value'>
                       </tr>
                     </table>
-                    
-                  <td><label>Time</label>       
-                  <td width='50%'>
-                    <table width='100%'>
-                      <tr width='100%'>            
-                        <td width='100%'><input  id='time' type='range' step='1' style='width:100%' oninput='onTimeChange(this.value);'>
-                        <td><input id='edit_time' size=2 onchange='onTimeChange(this.value);' class='toolbar_value'>
-                      </tr>
-                    </table>                  
+                  
                     
                   <td><label>Palette</label>     
                   <td>
@@ -376,7 +376,7 @@ body{
       config_str=''
 
       if(preset_name=="NEON_MOAB")
-        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_moab&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
+        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_moab_2017_2018&field=data&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
 
       else if(preset_name=="NEON_REDB")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_redb&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
@@ -384,7 +384,6 @@ body{
       else if(preset_name=="NEON_ABBA")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_abba&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
       
-        
       HOST_URL="index.html"
       gotourl = HOST_URL+"?"+config_str+"&demoid="+preset_name
       window.location=gotourl
@@ -393,8 +392,9 @@ body{
     demo_id = getParameterByName('demoid')
     dataset_param = getParameterByName('dataset')
 
-    if(demo_id==null && dataset_param==null)
+    if(demo_id==null && dataset_param==null){
       loadScenePreset("NEON_MOAB")
+    }
 
    function copyClick() {
     
@@ -417,6 +417,17 @@ body{
       console.log("error copy", err)
     }
   };
+
+  // function onNeonTimeChange(val){
+  //   console.log("selected "+val)
+
+  //   $("#timeNeonText").val(val);
+
+  //   if(val=="2017")
+  //     loadScenePreset("NEON_MOAB_2017")
+  //   else
+  //     loadScenePreset("NEON_MOAB_2018")
+  // }
 
   setTimeout(function () {
       var selection = visus1.osd.selection({
@@ -450,10 +461,21 @@ body{
               DOWN:   '../images/selection_cancel_pressed.png'
           },
         }
-
       });
+
       //selection.enable();
-    }, 3000);
+
+      // visualize slider if time varying dataset
+      if($("#time")[0].max > $("#time")[0].min){
+       $("#time").show()
+       $("#edit_time").show()
+      }
+      else{
+        $("#time").hide()
+        $("#edit_time").hide()
+      }
+
+    }, 1000);
   
   </script>
 
