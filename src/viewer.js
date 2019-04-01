@@ -387,11 +387,11 @@ function onTimeChange(value){
   refreshAll(0);
 }
 
-function onResolutionChange(value){
+function onResolutionChange(value, sel_factor=1){
   document.getElementById('resolution').value=value;
   document.getElementById('edit_resolution').value=value;
   level=value
-  size=visus1.getDataSize(value);
+  size=visus1.getDataSize(value)*sel_factor;
   document.getElementById('size_est').innerHTML="~"+parseFloat(size).toFixed(1)+"MB";
 
   if(document.getElementById('res_lbl'))
@@ -462,12 +462,12 @@ function onViewResolution(){
   fetch_and_draw(data_url,0)
 }
 
-function download(){
+function download(box=null){
   sel_level = parseInt(document.getElementById('resolution').value)
 
   data_url = ""
   if(dataset.dim==2)
-    data_url = visus1.download_query(sel_level)
+    data_url = visus1.download_query(sel_level, box)
   else
     data_url = visus1.refresh(sel_level)
 

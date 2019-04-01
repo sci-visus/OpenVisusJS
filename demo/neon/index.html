@@ -97,6 +97,12 @@ body{
 
 </head>
 
+<script>
+  var selection_box= new Array();
+  // Selection widget
+  var selection;
+</script>
+
 <body>
   <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
           <div class="modal-dialog">
@@ -111,7 +117,7 @@ body{
                 <div class="col" style="padding:20px">
                   <div class="row-md-6 text-center">
                     <div class="slidecontainer">
-                      <input  id='resolution' type='range' step='1' min='0' step='1' max='33' class="slider" oninput='onResolutionChange(this.value);'/> 
+                      <input  id='resolution' type='range' step='1' min='0' step='1' max='33' class="slider" oninput='updateDownloadResolution(this.value);'/> 
                     </div>
                   </div>
                   <div class="row-md-6 text-center">
@@ -123,7 +129,7 @@ body{
                 </div>
                 
               <div class="modal-footer">
-                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='download()'>Download</button>
+                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='callDownload()'>Download</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               </div>
             </div>
@@ -205,6 +211,14 @@ body{
       <li>
         <button type="button" class="btn btn-info navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()">Share</button>
       </li>
+      <li>
+        <div class="form-group" style="margin-top:15px">
+          <input class="slider form-control-sm navbar-btn" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/> 
+        </div>
+      </li>
+      <li>
+         <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn'/>
+      </li>
     </ul>
   
     <ul class="nav navbar-nav navbar-right">
@@ -217,7 +231,7 @@ body{
   <div id="viewer">
     <div class="container">
       <div class="row row-centered pos">
-        <div class="col-lg h-100" id='2dCanvas' style='background: black'></div>
+        <div class="col-lg h-100" id='2dCanvas' style='background: black; margin-top:50px'></div>
         <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px'></canvas></div>
       </div>
     </div>
@@ -280,15 +294,7 @@ body{
                           <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value'>
                       </tr>
                     </table>
-                    
-                  <td><label>Time</label>       
-                  <td width='50%'>
-                    <table width='100%'>
-                      <tr width='100%'>            
-                        <td width='100%'><input  id='time' type='range' step='1' style='width:100%' oninput='onTimeChange(this.value);'>
-                        <td><input id='edit_time' size=2 onchange='onTimeChange(this.value);' class='toolbar_value'>
-                      </tr>
-                    </table>                  
+                  
                     
                   <td><label>Palette</label>     
                   <td>
@@ -354,6 +360,7 @@ body{
   <!-- <details ontoggle="load_dataset(this, &#39;aneurism&#39;, {level: 24, width: 256, height: 256, depth: 256}, &#39;uint8&#39;, {width: 256.0, height: 256.0, depth: 256.0})"/> -->
 
   <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
+  <script src="../../src/selection/openseadragonselection.js"></script>
   <script src="../../src/colormaps.js"></script>
   <script src="../../src/dvr.js"></script>
   <script src="../../src/visus.js"></script>
@@ -361,11 +368,60 @@ body{
   <script src="../../src/viewer.js"></script>
 
   <script>
+    
+
+    function rectToSelection(bounds){
+      rect=visus1.osd.viewport.viewportToImageRectangle(bounds.x, bounds.y, bounds.width, bounds.height)
+      rect=new OpenSeadragon.Rect(Math.round(rect.x),Math.round(rect.y),Math.round(rect.width),Math.round(rect.height));
+
+      selection_box[0]=rect.x;
+      selection_box[1]=selection_box[0]+rect.width-1;
+      selection_box[2]=visus1.osd.tileSources.height-(rect.y+rect.height);
+      selection_box[3]=visus1.osd.tileSources.height-rect.y;
+    }
+
+    function callDownload(){
+      if(!selection || selection.isSelecting==false){
+        bounds=visus1.getBounds()
+        rectToSelection(bounds)
+        //console.log(selection_box)
+        download(selection_box)
+      }
+      else{
+        //console.log("rect", selection.rect)
+        rectToSelection(selection.rect)
+        download(selection_box)
+        selection.toggleState()
+      }
+    }
+
+    function updateDownloadResolution(value){
+      sel_factor = 1
+
+      if(!selection || selection.isSelecting==false){
+        bounds=visus1.getBounds()
+        rectToSelection(bounds)
+        //console.log(selection_box)
+        sel_size = (selection_box[1]-selection_box[0])*(selection_box[3]-selection_box[2]);
+        sel_factor=sel_size/(visus1.osd.tileSources.height*visus1.osd.tileSources.width)
+      }
+      else{
+        //console.log("rect", selection.rect)
+        rectToSelection(selection.rect)
+        sel_size = (selection_box[1]-selection_box[0])*(selection_box[3]-selection_box[2]);
+        sel_factor=sel_size/(visus1.osd.tileSources.height*visus1.osd.tileSources.width)
+      }
+      
+      console.log("sel_factor", sel_factor)
+
+      onResolutionChange(value, sel_factor)
+    }
+
     function loadScenePreset(preset_name){
       config_str=''
 
       if(preset_name=="NEON_MOAB")
-        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_moab&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
+        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_moab_2017_2018&field=data&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
 
       else if(preset_name=="NEON_REDB")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_redb&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
@@ -373,7 +429,6 @@ body{
       else if(preset_name=="NEON_ABBA")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_abba&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
       
-        
       HOST_URL="index.html"
       gotourl = HOST_URL+"?"+config_str+"&demoid="+preset_name
       window.location=gotourl
@@ -382,8 +437,9 @@ body{
     demo_id = getParameterByName('demoid')
     dataset_param = getParameterByName('dataset')
 
-    if(demo_id==null && dataset_param==null)
+    if(demo_id==null && dataset_param==null){
       loadScenePreset("NEON_MOAB")
+    }
 
    function copyClick() {
     
@@ -407,6 +463,65 @@ body{
     }
   };
 
+  $('#downloadModal').onLoad = function (){
+    updateDownloadResolution($('#edit_resolution').val);
+  };
+
+  setTimeout(function () {
+      selection = visus1.osd.selection({
+        onSelection:  function(rect) { 
+          //console.log(selection.rect); 
+          rectToSelection(selection.rect);
+
+          $('#downloadModal').modal();
+
+        },
+        keyboardShortcut:        's',
+        prefixUrl:               null, 
+        allowRotation:           false,
+        showConfirmDenyButtons:  false,
+        navImages:               { // overwrites OpenSeadragon's options
+          selection: {
+              REST:   '../images/selection_rest.png',
+              GROUP:  '../images/selection_grouphover.png',
+              HOVER:  '../images/selection_hover.png',
+              DOWN:   '../images/selection_pressed.png'
+          },
+          selectionConfirm: {
+              REST:   '../images/selection_confirm_rest.png',
+              GROUP:  '../images/selection_confirm_grouphover.png',
+              HOVER:  '../images/selection_confirm_hover.png',
+              DOWN:   '../images/selection_confirm_pressed.png'
+          },
+          selectionCancel: {
+              REST:   '../images/selection_cancel_rest.png',
+              GROUP:  '../images/selection_cancel_grouphover.png',
+              HOVER:  '../images/selection_cancel_hover.png',
+              DOWN:   '../images/selection_cancel_pressed.png',
+          },
+        }
+      });
+
+      selection.cancel = function(){ 
+        selection.toggleState(); console.log("CANCEL"); 
+        return this.outerTracker.setTracking(!1),this.outerTracker.setTracking(!0),this.viewer.raiseEvent("selection_cancel",!1),this.undraw()
+      };
+      //selection.enable();
+
+      // visualize slider if time varying dataset
+      if($("#time")[0].max > $("#time")[0].min){
+       $("#time").show()
+       $("#time").val($("#time")[0].min)
+       $("#time").change()
+       $("#edit_time").show()
+      }
+      else{
+        $("#time").hide()
+        $("#edit_time").hide()
+      }
+
+    }, 1000);
+  
   </script>
 
 </body>
