@@ -387,11 +387,11 @@ function onTimeChange(value){
   refreshAll(0);
 }
 
-function onResolutionChange(value){
+function onResolutionChange(value, sel_factor=1){
   document.getElementById('resolution').value=value;
   document.getElementById('edit_resolution').value=value;
   level=value
-  size=visus1.getDataSize(value);
+  size=visus1.getDataSize(value)*sel_factor;
   document.getElementById('size_est').innerHTML="~"+parseFloat(size).toFixed(1)+"MB";
 
   if(document.getElementById('res_lbl'))
