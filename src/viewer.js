@@ -522,9 +522,11 @@ function download(box=null){
 
           var url = window.URL.createObjectURL(blob);
           var a = document.createElement('a');
-          a.href = url;
+          document.body.appendChild(a); //required in FF, optional for Chrome
           a.download = visus1.dataset.name+"_"+out_size[0]+"_"+out_size[1]+"_"+out_size[2]+"_"+out_dtype+"_t"+time_value+"_lvl"+sel_level+out_ext_file;
-          a.click();                    
+          a.href=url;
+          a.target="_self";
+          a.click();
         
           hideStatus();
         });
