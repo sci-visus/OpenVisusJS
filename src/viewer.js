@@ -228,9 +228,10 @@ function setDataset(value, presets=false)
         item.textContent = fieldname;
         item.value=item.value = fieldname;
         field_widget.appendChild(item);
+
       }  
     }   
-    
+
     document.getElementById('resolution').max=dataset.maxh
 
     //update time range
@@ -268,6 +269,7 @@ function setDataset(value, presets=false)
       else
         document.getElementById('resolution').min=2
 
+      onFieldChange(document.getElementById('field').value)
 
     }else {
       console.log("USE 3D canvas")
@@ -383,17 +385,7 @@ function onFieldChange(value){
   palette_max = document.getElementById('palette_max').value
   
   if(palette_min=="" && palette_max==""){
-    var i;
-    for(i=0; i< visus1.dataset.fields.length; i++){
-      d=visus1.dataset.fields[i]
-      if(d.name == value){
-        if(d.min != 0.0 || d.max != 0.0){
-          visus1.setPaletteMin(d.min); 
-          visus1.setPaletteMax(d.max);
-          console.log("field", value,"using min max ", d.min, d.max)
-        }
-      }
-    }
+    visus1.guessRange();
   }
 
   refreshAll();

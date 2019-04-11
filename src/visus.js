@@ -300,6 +300,19 @@ function VisusOSD(params)
     self.tile_size=self.dataset.dims;     
   }
 
+  self.guessRange=function(){
+    for(i=0; i< self.dataset.fields.length; i++){
+      d=self.dataset.fields[i]
+      if(d.name == self.field){
+        if(d.min != 0.0 || d.max != 0.0){
+          self.palette_min = d.min; 
+          self.palette_max = d.max;
+          //console.log("field", self.field,"using min max ", d.min, d.max)
+        }
+      }
+    }
+  }
+
   //getTileUrl
   self.getTileUrl=function(level,x,y) {  
     base_url=self.dataset.base_url
@@ -573,6 +586,8 @@ function VisusOSD(params)
   //see https://github.com/openseadragon/openseadragon/issues/866
   self.refresh=function() 
   { 
+    guessRange();
+
     var oldImage=self.osd.world.getItemAt(0);
     self.osd.addTiledImage({
       tileSource : self.tileSource,
@@ -587,7 +602,7 @@ function VisusOSD(params)
       setTimeout(self.selfpresetbounds, 2000)
     }
   };
-  
+
   if (bRecycleOSD) {
     self.refresh();
   }
