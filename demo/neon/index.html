@@ -445,6 +445,7 @@ body{
     
     var input = document.querySelector('#link_text');
     input.setSelectionRange(0, input.value.length + 1);
+    input.select();
     try {
       var success = document.execCommand('copy');
       if (success) {
