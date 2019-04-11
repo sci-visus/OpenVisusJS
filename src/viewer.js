@@ -377,7 +377,26 @@ function onSliceChange(value){
 }
 
 function onFieldChange(value){
-  visus1.setField(value); refreshAll();
+  visus1.setField(value); 
+
+  palette_min = document.getElementById('palette_min').value
+  palette_max = document.getElementById('palette_max').value
+  
+  if(palette_min=="" && palette_max==""){
+    var i;
+    for(i=0; i< visus1.dataset.fields.length; i++){
+      d=visus1.dataset.fields[i]
+      if(d.name == value){
+        if(d.min != 0.0 || d.max != 0.0){
+          visus1.setPaletteMin(d.min); 
+          visus1.setPaletteMax(d.max);
+          console.log("field", value,"using min max ", d.min, d.max)
+        }
+      }
+    }
+  }
+
+  refreshAll();
 }
 
 function onTimeChange(value){
