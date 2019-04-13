@@ -39,9 +39,19 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
 <style type="text/css">
 body{
@@ -86,7 +96,7 @@ body{
   vertical-align: middle;
 }
 
-.nav>li{
+.nav-item{
   padding-right: 5px;
   padding-left: 5px;
 }
@@ -99,9 +109,41 @@ body{
  display:none; 
 }
 
+#servernav {
+ display:none; 
+}
+
 .navlabel{
   color: #9D9D9D;
   margin-top: 30%;
+}
+
+#paletteModal {
+  position: relative;
+}
+
+#palette-modal-dialog {
+  position: fixed;
+  margin: 0;
+  padding: 50px;
+}
+
+#palette-modal-dialog>.modal-content{
+  background-color: rgba(255,255,255,.3) !important;
+}
+
+.input-group-multi [class*='col-'] {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.input-group-multi .form-control {
+  border-right: 0;
+}
+
+.input-group-multi [class*='col-']:last-child .form-control {
+  border-radius: 0 4px 4px 0;
+  border-right: 1px solid #ccc;
 }
 
 </style>
@@ -116,14 +158,15 @@ body{
 
 <body>
   <div id='status_bar' style="float:top" hidden><img src="images/spinner.gif" height="10px" ><label id='status' style="color: blue"></label></div>
+
   <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
           <div class="modal-dialog">
 
             <!-- Download Modal content-->
             <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Select resolution to download</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
               </div>
               
                 <div class="col" style="padding:20px">
@@ -141,8 +184,8 @@ body{
                 </div>
                 
               <div class="modal-footer">
-                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='callDownload()'>Download</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button class="btn btn-primary" id='download_btn' onclick='callDownload()'>Download</button>
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
               </div>
             </div>
 
@@ -154,62 +197,110 @@ body{
             <!-- Share Modal content-->
             <div class="modal-content">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Share link</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
               </div>
-              
-
               <div class="col" style="padding:20px">
                 <div class="input-group">
-                <input type="text" id='link_text' class="form-control"
+                  <input type="text" id='link_text' class="form-control"
                     value="/path/to/foo/bar" placeholder="Some path">
-                  <span class="input-group-btn">
-                  <button class="btn btn-default" type="button" id="copy-button"
-                      data-toggle="tooltip" data-placement="button"
-                      title="Copy to Clipboard" onclick="copyClick()">
-                    Copy
-                  </button>
-                </span>
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="copy-button"
+                        data-toggle="tooltip" data-placement="button"
+                        title="Copy to Clipboard" onclick="copyClick()">
+                      Copy
+                    </button>
+                  </div>
               </div>
                 <!-- <input id='link_text' style='width:100%' />  -->
               </div>
                 
-              <div class="modal-footer">
-                <!-- <button id="copy_btn" class="btn btn-primary" onclick='onCopy()' glyphicon="glyphicon-ok">Copy</button> -->
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
+              <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+              </div> -->
             </div>
           </div>
         </div>
 
-  <nav class="navbar navbar-inverse navbar-fixed-top">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed " data-toggle="collapse" data-target="#main-navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <!-- <a class="navbar-brand" href="#">ViSUS.org<image src="logo.png" height="130%"/></a> -->
+  <div class="modal fade" id="paletteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div id="palette-modal-dialog" class="modal-dialog" role="document">
+      <div class="modal-content">
+        <!-- <div class="modal-header"> -->
+          <div class="modal-body">
+          <!-- <button class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
+            <div class="input-group">
+                <select id='palette' onchange='onPaletteChange();' class='custom-select'>
+                  <option value=''></option>
+                  <option value='rich' selected="selected">rich</option>
+                  <option value='hsl'>hsl</option>
+                  <option value='banded'>banded</option>
+                  <option value='bry'>bry</option>
+                  <option value='bgry'>bgry</option> 
+                  <option value='gamma'>gamma</option>
+                  <option value='hot1'>hot1</option>
+                  <option value='hot2'>hot2</option>
+                  <option value='ice'>ice</option>
+                  <option value='lighthues'>lighthues</option> 
+                  <option value='smoothrich'>smoothrich</option>
+                  <option value='lut16'>lut16</option>
+                  <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
+                  <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option> 
+                  <option value='GreenGold'>GreenGold</option>
+                  <option value='LinearGreen'>LinearGreen</option>
+                  <option value='LinearTurquois'>LinearTurquois</option>
+                  <option value='MutedBlueGreen'>MutedBlueGreen</option>
+                  <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
+                  <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
+                  <option value='LinearYellow'>LinearYellow</option>
+                  <option value='LinearGray5'>LinearGray5</option>
+                  <option value='LinearGray4'>LinearGray4</option>  
+                  <option value='grayopaque'>grayopaque</option>
+                  <option value='graytransparent'>graytransparent</option> 
+                  <option value='scivis_magic_colormap'>magic color map</option>
+                </select>
+              <div class="input-group-append">
+                <input id='palette_min' size=8 onchange='onPaletteChange();' class='form-control' placeholder="Min">
+              </div>
+              <div class="input-group-append">
+                <input id='palette_max' size=8 onchange='onPaletteChange();' class='form-control' placeholder="Max">
+              </div>
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          <!-- <h4 class="modal-title" id="myModalLabel">Palette</h4> -->
+        </div>
+        <!-- <div class="modal-body">
+            
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default" data-dismiss="modal">Close</button>
+        </div> -->
+      </div>
     </div>
-    <div class="collapse navbar-collapse" id="main-navbar">
-    <ul class="nav navbar-nav">
-      <!-- <li>  <label class="navlabel">Server</label> </li> -->
-      <li>
-        <input id='server' size=32 onchange='setServer(this.value);' class='form-control form-control-sm navbar-btn'/>
+  </div>
+
+  <nav class="navbar navbar-expand-sm navbar-dark bg-dark navbar-fixed-top rounded">
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <button type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal" onclick='javascript:$("#servernav").toggle()'><span class="fa fa-server"></span></button>
       </li>
-      <!-- <li><label class="labelnav">Dataset</label> </li> -->
-      <li>
-        <select id='dataset' onchange='setDataset(this.value);' class='btn btn-success dropdown-toggle navbar-btn'></select>
+      <li class="nav-item">
+        <div class="input-group">
+          <select id='dataset' onchange='setDataset(this.value);' class='form-control-sm'></select>
+          <div class="input-group-append">
+            <select id='field' onchange='onFieldChange(this.value);' class='form-control-sm' ></select> 
+          </div>
+        </div>
       </li>
-      <!-- <li><label class="labelnav">Field</label></li> -->
-      <li>
-        <select id='field' onchange='onFieldChange(this.value);' class='btn btn-success dropdown-toggle navbar-btn' ></select> 
-      </li>
-      <li>
+      <li class="nav-item">
         <div class="dropdown">
-            <select id='render_type' onchange='changeVis(this.value)' class='btn btn-success dropdown-toggle navbar-btn'>
+            <select id='render_type' onchange='changeVis(this.value)' class='form-control-sm'>
               <option value="0">Slice</option>
               <option value="1">Volume</option>
               <option value="2">Iso Contour</option>
@@ -217,37 +308,36 @@ body{
        </div>
       </li>
       
-      
-      <li>
+      <li class="nav-item">
+          <button id="palettebtn" class="btn btn-warning btn-sm navbar-btn"><span class="fa fa-paint-brush"></span></button>
+      </li>
+
+      <!-- <li class="nav-item">
         <label class="navlabel">Time:&nbsp;</label>
+      </li> -->
+      <li class="nav-item">
+          <input class="custom-range" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/>
       </li>
-      <li>
-        <div class="form-group">
-          <input class="slider form-control-sm navbar-btn" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/>
-        </div>
-      </li>
-      <li>
+      <li class="nav-item">
          <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn'/>
       </li>
-      <li>
-        <button type="button" class="btn btn-primary navbar-btn" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()"><span class="glyphicon glyphicon-save"></span></button>
-      </li>
-      <li>
-        <button type="button" class="btn btn-info navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()"><span class="glyphicon glyphicon-export"></span></button>
-      </li>
-      <li >
-          <button class="btn btn-info navbar-btn" onclick='javascript:$("#palettenav").toggle();' class="subnav-trigger"><span class="glyphicon glyphicon-tint"></span></button>
-      </li>
-
     </ul>
-  
-    <!-- <ul class="nav navbar-nav navbar-right">
-      <li><a href="https://www.visus.org">powered by OpenViSUS</a></li>
-    </ul> -->
 
-    </div>
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <div class="input-group">
+            <button type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()"><span class="fa fa-download"></span></button>
+            <div class="input-group-append">
+              <button type="button" class="btn btn-info btn-sm navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()"><span class="fa fa-external-link"></span></button>
+            </div>
+          </div>
+        </li>
+    </ul>
+
   </div>
-  <nav id="palettenav" class="navbar navbar-inverse" role="navigation" >
+</nav>
+
+  <!-- <nav id="palettenav" class="navbar navbar-inverse" role="navigation" >
         <ul class="nav navbar-nav">
           <li>
             <label class="navlabel">Palette</label>
@@ -298,9 +388,9 @@ body{
             </div>
           </li> 
       </ul>
-  </nav>
+  </nav> -->
 
-  <nav id="slicenav" class="navbar navbar-inverse" role="navigation">
+  <nav id="slicenav" class="navbar navbar-dark bg-dark" role="navigation">
         <ul class="nav navbar-nav">
           <li>
             <label id='render_slider_lbl' class="navlabel">Slice</label>
@@ -318,6 +408,14 @@ body{
       </ul>
   </nav>
 
+  <nav id="servernav" class="navbar navbar-dark bg-dark " role="navigation">
+        <ul class="nav navbar-nav">
+          <li>
+            <input id='server' size=32 onchange='setServer(this.value);' class='form-control form-control-sm navbar-btn'/>
+          </li>
+      </ul>
+  </nav>
+
 </nav>
 
 
@@ -325,8 +423,8 @@ body{
   <div id="viewer">
     <div class="container">
       <div class="row row-centered pos">
-        <div class="col-lg h-100" id='2dCanvas' style='background: black; margin-top:50px'></div>
-        <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px'></canvas></div>
+        <div class="col-lg h-100" id='2dCanvas' style='background: black;'></div>
+        <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px' style='background: black;'></canvas></div>
       </div>
     </div>
       
@@ -404,6 +502,25 @@ body{
   <script src="src/viewer.js"></script>
 
   <script>
+
+    $('#palettebtn').click(function() {
+      // reset modal if it isn't visible
+      if (!($('.modal.in').length)) {
+        $('#palette-modal-dialog').css({
+          top: 0,
+          left: 0
+        });
+      }
+      $('#paletteModal').modal({
+        backdrop: false,
+        show: true
+      });
+
+      $('#palette-modal-dialog').draggable({
+        handle: ".modal-body"
+      });
+    });
+
     function changeVis(value){
       if(value=="0" || value=="2")
         $("#slicenav").show();
