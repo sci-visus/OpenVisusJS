@@ -250,8 +250,12 @@ function setDataset(value, presets=false)
       document.getElementById('2dCanvas').hidden=false
       document.getElementById('3dCanvas').hidden=true
       document.getElementById('view_btn').hidden=true;
-
       document.getElementById('range_panel').hidden=true;
+
+      if(document.getElementById('isocontainer')){
+        $('#isocontainer').hide();
+        $('#slicenav').hide();
+      }
 
       console.log("USE 2D canvas")
       visus1=VisusOSD({
@@ -276,6 +280,12 @@ function setDataset(value, presets=false)
       document.getElementById('2dCanvas').hidden=true;
       document.getElementById('3dCanvas').hidden=false;
       document.getElementById('view_btn').hidden=false;
+      document.getElementById('range_panel').hidden=false;
+      
+      if(document.getElementById('isocontainer')){
+        $('#isocontainer').show();
+        $('#slicenav').show();
+      }
 
       visus1=VisusVR({
         id : '3dCanvas',
@@ -296,7 +306,7 @@ function setDataset(value, presets=false)
 
         bvals[parseInt(bits[b])] = bvals[parseInt(bits[b])]+1;
 
-        console.log(rcount, bvals);
+        //console.log(rcount, bvals);
 
         rcount++;
 
@@ -625,6 +635,10 @@ function loadRenderingTypePreset(){
   }
 }
 
+function isRendererDefined(){
+  return typeof renderer !== 'undefined';
+}
+
 function loadPresets(){
   
   // 3D params
@@ -701,13 +715,13 @@ function loadPresets(){
     onPaletteChange()
   }
 
-  if(pre_vpoint!=null){
+  if(pre_vpoint!=null && isRendererDefined()){
     mat = renderer.getMatrices()
     mat.view = pre_vpoint.split(',').map(parseFloat);
     renderer.setMatrices(mat)
   }
 
-  if(pre_q != null){
+  if(pre_q != null && isRendererDefined()){
     q = renderer.getQuaternion()
     qv = pre_q.split(',').map(parseFloat);
 
@@ -719,11 +733,12 @@ function loadPresets(){
     renderer.setQuaternion(q)
   }
 
-  if(pre_view_distance != null){
+  if(pre_view_distance != null && typeof renderer !== 'undefined'){
     renderer.setViewDistance(parseFloat(pre_view_distance))
   }
 
-  visus1.usePresets=false;
+  if(isRendererDefined())
+    visus1.usePresets=false;
 
   setTimeout(function(){ onSliceChange(pre_slice); onViewResolution(); }, 3000);
 

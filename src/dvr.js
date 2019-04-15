@@ -658,18 +658,18 @@ dvr(canvas, renderingMode)
                 gl.bufferSubData(gl.UNIFORM_BUFFER, 32*4, projection_matrix)
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, fbos.fbo)
-                gl.clearBufferfv(gl.COLOR, fbos.fbo, [255/255, 255/255, 255/255, 1.0])
+                gl.clearBufferfv(gl.COLOR, fbos.fbo, [0, 0, 0, 1.0]) // background color
                 gl.clearBufferfv(gl.DEPTH, fbos.fbo, [1.0])
 
                 gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
                 
-                gl.useProgram(programBox)
-                gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
-                gl.enableVertexAttribArray(0)
-                gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
-                gl.drawElements(gl.LINES, indicesBox.length, gl.UNSIGNED_SHORT, 0)
-
+                // Not draw bounding box, TODO make it optional
+                // gl.useProgram(programBox)
+                // gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+                // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
+                // gl.enableVertexAttribArray(0)
+                // gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+                // gl.drawElements(gl.LINES, indicesBox.length, gl.UNSIGNED_SHORT, 0)
 
                 // volume/surface rendering goes last as it needs to read depth from previous passes
                 gl.disable(gl.DEPTH_TEST) 
