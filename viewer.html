@@ -105,17 +105,17 @@ body{
   display:none; 
 }
 
-#paletteModal {
+.myModal {
   position: relative;
 }
 
-#palette-modal-dialog {
+.my-modal-dialog {
   position: fixed;
   margin: 0;
   padding: 50px;
 }
 
-#palette-modal-dialog>.modal-content{
+.my-modal-dialog>.modal-content{
   background-color: rgba(255,255,255,.3) !important;
 }
 
@@ -195,8 +195,8 @@ body{
         </div>
       </div>
 
-  <div id="paletteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div id="palette-modal-dialog" class="modal-dialog" role="document">
+  <div id="paletteModal" class="modal fade myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div id="palette-modal-dialog" class="modal-dialog my-modal-dialog" role="document">
       <div class="modal-content">
           <div class="modal-body">
             <div class="input-group input-group-sm">
@@ -272,10 +272,46 @@ body{
         </div>
 
         <div class="modal-footer">
-           <div id="range_panel" style="color:white; padding-bottom:5px">
-                <span class="form-control-sm">Computed Range <span class="form-control-sm" id="comp_range"> [...] </span></span>
+          <div id="range_panel" style="color:white; padding-bottom:5px">
+              <span class="form-control-sm">Computed Range <span class="form-control-sm" id="comp_range"> [...] </span></span>
+          </div>
+          <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div> 
+
+  <div id="serverModal" class="modal fade myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div id="server-modal-dialog" class="modal-dialog my-modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="row">
+              <div class="col">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Server</span>
+                </div>
+                <input id='server' type="text" size=32 onchange='setServer(this.value);' class='form-control'/>
+              </div>
             </div>
-            <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">AutoRefresh</span>
+                </div>
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);'></input>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -289,13 +325,13 @@ body{
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
-          <button type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal" onclick='javascript:$("#servernav").toggle()'><span class="fa fa-server"></span></button>
+          <button id="serverbtn" type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal"><span class="fa fa-server"></span></button>
         </li>
         <li class="nav-item">
           <div class="input-group input-group-sm">
-            <select id='dataset' onchange='setDataset(this.value);' class='custom-select'></select>
+            <select id='dataset' onchange='setDataset(this.value);' class='custom-select' style="max-width: 200px"></select>
             <div class="input-group-append input-group-sm">
-              <select id='field' onchange='onFieldChange(this.value);' class='custom-select' ></select> 
+              <select id='field' onchange='onFieldChange(this.value);' class='custom-select' style="max-width: 100px" ></select> 
             </div>
           </div>
         </li>
@@ -307,7 +343,7 @@ body{
               <select id='render_type' onchange='changeVis(this.value)' class='form-control-sm'>
                 <option value="0">Slice</option>
                 <option value="1">Volume</option>
-                <option value="2">Iso Contour</option>
+                <option value="2">IsoContour</option>
               </select>
             </div>
         </li>
@@ -367,124 +403,9 @@ body{
       </ul>
 
     </div>
-</nav>
-
-  <!-- <nav id="palettenav" class="myoptnav navbar navbar-dark bg-dark" role="navigation" >
-    <ul class="nav navbar-nav">
-       <li>
-        <div class="input-group input-group-sm">
-            <div class="input-group-prepend">
-              <span class="input-group-text form-control-sm">Palette</span>
-            </div>
-            <div class="input-group-append input-group-sm">
-              <select id='palette' onchange='onPaletteChange();' class='custom-select'>
-                <option value=''></option>
-                <option value='rich' selected="selected">rich</option>
-                <option value='hsl'>hsl</option>
-                <option value='banded'>banded</option>
-                <option value='bry'>bry</option>
-                <option value='bgry'>bgry</option> 
-                <option value='gamma'>gamma</option>
-                <option value='hot1'>hot1</option>
-                <option value='hot2'>hot2</option>
-                <option value='ice'>ice</option>
-                <option value='lighthues'>lighthues</option> 
-                <option value='smoothrich'>smoothrich</option>
-                <option value='lut16'>lut16</option>
-                <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
-                <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option> 
-                <option value='GreenGold'>GreenGold</option>
-                <option value='LinearGreen'>LinearGreen</option>
-                <option value='LinearTurquois'>LinearTurquois</option>
-                <option value='MutedBlueGreen'>MutedBlueGreen</option>
-                <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
-                <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
-                <option value='LinearYellow'>LinearYellow</option>
-                <option value='LinearGray5'>LinearGray5</option>
-                <option value='LinearGray4'>LinearGray4</option>  
-                <option value='grayopaque'>grayopaque</option>
-                <option value='graytransparent'>graytransparent</option> 
-                <option value='scivis_magic_colormap'>magic color map</option>
-              </select>
-            </div>
-            <div class="input-group-append">
-              <input id='palette_min' type="text" size=8 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Min">
-            </div>
-            <div class="input-group-append">
-              <input id='palette_max' type="text" size=8 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Max">
-            </div>
-          </div>
-        </li> 
-    </ul>
-  </nav>  -->
-
-  <nav id="resnav" class="myoptnav navbar navbar-dark bg-dark" role="navigation" >
-    <ul class="nav navbar-nav">
-        <li>
-          
-        </li>
-    </ul>
-  </nav> 
-
-  <!-- <nav id="slicenav" class="navbar navbar-dark bg-dark myoptnav" role="navigation">
-    <ul class="nav navbar-nav">
-      <li class="nav-item">
-        <div class="input-group input-group-sm">
-          <div class="input-group-prepend">
-            <span class="input-group-text form-control-sm" id='render_slider_lbl'>Axis</span>
-          </div>
-          <div class="input-group-append input-group-sm">
-            <select id='axis' onchange='onAxisChange(this.value);' class='custom-select'>
-              <option value='2'>Z</option>
-              <option value='1'>Y</option>
-              <option value='0'>X</option>
-            </select>
-          </div>
-          <div class="input-group-append">
-            <div class="input-group-text form-control-sm">
-              <input id='slice' type='range' min='0' step='1' max='100' class="custom-range" oninput='onSliceChange(this.value);'/>
-            </div>
-          </div>
-          <div class="input-group-append">
-            <input id='edit_slice' size="6" onchange='onSliceChange(this.value);' class='form-control form-control-sm'>
-          </div>
-        </div>
-      </li>
-    </ul>
-  </nav> -->
-
-  <nav id="servernav" class="navbar navbar-dark bg-dark myoptnav" role="navigation">
-        <ul class="nav navbar-nav">
-          <li class="nav-item">
-            <div class="row">
-              <div class="col">
-              <div class="input-group input-group-sm mb-3">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">Server</span>
-                </div>
-                <input id='server' type="text" size=32 onchange='setServer(this.value);' class='form-control'/>
-              </div>
-            </div>
-            <div class="col">
-              <div class="input-group input-group-sm">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">AutoRefresh</span>
-                </div>
-                <div class="input-group-append">
-                  <div class="input-group-text">
-                    <input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);'></input>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </li>
-      </ul>
   </nav>
 
 </nav>
-
-
 
   <div id="viewer">
     <div class="container">
@@ -521,10 +442,26 @@ body{
         show: true
       });
 
-      if($('#paletteModal').hasClass('in'))
-        $('#paletteModal').toggle()
-
       $('#palette-modal-dialog').draggable({
+        handle: ".modal-body"
+      });
+    });
+
+    $('#serverbtn').click(function() {
+      // reset modal if it isn't visible
+      if (!($('.modal.in').length)) {
+        $('#server-modal-dialog').css({
+          top: 0,
+          left: $('#serverbtn').position().left-50
+        });
+      }
+
+      $('#serverModal').modal({
+        backdrop: false,
+        show: true
+      });
+
+      $('#server-modal-dialog').draggable({
         handle: ".modal-body"
       });
     });
