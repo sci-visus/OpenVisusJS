@@ -405,6 +405,7 @@ function onTimeChange(value){
   visus1.setTime(value); 
   document.getElementById('edit_time').value=value;
   document.getElementById('time').value=value;
+
   refreshAll(0);
 }
 
