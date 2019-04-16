@@ -252,8 +252,8 @@ function setDataset(value, presets=false)
       document.getElementById('view_btn').hidden=true;
       document.getElementById('range_panel').hidden=true;
 
-      if(document.getElementById('isocontainer')){
-        $('#isocontainer').hide();
+      if(document.getElementById('rendercontainer')){
+        $('#rendercontainer').hide();
         $('#slicenav').hide();
       }
 
@@ -282,8 +282,8 @@ function setDataset(value, presets=false)
       document.getElementById('view_btn').hidden=false;
       document.getElementById('range_panel').hidden=false;
       
-      if(document.getElementById('isocontainer')){
-        $('#isocontainer').show();
+      if(document.getElementById('rendercontainer')){
+        $('#rendercontainer').show();
         $('#slicenav').show();
       }
 
@@ -428,21 +428,25 @@ function onVRChange(ren_type){
     document.getElementById('render_slider_lbl').innerHTML="Slice"
     document.getElementById('axis').disabled=false
     document.getElementById('edit_slice').disabled=false
-    console.log("using slice")
+    if(document.getElementById('slicenav'))
+      $("#slicenav").show();
   }
   else if(ren_type==VOLUME_RENDER_MODE){
     document.getElementById('axis').disabled=true
     document.getElementById('slice').disabled=true
     document.getElementById('edit_slice').disabled=true
+    if(document.getElementById('slicenav'))
+      $("#slicenav").hide();
   }
   else if(ren_type==ISOCONTOUR_RENDER_MODE){
     document.getElementById('slice').disabled=false
     document.getElementById('render_slider_lbl').innerHTML="IsoValue"
     document.getElementById('axis').disabled=true
     document.getElementById('axis').hidden=true
-    document.getElementById('axis_label').hidden=true
     document.getElementById('edit_slice').disabled=false
     document.getElementById('edit_slice').hidden=false
+    if(document.getElementById('slicenav'))
+      $("#slicenav").show();
   }
 
   visus1.setRenderType(ren_type);
@@ -629,10 +633,7 @@ function loadRenderingTypePreset(){
   let pre_vr = getParameterByName('vr')
 
   if(pre_vr!=null){
-    document.getElementById('render_type').value=pre_vr
-
-    if(dataset.dim>2)
-      visus1.setRenderType(pre_vr);
+    onVRChange(pre_vr)
   }
 }
 

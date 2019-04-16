@@ -45,13 +45,20 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css" />
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script> 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 
 <style type="text/css">
 body{
@@ -335,17 +342,12 @@ body{
             </div>
           </div>
         </li>
-        <li class="nav-item" id="isocontainer">
-            <div class="input-group input-group-sm">
-              <div class="input-group-prepend">
-                <span class="input-group-text">Render</span>
-              </div>
-              <select id='render_type' onchange='changeVis(this.value)' class='form-control-sm'>
-                <option value="0">Slice</option>
-                <option value="1">Volume</option>
-                <option value="2">IsoContour</option>
+        <li class="nav-item" id="rendercontainer" style="min-width: 55px">
+              <select id='render_type' onchange='changeVis(this.value)' class='form-control border form-control-sm'  data-show-content="true">
+                <option value="0" data-content="<i class='fa fa-pizza-slice'></i> Slice"></option>
+                <option value="1" data-content="<i class='fa fa-cube'></i> Volume"></option>
+                <option value="2" data-content="<i class='fa fa-filter'></i> IsoContour"></option>
               </select>
-            </div>
         </li>
 
         <li class="nav-item" id="slicenav">
@@ -372,7 +374,7 @@ body{
         </li>
         
         <li class="nav-item">
-            <button id="palettebtn" class="btn btn-warning btn-sm navbar-btn"><span class="fa fa-paint-brush"></span></button>
+            <button id="palettebtn" class="btn btn-warning btn-sm navbar-btn"><span class="fa fa-palette"></span></button>
         </li>
         <li class="nav-item">
           <div class="input-group input-group-sm">
@@ -396,7 +398,7 @@ body{
           <div class="input-group">
             <button type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()"><span class="fa fa-download"></span></button>
             <div class="input-group-append">
-              <button type="button" class="btn btn-info btn-sm navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()"><span class="fa fa-external-link"></span></button>
+              <button type="button" class="btn btn-info btn-sm navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()"><span class="fa fa-external-link-alt"></span></button>
             </div>
           </div>
         </li>
@@ -467,6 +469,7 @@ body{
     });
 
     function changeVis(value){
+      console.log("change", value)
       if(value=="0" || value=="2")
         $("#slicenav").show();
       else
@@ -552,9 +555,9 @@ body{
   setTimeout(function () {
       if(visus1){
         if(visus1.dataset.dim==3)
-          $("#isocontainer").show();
+          $("#rendercontainer").show();
         else
-          $("#isocontainer").hide();
+          $("#rendercontainer").hide();
 
         if(visus1.osd){
           selection = visus1.osd.selection({
@@ -612,12 +615,7 @@ body{
 
     }, 1000);
 
-  // $(document).ready(function(){
-  //   $("#3dCanvas").width=$(window).width();
-  //   //$("#3dCanvas").height($(window).heigth();
-  //   $("#2dCanvas").width=$(window).width();
-  //   //$("#2dCanvas").height($(window).heigth());
-  // });
+  $('#render_type').selectpicker();
   
   </script>
 
