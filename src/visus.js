@@ -304,7 +304,7 @@ function VisusOSD(params)
     for(i=0; i< self.dataset.fields.length; i++){
       d=self.dataset.fields[i]
       if(d.name == self.field){
-        if(d.min != 0.0 || d.max != 0.0){
+        if(d.min != "0" || d.max != "0"){
           self.palette_min = d.min; 
           self.palette_max = d.max;
           //console.log("field", self.field,"using min max ", d.min, d.max)
@@ -586,8 +586,6 @@ function VisusOSD(params)
   //see https://github.com/openseadragon/openseadragon/issues/866
   self.refresh=function() 
   { 
-    guessRange();
-
     var oldImage=self.osd.world.getItemAt(0);
     self.osd.addTiledImage({
       tileSource : self.tileSource,

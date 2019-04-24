@@ -391,8 +391,8 @@ function onSliceChange(value){
 function onFieldChange(value){
   visus1.setField(value); 
 
-  palette_min = document.getElementById('palette_min').value
-  palette_max = document.getElementById('palette_max').value
+  let palette_min = document.getElementById('palette_min').value
+  let palette_max = document.getElementById('palette_max').value
   
   if(palette_min=="" && palette_max==""){
     visus1.guessRange();
@@ -459,15 +459,14 @@ function onVRChange(ren_type){
 
 function onPaletteChange(){
 
-  visus1.setPalette(document.getElementById('palette').value); 
-  visus1.setPaletteMin(parseFloat(document.getElementById('palette_min').value)); 
-  visus1.setPaletteMax(parseFloat(document.getElementById('palette_max').value)); 
-  // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
-
+  var colormap = get_palette_data(document.getElementById('palette').value)
   let pal_min= parseFloat(document.getElementById('palette_min').value)
   let pal_max= parseFloat(document.getElementById('palette_max').value)
 
-  var colormap = get_palette_data(document.getElementById('palette').value)
+  visus1.setPalette(document.getElementById('palette').value); 
+  visus1.setPaletteMin(pal_min); 
+  visus1.setPaletteMax(pal_max); 
+  // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
 
   if(renderer)
     renderer.updateColorMap(pal_min, pal_max);
