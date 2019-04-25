@@ -285,8 +285,8 @@ function VisusOSD(params)
   self.showNavigator  = params['showNavigator']  || true;
   self.debugMode      = params['debugMode']      || false;
   self.palette        = params['palette']        || "";
-  self.palette_min    = params['palette_min']    || 0;
-  self.palette_max    = params['palette_max']    || 0;
+  self.palette_min    = params['palette_min']    || NaN;
+  self.palette_max    = params['palette_max']    || NaN;
   self.palette_interp = params['palette_interp'] || 'Default';
   
   if (self.dataset.dim==2)

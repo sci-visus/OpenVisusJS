@@ -398,6 +398,8 @@ function onFieldChange(value){
   let palette_min = document.getElementById('palette_min').value
   let palette_max = document.getElementById('palette_max').value
   
+  onPaletteChange();
+
   if(palette_min=="" && palette_max==""){
     visus1.guessRange();
   }
@@ -475,7 +477,7 @@ function onPaletteChange(){
   if(renderer)
     renderer.updateColorMap(pal_min, pal_max);
 
-  if(document.getElementById('2dCanvas').hidden==false)
+  //if(document.getElementById('2dCanvas').hidden==false)
     refreshAll(0);
 }
 
