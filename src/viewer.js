@@ -97,7 +97,7 @@ function fetch_and_draw(query_str, reset_view=1)
         let pal_max= parseFloat(document.getElementById('palette_max').value)
 
         //console.log("update color map "+pal_min+" "+pal_max)
-        renderer.updateColorMap(pal_min, pal_max);
+        renderer.updateColorMap(document.getElementById('palette').value, pal_min, pal_max);
 
         var range=renderer.getDataExtent();
         //console.log("R:"+range[0]+", "+range[1])

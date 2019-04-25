@@ -878,8 +878,7 @@ dvr(canvas, renderingMode)
                 })
         }
 
-        dvr.updateColorMap = (ext1, ext2) =>  {
-          var palette_str = document.getElementById('palette').value;
+        dvr.updateColorMap = (palette_str, ext1, ext2) =>  {
           var colormap = get_palette_data(palette_str)
           var extent = data_extent[1]-data_extent[0]
 
