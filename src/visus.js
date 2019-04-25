@@ -558,7 +558,8 @@ function VisusOSD(params)
       source.tileWidth==self.tile_size[X]  &&
       source.tileHeight==self.tile_size[Y] && 
       source.minLevel==self.minLevel       &&
-      source.maxLevel==self.maxLevel;
+      source.maxLevel==self.maxLevel       &&
+      source.getTileUrl==self.getTileUrl;
   }
   
   if (bRecycleOSD)
@@ -587,12 +588,18 @@ function VisusOSD(params)
   self.refresh=function() 
   { 
     guessRange();
+
     var oldImage=self.osd.world.getItemAt(0);
+
     self.osd.addTiledImage({
       tileSource : self.tileSource,
       success : function() {
-        if (oldImage)
+        if (oldImage){
           self.osd.world.removeItem(oldImage);
+          // we are keeping only one item to avoid rendering of mixed tiles
+          while(visus1.osd.world.getItemCount() > 1)
+            visus1.osd.world.removeItem(self.osd.world.getItemAt(1))
+        }
       }    
     });  
 
