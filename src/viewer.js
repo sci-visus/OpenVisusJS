@@ -15,10 +15,14 @@ toArray(buffer, dataType)
                 return new Uint8Array(buffer)
         case 'uint16':
                 return new Uint16Array(buffer)
+        case 'uint32':
+                return new Uint32Array(buffer)
         case 'int8':
                 return new Int8Array(buffer)
         case 'int16':
                 return new Int16Array(buffer)
+        case 'int32':
+                return new Int32Array(buffer)
         case 'float32':
                 return new Float32Array(buffer)
         case 'float64':

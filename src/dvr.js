@@ -768,7 +768,7 @@ dvr(canvas, renderingMode)
 
                 /* update isovalue slider and shader uniform */
                 data_extent = typedArray.reduce(([min, max], d) => [Math.min(d, min), Math.max(d, max)], [typedArray[0], typedArray[0]])
-
+                // console.log(data_extent);
                 gl.uniform1f(gl.getUniformLocation(program, "extent1"), 0.0)//data_extent[0]);
                 gl.uniform1f(gl.getUniformLocation(program, "extent2"), 1.0)//data_extent[1]);
 
@@ -795,6 +795,14 @@ dvr(canvas, renderingMode)
                                          gl.RED, gl.HALF_FLOAT, converted)
                         
 
+                } else if(typedArray instanceof Int32Array || typedArray instanceof Uint32Array){
+
+                        const converted = new Float32Array(typedArray.length).map((_, i) => ((typedArray[i] - data_extent[0])/(data_extent[1] - data_extent[0])))
+                        gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R32F, width, height, depth)
+                        gl.texSubImage3D(gl.TEXTURE_3D, 0,
+                                         0, 0, 0,
+                                         width, height, depth,
+                                         gl.RED, gl.FLOAT, converted)
                 } else if (typedArray instanceof Float32Array) {
                         const converted = typedArray.map(d => (d - data_extent[0])/(data_extent[1] - data_extent[0]))
                         gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R32F, width, height, depth)
