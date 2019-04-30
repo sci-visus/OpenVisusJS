@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <script>
 /*
- * Copyright (c) 2017 University of Utah 
+ * Copyright (c) 2019 University of Utah 
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,160 +29,595 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 </script>
-<!-- saved from url=(0043)https://klacansky.com/open-scivis-datasets/ -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        
-        <title>ViSUS WebViewer</title>
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>ViSUS WebViewer</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css" />
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script> 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+<style type="text/css">
+body{
+  background: black;
+}
+
+.slidecontainer {
+  width: 100%; /* Width of the outside container */
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;   
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: #4CAF50;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #4CAF50;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.nav-item{
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+.myoptnav{
+  display:none; 
+}
+
+.myModal {
+  position: relative;
+}
+
+.my-modal-dialog {
+  position: fixed;
+  margin: 0;
+  padding: 50px;
+}
+
+.my-modal-dialog>.modal-content{
+  background-color: rgba(255,255,255,.3) !important;
+}
+
+</style>
 
 </head>
 
-<style type="text/css">
-  .datagrid table { border-collapse: collapse; text-align: left; width: 100%; } .datagrid {font: normal 12px/150% Arial, Helvetica, sans-serif; background: #fff; overflow: hidden; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; }.datagrid table td, .datagrid table th { padding: 3px 10px; }.datagrid table thead th {background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');background-color:#006699; color:#FFFFFF; font-size: 15px; font-weight: bold; border-left: 1px solid #0070A8; } .datagrid table thead th:first-child { border: none; }.datagrid table tbody td { color: #00557F; border-left: 1px solid #E1EEF4;font-size: 12px;font-weight: normal; }.datagrid table tbody .alt td { background: #E1EEF4; color: #00557F; }.datagrid table tbody td:first-child { border-left: none; }.datagrid table tbody tr:last-child td { border-bottom: none; }.datagrid table tfoot td div { border-top: 1px solid #006699;background: #E1EEF4;} .datagrid table tfoot td { padding: 0; font-size: 12px } .datagrid table tfoot td div{ padding: 2px; }.datagrid table tfoot td ul { margin: 0; padding:0; list-style: none; text-align: right; }.datagrid table tfoot  li { display: inline; }.datagrid table tfoot li a { text-decoration: none; display: inline-block;  padding: 2px 8px; margin: 1px;color: #FFFFFF;border: 1px solid #006699;-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');background-color:#006699; }.datagrid table tfoot ul.active, .datagrid table tfoot ul a:hover { text-decoration: none;border-color: #00557F; color: #FFFFFF; background: none; background-color:#006699;}div.dhtmlx_window_active, div.dhx_modal_cover_dv { position: fixed !important; }
-</style>
+<script>
+  var selection_box= new Array();
+  // Selection widget
+  var selection;
+</script>
 
 <body>
-  <div id="viewer">
-    <div>
-      <table cellspacing="0" cellpadding="0" style='height:100%;width:100%; position: absolute; top: 0; bottom: 0; left: 0; right: 0;'>
-        <tr>
-          <td align="center" class="datagrid" height="18px">
-            <div id='status_bar' style="float:top" hidden><img src="images/spinner.gif" height="10px" ><label id='status' style="color: blue"></label></div>
-          </td>
-        </tr>
-        <tr style='height:100%;width:100%'>
-          <td align="center">
-            <div id='2dCanvas' style='width:100%; height:100%;'></div>
-            <canvas id='3dCanvas' width='1000px' height='600px'></canvas>
-          </td>
-        </tr>
-        <tr id='row_link' hidden><td><input id='link_text' style='width:100%' /> <input type='button' value='Copy' onclick='onCopy()'/></td></tr>
-        <tr>
-          <td>
-            <div class="datagrid">
-              <table width='100%'>
-                <tr>
-                  <td> <label>Server</label> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'/>
-                  <td> <label>Render</label> 
-                    <select id='render_type' onchange='onVRChange(this.value);' class='toolbar_value'>
-                      <option value="0">Slice</option>
-                      <option value="1">Volume</option>
-                      <option value="2">Iso Contour</option>
-                    </select>
-                  <td> <label>Dataset</label> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value' />
-                  <td><label>Field</label> <select id='field' onchange='onFieldChange(this.value);' class='toolbar_value' /> 
-                  <td><input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);' class='toolbar_value'>auto</input> <input type='button' value='Refresh' onclick="refreshAll(0)"/> </td>
-                  <td id='range_panel'><label>Range</label> <label id="comp_range"> [...] </label>
-                  <td id='resolution_panel'><label>Resolution</label><input  id='resolution' type='range' step='1' min='0' step='1' max='33' style='width:100%' oninput='onResolutionChange(this.value);'/> 
-                  <td id='edit_resolution_panel'><div><input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='toolbar_value'/><label id="size_est"> ... KB </label></div>
-                  <td><div><input id='view_btn' type='button' value='View' onclick='onViewResolution()'/> <input type='button' id='download_btn' value='Download' onclick='download()'/> <input type='button' value='Share' onclick='shareLink()'/></div>
-                </tr>
-              </table>
+  <div id='status_bar' style="float:top; display: none"><img src="images/spinner.gif" height="10px" ><label id='status' style="color: blue"></label></div>
+
+  <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
+          <div class="modal-dialog">
+
+            <!-- Download Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Select resolution to download</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+              
+                <div class="col" style="padding:20px">
+                  <div class="row-md-6 text-center">
+                    <div class="slidecontainer">
+                      <input  id='resolution' type='range' step='1' min='0' step='1' max='33' class="slider" oninput='updateDownloadResolution(this.value);'/> 
+                    </div>
+                  </div>
+                  <div class="row-md-6 text-center">
+                    <label style="color:green">Resolution:&nbsp;</label><label style="color:green" id='res_lbl'>&nbsp;</label>
+                  </div>
+                  <div class="row-md-6 text-center">
+                    <label>Size:&nbsp;</label><label id="size_est" > ... KB </label>
+                  </div>
+                </div>
+                
+              <div class="modal-footer">
+                <button class="btn btn-primary" id='download_btn' onclick='callDownload()'>Download</button>
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+              </div>
             </div>
-          </td>   
-        </tr>    
-        <tr>
-          <td>
-            <div class="datagrid">
-              <table width='100%' >
-                <tr>
-                  <td><label id="axis_label">Axis</label>
-                  <td>
-                    <select id='axis' onchange='onAxisChange(this.value);' class='toolbar_value'>
-                      <option value='2'>Z</option>
-                      <option value='1'>Y</option>
-                      <option value='0'>X</option>
-                    </select>
-                    
-                  <td><label id='render_slider_lbl'>Slice</label>
-                  <td width='50%'>
-                    <table width='100%'>
-                      <tr width='100%'>
-                        <td width='100%'>
-                          <input id='slice' type='range' min='0' step='1' max='100' style='width:100%' oninput='onSliceChange(this.value);'/>
-                        <td>
-                          <input id='edit_slice' size=2 onchange='onSliceChange(this.value);' class='toolbar_value'>
-                      </tr>
-                    </table>
-                    
-                  <td><label>Time</label>       
-                  <td width='33%'>
-                    <table width='100%'>
-                      <tr width='100%'>            
-                        <td width='100%'><input  id='time' type='range' step='1' style='width:100%' oninput='onTimeChange(this.value);'>
-                        <td><input id='edit_time' style="width:50px" step="1" type="number" onchange='onTimeChange(this.value);' class='toolbar_value'>
-                      </tr>
-                    </table>                  
-                    
-                  <td><label>Palette</label>     
-                  <td>
-                    <select id='palette' onchange='onPaletteChange();' class='toolbar_value' >
-                      <option value=''></option>
-                      <option value='rich' selected="selected">rich</option>
-                      <option value='hsl'>hsl</option>
-                      <option value='banded'>banded</option>
-                      <option value='bry'>bry</option>
-                      <option value='bgry'>bgry</option> 
-                      <option value='gamma'>gamma</option>
-                      <option value='hot1'>hot1</option>
-                      <option value='hot2'>hot2</option>
-                      <option value='ice'>ice</option>
-                      <option value='lighthues'>lighthues</option> 
-                      <option value='smoothrich'>smoothrich</option>
-                      <option value='lut16'>lut16</option>
-                      <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
-                      <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option> 
-                      <option value='GreenGold'>GreenGold</option>
-                      <option value='LinearGreen'>LinearGreen</option>
-                      <option value='LinearTurquois'>LinearTurquois</option>
-                      <option value='MutedBlueGreen'>MutedBlueGreen</option>
-                      <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
-                      <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
-                      <option value='LinearYellow'>LinearYellow</option>
-                      <option value='LinearGray5'>LinearGray5</option>
-                      <option value='LinearGray4'>LinearGray4</option>  
-                      <option value='grayopaque'>grayopaque</option>
-                      <option value='graytransparent'>graytransparent</option> 
-                      <option value='scivis_magic_colormap'>magic color map</option>
-                    </select>
-                    
-                  <td><label>Min</label>
-                  <td><input id='palette_min' style="width:50px" onchange='onPaletteChange();' class='toolbar_value'>
-                    
-                  <td><label>Max</label> 
-                  <td><input id='palette_max' style="width:50px" onchange='onPaletteChange();' class='toolbar_value'>
-                    
-                    <!-- <td><label>Interpolation</label>    
-                         <td>
-                           <select id='palette_interp' onchange='onPaletteChange();' class='toolbar_value'>
-                             <option value='Default'>Default</option>
-                             <option value='Flat'>Flat</option>
-                             <option value='Inverted'>Inverted</option>
-                           </select>  -->
-                </tr>
-              </table>
+
+          </div>
+        </div>
+
+        <div id="shareModal" class="modal fade modal-fullscreen" role="dialog">
+          <div class="modal-dialog">
+            <!-- Share Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title">Share link</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+              <div class="col" style="padding:20px">
+                <div class="input-group">
+                  <input type="text" id='link_text' class="form-control"
+                    value="/path/to/foo/bar" placeholder="Some path">
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button" id="copy-button"
+                        data-toggle="tooltip" data-placement="button"
+                        title="Copy to Clipboard" onclick="copyClick()">
+                      Copy
+                    </button>
+                  </div>
+              </div>
+                <!-- <input id='link_text' style='width:100%' />  -->
+              </div>
+                
+              <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
+              </div> -->
+          </div>
+        </div>
+      </div>
+
+  <div id="paletteModal" class="modal fade myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div id="palette-modal-dialog" class="modal-dialog my-modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-body">
+            <div class="input-group input-group-sm">
+              <div class="input-group-prepend">
+                <span class="input-group-text form-control-sm">Palette</span>
+              </div>
+              <div class="input-group-append input-group-sm">
+                <select id='palette' onchange='onPaletteChange();' class='custom-select'>
+                  <option value=''></option>
+                  <option value='rich' selected="selected">rich</option>
+                  <option value='hsl'>hsl</option>
+                  <option value='banded'>banded</option>
+                  <option value='bry'>bry</option>
+                  <option value='bgry'>bgry</option> 
+                  <option value='gamma'>gamma</option>
+                  <option value='hot1'>hot1</option>
+                  <option value='hot2'>hot2</option>
+                  <option value='ice'>ice</option>
+                  <option value='lighthues'>lighthues</option> 
+                  <option value='smoothrich'>smoothrich</option>
+                  <option value='lut16'>lut16</option>
+                  <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
+                  <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option> 
+                  <option value='GreenGold'>GreenGold</option>
+                  <option value='LinearGreen'>LinearGreen</option>
+                  <option value='LinearTurquois'>LinearTurquois</option>
+                  <option value='MutedBlueGreen'>MutedBlueGreen</option>
+                  <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
+                  <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
+                  <option value='LinearYellow'>LinearYellow</option>
+                  <option value='LinearGray5'>LinearGray5</option>
+                  <option value='LinearGray4'>LinearGray4</option>  
+                  <option value='grayopaque'>grayopaque</option>
+                  <option value='graytransparent'>graytransparent</option> 
+                  <option value='scivis_magic_colormap'>magic color map</option>
+                </select>
+              </div>
             </div>
-          </td>
-        </tr>
+            <div class="input-group input-group-sm" style="padding-top:5px">
+              <div class="input-group-prepend">
+                <span class="input-group-text form-control-sm">Range</span>
+              </div>
+              <div class="input-group-append">
+                <input id='palette_min' type="text" size=8 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Min">
+              </div>
+              <div class="input-group-append">
+                <input id='palette_max' type="text" size=8 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Max">
+              </div>
+              <div style="width:13%"></div>
+              
+            </div>
+
+            <div id='resolution_panel' class="input-group input-group-sm" style="padding-top:5px">
+              <div class="input-group-prepend">
+                <span class="input-group-text">Resol.</span>
+              </div>
+              <div class="input-group-append">
+                <input id='edit_resolution' type="text" size="2" onchange='onResolutionChange(this.value);'/>
+              </div>
+              <div class="input-group-append">
+                <div class="input-group-text">
+                  <input id='resolutionview' type='range' step='1' min='0' step='1' max='33' class="custom-range" oninput='onResolutionChange(this.value);'/> 
+                </div>
+              </div>
+              <!-- <div class="input-group-append">
+                <label class="input-group-text" id="size_est"> ... KB </label>
+              </div> -->
+              <div class="input-group-append">
+                <button id='view_btn' type='button' class="btn btn-primary btn-sm" onclick='onViewResolution()'>Update</button> 
+              </div>
+            </div>
+            
+        </div>
+
+        <div class="modal-footer">
+          <div id="range_panel" style="color:white; padding-bottom:5px">
+              <span class="form-control-sm">Computed Range <span class="form-control-sm" id="comp_range"> [...] </span></span>
+          </div>
+          <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div> 
+
+  <div id="serverModal" class="modal fade myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div id="server-modal-dialog" class="modal-dialog my-modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="row">
+              <div class="col">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Server</span>
+                </div>
+                <input id='server' type="text" size=32 onchange='setServer(this.value);' class='form-control'/>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">AutoRefresh</span>
+                </div>
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);'></input>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> 
+
+  <nav class="navbar navbar-expand-sm navbar-dark bg-dark rounded">
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <button id="serverbtn" type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal"><span class="fa fa-server"></span></button>
+        </li>
+        <li class="nav-item">
+          <div class="input-group input-group-sm">
+            <select id='dataset' onchange='setDataset(this.value);' class='custom-select' style="max-width: 200px"></select>
+            <div class="input-group-append input-group-sm">
+              <select id='field' onchange='onFieldChange(this.value);' class='custom-select' style="max-width: 100px" ></select> 
+            </div>
+          </div>
+        </li>
+        <li class="nav-item" id="rendercontainer" style="min-width: 55px">
+              <select id='render_type' onchange='changeVis(this.value)' class='form-control border form-control-sm'  data-show-content="true">
+                <option value="0" data-content="<i class='fa fa-pizza-slice'></i> Slice"></option>
+                <option value="1" data-content="<i class='fa fa-cube'></i> Volume"></option>
+                <option value="2" data-content="<i class='fa fa-filter'></i> IsoContour"></option>
+              </select>
+        </li>
+
+        <li class="nav-item" id="slicenav">
+          <div class="input-group input-group-sm">
+          <div class="input-group-prepend">
+            <span class="input-group-text form-control-sm" id='render_slider_lbl'>Axis</span>
+          </div>
+          <div class="input-group-append input-group-sm">
+            <select id='axis' onchange='onAxisChange(this.value);' class='custom-select'>
+              <option value='2'>Z</option>
+              <option value='1'>Y</option>
+              <option value='0'>X</option>
+            </select>
+          </div>
+          <div class="input-group-append">
+            <div class="input-group-text form-control-sm">
+              <input id='slice' type='range' min='0' step='1' max='100' class="custom-range" oninput='onSliceChange(this.value);'/>
+            </div>
+          </div>
+          <div class="input-group-append">
+            <input id='edit_slice' size="6" onchange='onSliceChange(this.value);' class='form-control form-control-sm'>
+          </div>
+        </div>
+        </li>
         
-        <table>
-          <!-- 
-               <label>Resolution:<input id="resolution_select" type="range" step="1"></label>
-               <button>Submit</button>
-               <label>Isovalue:<input id="isovalue_select" type="range" step="0.01"></label> -->
-          <!-- <a onclick="vr_present()">VR</a> -->
-        </table>
-      </table>
+        <li class="nav-item">
+            <button id="palettebtn" class="btn btn-warning btn-sm navbar-btn"><span class="fa fa-palette"></span></button>
+        </li>
+        <li class="nav-item">
+          <div class="input-group input-group-sm">
+            <div class="input-group-prepend">
+              <span class="input-group-text form-control-sm ">Time</span>
+            </div>
+            <div class="input-group-append">
+              <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn'/>
+            </div>
+            <div class="input-group-append">
+              <div class="input-group-text form-control-sm">
+                <input class="custom-range" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/>  
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <div class="input-group">
+            <button type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()"><span class="fa fa-download"></span></button>
+            <div class="input-group-append">
+              <button type="button" class="btn btn-info btn-sm navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()"><span class="fa fa-external-link-alt"></span></button>
+            </div>
+          </div>
+        </li>
+      </ul>
+
+    </div>
+  </nav>
+
+</nav>
+
+  <div id="viewer">
+    <div class="container">
+      <div class="row row-centered pos">
+        <div class="col-lg h-100" id='2dCanvas' style='background: black;'></div>
+          <script>
+            document.write('<canvas id="3dCanvas" style="background: black" width="' + $(window).width()*.9 + '"  height="' + $(window).height()*.9+ '"/>');
+          </script>
+      </div>
     </div>
   </div>
 
-  <!-- <details ontoggle="load_dataset(this, &#39;aneurism&#39;, {level: 24, width: 256, height: 256, depth: 256}, &#39;uint8&#39;, {width: 256.0, height: 256.0, depth: 256.0})"/> -->
-
   <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
-  <script src="./src/colormaps.js"></script>
-  <script src="./src/dvr.js"></script>
-  <script src="./src/visus.js"></script>
-  <script src="./config.js"></script>
-  <script src="./src/viewer.js"></script>
+  <script src="src/selection/openseadragonselection.js"></script>
+  <script src="src/colormaps.js"></script>
+  <script src="src/dvr.js"></script>
+  <script src="src/visus.js"></script>
+  <script src="config.js"></script>
+  <script src="src/viewer.js"></script>
+
+  <script>
+
+    $('#palettebtn').click(function() {
+      // reset modal if it isn't visible
+      if (!($('.modal.in').length)) {
+        $('#palette-modal-dialog').css({
+          top: 0,
+          left: $('#palettebtn').position().left-50
+        });
+      }
+
+      $('#paletteModal').modal({
+        backdrop: false,
+        show: true
+      });
+
+      $('#palette-modal-dialog').draggable({
+        handle: ".modal-body"
+      });
+    });
+
+    $('#serverbtn').click(function() {
+      // reset modal if it isn't visible
+      if (!($('.modal.in').length)) {
+        $('#server-modal-dialog').css({
+          top: 0,
+          left: $('#serverbtn').position().left-50
+        });
+      }
+
+      $('#serverModal').modal({
+        backdrop: false,
+        show: true
+      });
+
+      $('#server-modal-dialog').draggable({
+        handle: ".modal-body"
+      });
+    });
+
+    function changeVis(value){
+      console.log("change", value)
+      if(value=="0" || value=="2")
+        $("#slicenav").show();
+      else
+        $("#slicenav").hide();
+
+      onVRChange(value);
+    }
+
+    function rectToSelection(bounds){
+      rect=visus1.osd.viewport.viewportToImageRectangle(bounds.x, bounds.y, bounds.width, bounds.height)
+      rect=new OpenSeadragon.Rect(Math.round(rect.x),Math.round(rect.y),Math.round(rect.width),Math.round(rect.height));
+
+      selection_box[0]=rect.x;
+      selection_box[1]=selection_box[0]+rect.width-1;
+      selection_box[2]=visus1.osd.tileSources.height-(rect.y+rect.height);
+      selection_box[3]=visus1.osd.tileSources.height-rect.y;
+    }
+
+    function callDownload(){
+      if(!selection || selection.isSelecting==false){
+        bounds=visus1.getBounds()
+        rectToSelection(bounds)
+        //console.log(selection_box)
+        download(selection_box)
+      }
+      else{
+        //console.log("rect", selection.rect)
+        rectToSelection(selection.rect)
+        download(selection_box)
+        selection.toggleState()
+      }
+    }
+
+    function updateDownloadResolution(value){
+      sel_factor = 1
+
+      if(!selection || selection.isSelecting==false){
+        bounds=visus1.getBounds()
+        rectToSelection(bounds)
+        //console.log(selection_box)
+        sel_size = (selection_box[1]-selection_box[0])*(selection_box[3]-selection_box[2]);
+        sel_factor=sel_size/(visus1.osd.tileSources.height*visus1.osd.tileSources.width)
+      }
+      else{
+        //console.log("rect", selection.rect)
+        rectToSelection(selection.rect)
+        sel_size = (selection_box[1]-selection_box[0])*(selection_box[3]-selection_box[2]);
+        sel_factor=sel_size/(visus1.osd.tileSources.height*visus1.osd.tileSources.width)
+      }
+      
+      //console.log("sel_factor", sel_factor)
+
+      onResolutionChange(value, sel_factor)
+    }
+
+   function copyClick() {
+    
+    var input = document.querySelector('#link_text');
+    input.setSelectionRange(0, input.value.length + 1);
+    input.select();
+    try {
+      var success = document.execCommand('copy');
+      if (success) {
+        document.getElementById('link_text').value = "The URL has been copied to your clipboard"
+        // Change tooltip message to "Copied!"
+        console.log("success copy")
+      } else {
+        // Handle error. Perhaps change tooltip message to tell user to use Ctrl-c
+        // instead.
+        console.log("not success copy")
+      }
+    } catch (err) {
+      // Handle error. Perhaps change tooltip message to tell user to use Ctrl-c
+      // instead.
+      console.log("error copy", err)
+    }
+  };
+
+  $('#downloadModal').onLoad = function (){
+    updateDownloadResolution($('#edit_resolution').val);
+  };
+
+  setTimeout(function () {
+      if(visus1){
+        if(visus1.dataset.dim==3)
+          $("#rendercontainer").show();
+        else
+          $("#rendercontainer").hide();
+
+        if(visus1.osd){
+          selection = visus1.osd.selection({
+            onSelection:  function(rect) { 
+              //console.log(selection.rect); 
+              rectToSelection(selection.rect);
+
+              $('#downloadModal').modal();
+
+            },
+            keyboardShortcut:        's',
+            prefixUrl:               null, 
+            allowRotation:           false,
+            showConfirmDenyButtons:  false,
+            navImages:               { // overwrites OpenSeadragon's options
+              selection: {
+                  REST:   '../images/selection_rest.png',
+                  GROUP:  '../images/selection_grouphover.png',
+                  HOVER:  '../images/selection_hover.png',
+                  DOWN:   '../images/selection_pressed.png'
+              },
+              selectionConfirm: {
+                  REST:   '../images/selection_confirm_rest.png',
+                  GROUP:  '../images/selection_confirm_grouphover.png',
+                  HOVER:  '../images/selection_confirm_hover.png',
+                  DOWN:   '../images/selection_confirm_pressed.png'
+              },
+              selectionCancel: {
+                  REST:   '../images/selection_cancel_rest.png',
+                  GROUP:  '../images/selection_cancel_grouphover.png',
+                  HOVER:  '../images/selection_cancel_hover.png',
+                  DOWN:   '../images/selection_cancel_pressed.png',
+              },
+            }
+          });
+
+          selection.cancel = function(){ 
+            selection.toggleState(); console.log("CANCEL"); 
+            return this.outerTracker.setTracking(!1),this.outerTracker.setTracking(!0),this.viewer.raiseEvent("selection_cancel",!1),this.undraw()
+          };
+        }
+      }
+
+      // visualize slider if time varying dataset
+      // if($("#time")[0].max > $("#time")[0].min){
+      //   $("#time").show()
+      //   $("#time").val($("#time")[0].min)
+      //   $("#time").change()
+      //   $("#edit_time").show()
+      // }
+      // else{
+      //   $("#time").hide()
+      //   $("#edit_time").hide()
+      // }
+
+    }, 1000);
+
+  $('#render_type').selectpicker();
+  
+  </script>
 
 </body>
 </html>

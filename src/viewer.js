@@ -15,10 +15,14 @@ toArray(buffer, dataType)
                 return new Uint8Array(buffer)
         case 'uint16':
                 return new Uint16Array(buffer)
+        case 'uint32':
+                return new Uint32Array(buffer)
         case 'int8':
                 return new Int8Array(buffer)
         case 'int16':
                 return new Int16Array(buffer)
+        case 'int32':
+                return new Int32Array(buffer)
         case 'float32':
                 return new Float32Array(buffer)
         case 'float64':
@@ -250,8 +254,12 @@ function setDataset(value, presets=false)
       document.getElementById('2dCanvas').hidden=false
       document.getElementById('3dCanvas').hidden=true
       document.getElementById('view_btn').hidden=true;
-
       document.getElementById('range_panel').hidden=true;
+
+      if(document.getElementById('rendercontainer')){
+        $('#rendercontainer').hide();
+        $('#slicenav').hide();
+      }
 
       console.log("USE 2D canvas")
       visus1=VisusOSD({
@@ -276,6 +284,12 @@ function setDataset(value, presets=false)
       document.getElementById('2dCanvas').hidden=true;
       document.getElementById('3dCanvas').hidden=false;
       document.getElementById('view_btn').hidden=false;
+      document.getElementById('range_panel').hidden=false;
+      
+      if(document.getElementById('rendercontainer')){
+        $('#rendercontainer').show();
+        $('#slicenav').show();
+      }
 
       visus1=VisusVR({
         id : '3dCanvas',
@@ -296,7 +310,7 @@ function setDataset(value, presets=false)
 
         bvals[parseInt(bits[b])] = bvals[parseInt(bits[b])]+1;
 
-        console.log(rcount, bvals);
+        //console.log(rcount, bvals);
 
         rcount++;
 
@@ -381,9 +395,11 @@ function onSliceChange(value){
 function onFieldChange(value){
   visus1.setField(value); 
 
-  palette_min = document.getElementById('palette_min').value
-  palette_max = document.getElementById('palette_max').value
+  let palette_min = document.getElementById('palette_min').value
+  let palette_max = document.getElementById('palette_max').value
   
+  onPaletteChange();
+
   if(palette_min=="" && palette_max==""){
     visus1.guessRange();
   }
@@ -395,6 +411,7 @@ function onTimeChange(value){
   visus1.setTime(value); 
   document.getElementById('edit_time').value=value;
   document.getElementById('time').value=value;
+
   refreshAll(0);
 }
 
@@ -417,21 +434,25 @@ function onVRChange(ren_type){
     document.getElementById('render_slider_lbl').innerHTML="Slice"
     document.getElementById('axis').disabled=false
     document.getElementById('edit_slice').disabled=false
-    console.log("using slice")
+    if(document.getElementById('slicenav'))
+      $("#slicenav").show();
   }
   else if(ren_type==VOLUME_RENDER_MODE){
     document.getElementById('axis').disabled=true
     document.getElementById('slice').disabled=true
     document.getElementById('edit_slice').disabled=true
+    if(document.getElementById('slicenav'))
+      $("#slicenav").hide();
   }
   else if(ren_type==ISOCONTOUR_RENDER_MODE){
     document.getElementById('slice').disabled=false
     document.getElementById('render_slider_lbl').innerHTML="IsoValue"
     document.getElementById('axis').disabled=true
     document.getElementById('axis').hidden=true
-    document.getElementById('axis_label').hidden=true
     document.getElementById('edit_slice').disabled=false
     document.getElementById('edit_slice').hidden=false
+    if(document.getElementById('slicenav'))
+      $("#slicenav").show();
   }
 
   visus1.setRenderType(ren_type);
@@ -444,20 +465,19 @@ function onVRChange(ren_type){
 
 function onPaletteChange(){
 
-  visus1.setPalette(document.getElementById('palette').value); 
-  visus1.setPaletteMin(parseFloat(document.getElementById('palette_min').value)); 
-  visus1.setPaletteMax(parseFloat(document.getElementById('palette_max').value)); 
-  // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
-
+  var colormap = get_palette_data(document.getElementById('palette').value)
   let pal_min= parseFloat(document.getElementById('palette_min').value)
   let pal_max= parseFloat(document.getElementById('palette_max').value)
 
-  var colormap = get_palette_data(document.getElementById('palette').value)
+  visus1.setPalette(document.getElementById('palette').value); 
+  visus1.setPaletteMin(pal_min); 
+  visus1.setPaletteMax(pal_max); 
+  // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
 
   if(renderer)
     renderer.updateColorMap(pal_min, pal_max);
 
-  if(document.getElementById('2dCanvas').hidden==false)
+  //if(document.getElementById('2dCanvas').hidden==false)
     refreshAll(0);
 }
 
@@ -618,11 +638,12 @@ function loadRenderingTypePreset(){
   let pre_vr = getParameterByName('vr')
 
   if(pre_vr!=null){
-    document.getElementById('render_type').value=pre_vr
-
-    if(dataset.dim>2)
-      visus1.setRenderType(pre_vr);
+    onVRChange(pre_vr)
   }
+}
+
+function isRendererDefined(){
+  return typeof renderer !== 'undefined';
 }
 
 function loadPresets(){
@@ -701,13 +722,13 @@ function loadPresets(){
     onPaletteChange()
   }
 
-  if(pre_vpoint!=null){
+  if(pre_vpoint!=null && isRendererDefined()){
     mat = renderer.getMatrices()
     mat.view = pre_vpoint.split(',').map(parseFloat);
     renderer.setMatrices(mat)
   }
 
-  if(pre_q != null){
+  if(pre_q != null && isRendererDefined()){
     q = renderer.getQuaternion()
     qv = pre_q.split(',').map(parseFloat);
 
@@ -719,11 +740,12 @@ function loadPresets(){
     renderer.setQuaternion(q)
   }
 
-  if(pre_view_distance != null){
+  if(pre_view_distance != null && typeof renderer !== 'undefined'){
     renderer.setViewDistance(parseFloat(pre_view_distance))
   }
 
-  visus1.usePresets=false;
+  if(isRendererDefined())
+    visus1.usePresets=false;
 
   setTimeout(function(){ onSliceChange(pre_slice); onViewResolution(); }, 3000);
 
