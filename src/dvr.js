@@ -376,10 +376,16 @@ var pointDist = function(a, b) {
 }
 
 async function
-dvr(canvas, renderingMode)
+dvr(canvas, renderingMode, backgroundColor)
 {
         const width = canvas.width
         const height = canvas.height
+
+        //If undefined set
+        if (backgroundColor == undefined){
+            backgroundColor =  [0, 0, 0, 1.0];
+
+        }
 
         const arcball_circle = {
                 center: vec2(width/2, height/2),
@@ -658,7 +664,7 @@ dvr(canvas, renderingMode)
                 gl.bufferSubData(gl.UNIFORM_BUFFER, 32*4, projection_matrix)
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, fbos.fbo)
-                gl.clearBufferfv(gl.COLOR, fbos.fbo, [0, 0, 0, 1.0]) // background color
+                gl.clearBufferfv(gl.COLOR, fbos.fbo, backgroundColor) // background color
                 gl.clearBufferfv(gl.DEPTH, fbos.fbo, [1.0])
 
                 gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)

@@ -80,10 +80,10 @@ function fetch_and_draw(query_str, reset_view=1)
         if (!renderer || (visus1.render_type != curr_render_type)){
           //console.log("creating renderer type "+visus1.render_type)
           if(visus1.render_type==ISOCONTOUR_RENDER_MODE){
-            renderer = await dvr(document.getElementById('3dCanvas'), 'surface')
+            renderer = await dvr(document.getElementById('3dCanvas'), 'surface', [255/255, 255/255, 255/255, 1.0])//specify the background color
           }
           else
-            renderer = await dvr(document.getElementById('3dCanvas'), 'volume')
+            renderer = await dvr(document.getElementById('3dCanvas'), 'volume', [255/255, 255/255, 255/255, 1.0])//specify the background color
         }
         
         curr_render_type = visus1.render_type;
