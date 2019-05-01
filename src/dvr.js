@@ -658,18 +658,18 @@ dvr(canvas, renderingMode)
                 gl.bufferSubData(gl.UNIFORM_BUFFER, 32*4, projection_matrix)
 
                 gl.bindFramebuffer(gl.FRAMEBUFFER, fbos.fbo)
-                gl.clearBufferfv(gl.COLOR, fbos.fbo, [255/255, 255/255, 255/255, 1.0])
+                gl.clearBufferfv(gl.COLOR, fbos.fbo, [0, 0, 0, 1.0]) // background color
                 gl.clearBufferfv(gl.DEPTH, fbos.fbo, [1.0])
 
                 gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, ubo)
                 
-                gl.useProgram(programBox)
-                gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
-                gl.enableVertexAttribArray(0)
-                gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
-                gl.drawElements(gl.LINES, indicesBox.length, gl.UNSIGNED_SHORT, 0)
-
+                // Not draw bounding box, TODO make it optional
+                // gl.useProgram(programBox)
+                // gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+                // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, eboBox)
+                // gl.enableVertexAttribArray(0)
+                // gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0)
+                // gl.drawElements(gl.LINES, indicesBox.length, gl.UNSIGNED_SHORT, 0)
 
                 // volume/surface rendering goes last as it needs to read depth from previous passes
                 gl.disable(gl.DEPTH_TEST) 
@@ -768,7 +768,7 @@ dvr(canvas, renderingMode)
 
                 /* update isovalue slider and shader uniform */
                 data_extent = typedArray.reduce(([min, max], d) => [Math.min(d, min), Math.max(d, max)], [typedArray[0], typedArray[0]])
-
+                // console.log(data_extent);
                 gl.uniform1f(gl.getUniformLocation(program, "extent1"), 0.0)//data_extent[0]);
                 gl.uniform1f(gl.getUniformLocation(program, "extent2"), 1.0)//data_extent[1]);
 
@@ -795,6 +795,14 @@ dvr(canvas, renderingMode)
                                          gl.RED, gl.HALF_FLOAT, converted)
                         
 
+                } else if(typedArray instanceof Int32Array || typedArray instanceof Uint32Array){
+
+                        const converted = new Float32Array(typedArray.length).map((_, i) => ((typedArray[i] - data_extent[0])/(data_extent[1] - data_extent[0])))
+                        gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R32F, width, height, depth)
+                        gl.texSubImage3D(gl.TEXTURE_3D, 0,
+                                         0, 0, 0,
+                                         width, height, depth,
+                                         gl.RED, gl.FLOAT, converted)
                 } else if (typedArray instanceof Float32Array) {
                         const converted = typedArray.map(d => (d - data_extent[0])/(data_extent[1] - data_extent[0]))
                         gl.texStorage3D(gl.TEXTURE_3D, 1, gl.R32F, width, height, depth)
