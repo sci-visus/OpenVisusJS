@@ -5,7 +5,7 @@
   "private": false,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cat src/{visus.js,colormaps.js,dvr.js,libexport.js} > src/concat.js && webpack",
+    "build": "cat src/visus/visus.js src/visus/colormaps.js src/visus/dvr.js src/visus/export.js > src/concat.js && patch -p0 -i patches/scoping_fix.patch && webpack",
     "install": "npm run build"
   },
   "main": "dist/index.js",
