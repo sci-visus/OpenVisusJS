@@ -691,7 +691,7 @@ function VisusVR(params)
       h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
       d=self.tile_size[2] * vs; z1=z * d; z2=z1 + d;
       
-      if(render_type==SLICE_RENDER_MODE){
+      if(self.render_type==SLICE_RENDER_MODE){
         //console.log("slice "+self.slice+" axis "+self.axis);
         if(self.axis=='0'){
           x1=Math.floor(self.dataset.dims[0]*(self.slice/100.0))
