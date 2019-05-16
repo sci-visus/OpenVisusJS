@@ -333,6 +333,12 @@ function setDataset(value, presets=false)
       document.getElementById('resolution').step=3;
     }
 
+    // use same step and min for resolution view slider
+    if (document.getElementById('resolutionview')) {
+      document.getElementById('resolutionview').min=document.getElementById('resolution').min;
+      document.getElementById('resolutionview').step=document.getElementById('resolution').step;
+    }
+
     onPaletteChange()
 
     if(presets){
@@ -461,6 +467,7 @@ function onVRChange(ren_type){
     onSliceChange(50);
   else
     refreshAll(0)
+
 }
 
 function onPaletteChange(){
@@ -638,7 +645,8 @@ function loadRenderingTypePreset(){
   let pre_vr = getParameterByName('vr')
 
   if(pre_vr!=null){
-    onVRChange(pre_vr)
+    $('#render_type option[value="'+pre_vr+'"]').prop("selected", "selected").change();
+    //onVRChange(pre_vr)
   }
 }
 
@@ -676,7 +684,7 @@ function loadPresets(){
     bounds.y=parseFloat(pre_by)
     bounds.degrees=parseFloat(pre_bd)
     visus1.setBounds(bounds)
-    console.log(visus1.getBounds())
+    //console.log(visus1.getBounds())
   }
 
   if(pre_slice!=null){
@@ -747,6 +755,6 @@ function loadPresets(){
   if(isRendererDefined())
     visus1.usePresets=false;
 
-  setTimeout(function(){ onSliceChange(pre_slice); onViewResolution(); }, 3000);
+  setTimeout(function(){ onSliceChange(pre_slice); onViewResolution(); }, 5000);
 
 }
