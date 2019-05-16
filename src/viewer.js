@@ -113,12 +113,11 @@ function fetch_and_draw(query_str, reset_view=1)
         if(visus1.usePresets)
           loadPresets();
 
-        if(visus1.render_type!=ISOCONTOUR_RENDER_MODE)
+        // if(visus1.render_type!=ISOCONTOUR_RENDER_MODE)
           renderer.present();
-        else{
-          renderer.present().isovalue(0.5);
-        }
-
+        // else if(visus1.usePresets==false)
+        //   onSliceChange(50);
+        
         hideStatus();
       }
 
@@ -372,19 +371,15 @@ function setDefaultResolution(){
 }
 
 function onSliceChange(value){
-  visus1.setSlice(value); 
+  visus1.setSlice(value)
 
-  // if(!renderer){
-  //   refreshAll(0)
-  //   return
-  // }
-
-  //console.log("get value "+value+" set value "+range[0]+(value/100)*ext)
   if(visus1.render_type==ISOCONTOUR_RENDER_MODE && renderer){
     var range=renderer.getDataExtent();
     ext = range[1]-range[0]
 
-    document.getElementById('edit_slice').value=range[0]+(value/100)*ext;
+    real_value=range[0]+(value/100)*ext;
+    document.getElementById('edit_slice').value=real_value;
+    //console.log("get value "+value+" set value "+real_value)
   }
   else
     document.getElementById('edit_slice').value=value;
@@ -490,6 +485,7 @@ function onPaletteChange(){
 
 function onViewResolution(){
   sel_level = parseInt(document.getElementById('resolution').value)
+
   size=parseFloat(visus1.getDataSize(sel_level))
 
   if(size > 10000)
@@ -755,6 +751,6 @@ function loadPresets(){
   if(isRendererDefined())
     visus1.usePresets=false;
 
-  setTimeout(function(){ onSliceChange(pre_slice); onViewResolution(); }, 5000);
+  setTimeout(function(){ onViewResolution(); }, 3000);
 
 }
