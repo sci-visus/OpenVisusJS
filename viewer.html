@@ -131,6 +131,8 @@ body{
   position:relative;
   z-index:30;
   padding-top: 50px;
+  background-color: rgba(255,255,255,.8);
+  color:rgba(64,64,64,1.0);
 }
 
 </style>
@@ -150,10 +152,10 @@ body{
   <nav id="info" class="panel" role="navigation">
       <ul>
           <li><a href="#">Home</a></li>
-          <li><a href="#">The Ballad of El Goodo</a></li>
-          <li><a href="#">Thirteen</a></li>
-          <li><a href="#">September Gurls</a></li>
-          <li><a href="#">What's Going Ahn</a></li>
+          <li><a href="#">Dataset Info</a></li>
+          <li><a href="#">OpenVisus</a></li>
+          <li><a href="#">Ondemand</a></li>
+          <li><a href="#">Contact Us</a></li>
       </ul>
   </nav>
 
@@ -451,14 +453,8 @@ body{
 
   <script>
 
-    function updateInfo() {
-      console.log("updateInfo()");
-      /* todo */
-    }
-
     $('#infobtn').click(function() {
       console.log("infobtn.onclick");
-      updateInfo();
     });
 
     $('#palettebtn').click(function() {

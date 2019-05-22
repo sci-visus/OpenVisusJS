@@ -202,6 +202,29 @@ function getDataset() {
 }
 
 ///////////////////////////////////////////////////////
+function updateInfo(dataset) {
+  console.log("updateInfo()");
+
+  num_timesteps=1+dataset.timesteps[1]-dataset.timesteps[0]; // todo: / stepsize (not yet passed by visusAsyncLoadDataset)
+
+  field_size=4.0; //todo: get size per field (not yet passed by visusAsyncLoadDataset)
+  size_str=(dataset.fields.length*num_timesteps*dataset.dims[0]*dataset.dims[1]*dataset.dims[2]*4.0/(1024*1024*1024)).toFixed(2)+" GB";
+  
+  dims_str=dataset.dims[0]+" x "+dataset.dims[1];
+  if (dataset.dim > 2)
+    dims_str += " x "+dataset.dims[2];
+
+  document.getElementById('info').innerHTML="\
+    <span style=\"font-size:20px\" onclick=\"openNav()\">"+dataset.name+"</span> \
+    <ul> \
+      <li>Size: "+size_str+"</li> \
+      <li>Dims: "+dims_str+"</li> \
+      <li>Timesteps: "+num_timesteps+"</li> \
+      <li>Fields: "+dataset.fields.length+"</li> \
+    </ul>";
+}
+
+///////////////////////////////////////////////////////
 function setDataset(value, presets=false) 
 {
   document.getElementById('dataset').value=value;
@@ -337,6 +360,9 @@ function setDataset(value, presets=false)
       document.getElementById('resolutionview').min=document.getElementById('resolution').min;
       document.getElementById('resolutionview').step=document.getElementById('resolution').step;
     }
+
+    // update info pane
+    updateInfo(dataset);
 
     onPaletteChange()
 

@@ -186,6 +186,7 @@ function visusAsyncLoadDataset(url)
               field.max=maxval;
             }
           }
+          //todo: also pass field types in order to calculate their size
           ret.fields.push(field);
         }
         
@@ -219,7 +220,7 @@ function visusAsyncLoadDataset(url)
               var range=s[t].substring(1,s[t].length-1).split(','); 
               var start=parseInt(range[0]);
               var end  =parseInt(range[1]);
-              //just ignore step for now
+              //just ignore step for now (todo)
               ret.timesteps=[Math.min(start,ret.timesteps[0]),Math.max(end,ret.timesteps[1])];
             }
           }
