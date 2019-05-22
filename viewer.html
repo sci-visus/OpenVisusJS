@@ -106,6 +106,7 @@ body{
 .nav-item{
   padding-right: 5px;
   padding-left: 5px;
+  z-index:50;
 }
 
 .myoptnav{
@@ -126,6 +127,12 @@ body{
   background-color: rgba(255,255,255,.3) !important;
 }
 
+#info{
+  position:relative;
+  z-index:30;
+  padding-top: 50px;
+}
+
 </style>
 
 </head>
@@ -134,10 +141,21 @@ body{
   var selection_box= new Array();
   // Selection widget
   var selection;
+
 </script>
 
 <body>
   <div id='status_bar' style="float:top; display: none"><img src="images/spinner.gif" height="10px" ><label id='status' style="color: blue"></label></div>
+
+  <nav id="info" class="panel" role="navigation">
+      <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">The Ballad of El Goodo</a></li>
+          <li><a href="#">Thirteen</a></li>
+          <li><a href="#">September Gurls</a></li>
+          <li><a href="#">What's Going Ahn</a></li>
+      </ul>
+  </nav>
 
   <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
           <div class="modal-dialog">
@@ -402,6 +420,9 @@ body{
             </div>
           </div>
         </li>
+        <li class="nav-item">
+          <button id="infobtn" type="button" class="btn btn-primary btn-sm navbar-btn info-link" data-toggle="modal" ><span class="fa fa-info"></span></button>
+        </li>
       </ul>
 
     </div>
@@ -429,6 +450,16 @@ body{
   <script src="src/viewer.js"></script>
 
   <script>
+
+    function updateInfo() {
+      console.log("updateInfo()");
+      /* todo */
+    }
+
+    $('#infobtn').click(function() {
+      console.log("infobtn.onclick");
+      updateInfo();
+    });
 
     $('#palettebtn').click(function() {
       // reset modal if it isn't visible
@@ -616,8 +647,18 @@ body{
     }, 1000);
 
   $('#render_type').selectpicker();
-  
+
   </script>
+
+<script src="src/bigSlide.js"></script>
+<script>
+
+    <!-- dataset info panel -->
+    $(document).ready(function() {
+        $('.info-link').bigSlide({side:'right', menu:'#info'});
+    });
+
+</script>
 
 </body>
 </html>
