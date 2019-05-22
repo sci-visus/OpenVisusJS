@@ -207,12 +207,14 @@ function updateInfo(dataset) {
 
   num_timesteps=1+dataset.timesteps[1]-dataset.timesteps[0]; // todo: / stepsize (not yet passed by visusAsyncLoadDataset)
 
+  volume=dataset.dims[0]*dataset.dims[1];
+  if (dataset.dim > 2) volume *= dataset.dims[2];
+  
   field_size=4.0; //todo: get size per field (not yet passed by visusAsyncLoadDataset)
-  size_str=(dataset.fields.length*num_timesteps*dataset.dims[0]*dataset.dims[1]*dataset.dims[2]*4.0/(1024*1024*1024)).toFixed(2)+" GB";
+  size_str=(dataset.fields.length*num_timesteps*volume*field_size/(1024*1024*1024)).toFixed(2)+" GB";
   
   dims_str=dataset.dims[0]+" x "+dataset.dims[1];
-  if (dataset.dim > 2)
-    dims_str += " x "+dataset.dims[2];
+  if (dataset.dim > 2) dims_str += " x "+dataset.dims[2];
 
   document.getElementById('info').innerHTML="\
     <span style=\"font-size:20px\" onclick=\"openNav()\">"+dataset.name+"</span> \
