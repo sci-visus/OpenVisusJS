@@ -766,6 +766,120 @@ dvr(canvas, renderingMode, backgroundColor)
                 return dvr
         }
 
+        dvr.updateColorMap = (palette_str, ext1, ext2) =>  {
+          var colormap = get_palette_data(palette_str)
+          var extent = data_extent[1]-data_extent[0]
+
+           if(!isNaN(ext1))
+                extent1 = parseFloat(ext1)/extent;
+              else
+                extent1 = 0.0 //data_extent[0]
+              if(!isNaN(ext2))
+                extent2 = parseFloat(ext2)/extent;
+              else
+                extent2 = 1.0 //data_extent[1]
+
+             //console.log ("using ext ["+extent1+","+extent2+"]")
+          gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
+          gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
+
+          transferFunctionTex = gl.createTexture()
+            gl.bindTexture(gl.TEXTURE_2D, transferFunctionTex)
+            gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
+            gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
+            gl.UNSIGNED_BYTE, new Uint8Array(colormap))
+
+            if (vr_display && vr_display.isPresenting)
+                    return dvr
+
+            render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+
+        }
+
+        if (renderingMode === 'surface'){
+                /* isovalue must be within range [0,1] */
+                dvr.isovalue = (value) => {
+                        gl.useProgram(program)
+                        gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), value)
+                        if (vr_display && vr_display.isPresenting)
+                                return dvr
+
+                        render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+                        return dvr
+                }
+            }
+
+
+        if (renderingMode === 'volume'){
+                dvr.transferFunction = (array) => {
+                        /* WebGL does not support 1D textures directly */
+                        transferFunctionTex = gl.createTexture()
+                        gl.bindTexture(gl.TEXTURE_2D, transferFunctionTex)
+                        gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, array.length/4, 1)
+                        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, array.length/4, 1, gl.RGBA,
+                        gl.UNSIGNED_BYTE, new Uint8Array(array))
+
+                        if (vr_display && vr_display.isPresenting)
+                                return dvr
+
+                        render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+                        return dvr
+                }
+        }
+        /*
+        if (navigator.getVRDisplays) {
+                return new Promise((resolve, reject) => {
+                        frame_data = new VRFrameData()
+
+                        navigator.getVRDisplays().then(displays => {
+                                if (!displays.length) {
+                                        console.log('VR: No device connected')
+                                        resolve(dvr)
+                                        return
+                                }
+
+                                vr_display = displays[displays.length - 1]
+
+                                vr_display.depthNear = 0.1
+                                vr_display.depthFar = 100
+
+                                if (vr_display.capabilities.canPresent)
+                                        // TODO: add button 
+                                        console.log('device can present')
+
+
+                                window.addEventListener('vrdisplaypresentchange', () => vr_display_present_change(vr_display, canvas, gl, vrFbos), false)
+                                window.addEventListener('vrdisplayactivate', vr_display_activate, false)
+                                window.addEventListener('vrdisplaydeactivate', vr_display_deactivate, false)
+
+                                dvr.vr = () => {
+                                        vr_request_present(vr_display, frame_data, canvas, gl, vrFbos, render)
+                                }
+
+                                resolve(dvr)
+                        })
+                })
+        }*/
+
+        /* setup scene for 2D view */
+        dvr.resetView = () =>{
+            q = quat(1.0, 0.0, 0.0, 0.0)
+            matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0)
+            matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,
+                             0.0, 1.0, 0.0, 0.0,
+                             0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
+                             0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0)
+
+            gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
+            gl.bufferSubData(gl.UNIFORM_BUFFER, matrices.model.length*4, new Float32Array([...matrices.view, ...matrices.projection]))
+
+            dvr.present()
+        }
+
+        dvr.getDataExtent = () =>{
+          return data_extent;
+        }
+
         /* 8 and 16 bit integers are converted to float16 */
         dvr.uploadData = (typedArray, datatype, width, height, depth, boxWidth, boxHeight, boxDepth) => {
                 /* TODO: dealloc or if same size then reuse */
@@ -825,120 +939,6 @@ dvr(canvas, renderingMode, backgroundColor)
                 gl.bufferSubData(gl.UNIFORM_BUFFER, 0, new Float32Array(matrices.model))
 
                 return dvr
-        }
-
-
-
-        if (renderingMode === 'surface')
-                /* isovalue must be within range [0,1] */
-                dvr.isovalue = (value) => {
-                        gl.useProgram(program)
-                        gl.uniform1f(gl.getUniformLocation(program, 'isovalue'), value)
-                        if (vr_display && vr_display.isPresenting)
-                                return dvr
-
-                        render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
-                        return dvr
-                }
-
-
-        if (renderingMode === 'volume')
-                dvr.transferFunction = (array) => {
-                        /* WebGL does not support 1D textures directly */
-                        transferFunctionTex = gl.createTexture()
-                        gl.bindTexture(gl.TEXTURE_2D, transferFunctionTex)
-                        gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, array.length/4, 1)
-                        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, array.length/4, 1, gl.RGBA,
-                        gl.UNSIGNED_BYTE, new Uint8Array(array))
-
-                        if (vr_display && vr_display.isPresenting)
-                                return dvr
-
-                        render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
-                        return dvr
-                }
-
-        if (navigator.getVRDisplays) {
-                return new Promise((resolve, reject) => {
-                        frame_data = new VRFrameData()
-
-                        navigator.getVRDisplays().then(displays => {
-                                if (!displays.length) {
-                                        console.log('VR: No device connected')
-                                        resolve(dvr)
-                                        return
-                                }
-
-                                vr_display = displays[displays.length - 1]
-
-                                vr_display.depthNear = 0.1
-                                vr_display.depthFar = 100
-
-                                if (vr_display.capabilities.canPresent)
-                                        /* TODO: add button */
-                                        console.log('device can present')
-
-
-                                window.addEventListener('vrdisplaypresentchange', () => vr_display_present_change(vr_display, canvas, gl, vrFbos), false)
-                                window.addEventListener('vrdisplayactivate', vr_display_activate, false)
-                                window.addEventListener('vrdisplaydeactivate', vr_display_deactivate, false)
-
-                                dvr.vr = () => {
-                                        vr_request_present(vr_display, frame_data, canvas, gl, vrFbos, render)
-                                }
-
-                                resolve(dvr)
-                        })
-                })
-        }
-
-        dvr.updateColorMap = (palette_str, ext1, ext2) =>  {
-          var colormap = get_palette_data(palette_str)
-          var extent = data_extent[1]-data_extent[0]
-
-           if(!isNaN(ext1))
-                extent1 = parseFloat(ext1)/extent;
-              else
-                extent1 = 0.0 //data_extent[0]
-              if(!isNaN(ext2))
-                extent2 = parseFloat(ext2)/extent;
-              else
-                extent2 = 1.0 //data_extent[1]
-
-             //console.log ("using ext ["+extent1+","+extent2+"]")
-          gl.uniform1f(gl.getUniformLocation(program, "extent1"), extent1);
-          gl.uniform1f(gl.getUniformLocation(program, "extent2"), extent2);
-
-          transferFunctionTex = gl.createTexture()
-            gl.bindTexture(gl.TEXTURE_2D, transferFunctionTex)
-            gl.texStorage2D(gl.TEXTURE_2D, 1, gl.SRGB8_ALPHA8, colormap.length/4, 1)
-            gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, colormap.length/4, 1, gl.RGBA,
-            gl.UNSIGNED_BYTE, new Uint8Array(colormap))
-
-            if (vr_display && vr_display.isPresenting)
-                    return dvr
-
-            render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
-
-        }
-
-        /* setup scene for 2D view */
-        dvr.resetView = () =>{
-            q = quat(1.0, 0.0, 0.0, 0.0)
-            matrices.view       = mat4(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -viewDistance, 1.0)
-            matrices.projection = mat4(1.0, 0.0, 0.0, 0.0,
-                             0.0, 1.0, 0.0, 0.0,
-                             0.0, 0.0, -(far_plane + near_plane)/(far_plane - near_plane), -1.0,
-                             0.0, 0.0, -2.0*far_plane*near_plane/(far_plane - near_plane), 0.0)
-
-            gl.bindBuffer(gl.UNIFORM_BUFFER, ubo)
-            gl.bufferSubData(gl.UNIFORM_BUFFER, matrices.model.length*4, new Float32Array([...matrices.view, ...matrices.projection]))
-
-            dvr.present()
-        }
-
-        dvr.getDataExtent = () =>{
-          return data_extent;
         }
 
         return new Promise((resolve, reject) => resolve(dvr))

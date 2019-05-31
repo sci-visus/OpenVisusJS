@@ -508,7 +508,7 @@ function onPaletteChange(){
   // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
 
   if(renderer)
-    renderer.updateColorMap(pal_min, pal_max);
+    renderer.updateColorMap(colormap,pal_min, pal_max);
 
   //if(document.getElementById('2dCanvas').hidden==false)
     refreshAll(0);
