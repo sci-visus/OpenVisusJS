@@ -502,6 +502,9 @@ function onPaletteChange(){
   let pal_min= parseFloat(document.getElementById('palette_min').value)
   let pal_max= parseFloat(document.getElementById('palette_max').value)
 
+  if(isNaN(pal_min)) pal_min = 0;
+  if(isNaN(pal_max)) pal_max = 0;
+
   visus1.setPalette(document.getElementById('palette').value); 
   visus1.setPaletteMin(pal_min); 
   visus1.setPaletteMax(pal_max); 
