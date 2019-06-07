@@ -1,0 +1,31 @@
+
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Mamography Powered by Visus</title>
+    <script src="https://openseadragon.github.io/openseadragon/openseadragon.min.js"></script>
+    <script src="../src/VisusGetTileSources.js"></script>
+</head>
+<body>
+    
+    <div id="openseadragon1" class="openseadragon" style="width:100%; height:100%;background-color: black; "></div>
+    <script type="text/javascript">
+     var bXRoad=false;
+     OpenSeadragon({
+         id: "openseadragon1",
+         prefixUrl: "https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/",
+         showNavigator: true,
+         showReferenceStrip: true,
+         navigatorPosition: "TOP_RIGHT",
+         sequenceMode: true,
+         preserveViewport: true,
+         tileSources: [
+               getTileSources("http://atlantis.sci.utah.edu", "mamografia_00000_uint8_3", 4040, 5416, 25, 512, bXRoad)
+             , getTileSources("http://atlantis.sci.utah.edu", "mamografia_00001_uint8_3", 4040, 5416, 25, 512, bXRoad)
+             , getTileSources("http://atlantis.sci.utah.edu", "mamografia_00002_uint8_3", 4040, 5416, 25, 512, bXRoad)
+             , getTileSources("http://atlantis.sci.utah.edu", "mamografia_00003_uint8_3", 4040, 5416, 25, 512, bXRoad)
+         ]
+     });
+    </script>
+</body>
+</html>
