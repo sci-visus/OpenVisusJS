@@ -123,6 +123,7 @@ function visusAsyncLoadDataset(url)
     parse_url= parseUrl(ret.url);  
     ret.name=parse_url.getSearchVariable("dataset");
     ret.base_url = parse_url.protocol+'//'+parse_url.hostname+':'+parse_url.port+parse_url.pathname+'?';
+    ret.logic_to_physic=[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];  // initialize to identity
     
     ret.timesteps=[0,0];
   
@@ -136,6 +137,15 @@ function visusAsyncLoadDataset(url)
         ret.dims[0]=parseInt(dims[1])+1;
         ret.dims[1]=parseInt(dims[3])+1;
         ret.dims[2]=parseInt(dims[5])+1;
+        continue;
+      }
+      
+      //logic_to_physic
+      if (lines[i]=="(logic_to_physic)") 
+      {
+        var val=lines[++i].split(' ');
+        for(b=0;b<16;b++)
+          ret.logic_to_physic[b]=parseFloat(val[b]);
         continue;
       }
       
@@ -253,6 +263,7 @@ function visusAsyncLoadDataset(url)
     console.log("  name: "+ret.name);
     console.log("  dim: "+ret.dim);    
     console.log("  dims: "+ret.dims);
+    console.log("  logic_to_physic: "+ret.logic_to_physic);
     console.log("  bitmask: "+ret.bitmask);
     console.log("  maxh: "+ret.maxh);
     console.log("  bitsperblock: "+ret.bitsperblock);
