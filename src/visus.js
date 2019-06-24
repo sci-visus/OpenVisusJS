@@ -48,15 +48,18 @@ function visusAsyncGetListOfDatasets(url)
     
     var arr=obj.childs;
     var ret=[];
+
     while (arr.length > 0) 
     {
       item = arr.shift();
       if (item.name == "group" && 'childs' in item)
         arr = item.childs.concat(arr);
-      else if ('childs' in item)
-        arr = item.childs.concat(arr);
-      else if (item.name == "dataset")
+      else if (item.name == "dataset"){
         ret.push(item.attributes.name);
+      }
+      else if ('childs' in item){
+        arr = item.childs.concat(arr);
+      }
       else
         console.log("unknown item encountered: "+item.name);
     }
