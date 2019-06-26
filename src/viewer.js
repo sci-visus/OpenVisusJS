@@ -46,7 +46,7 @@ function hideStatus(){ if(document.getElementById('status_bar')) document.getEle
 function fetch_and_draw(query_str, reset_view=1)
 {
   data_size=[256, 256, 256]
-  dtype='uint8'
+  dtype=visus1.dtype;
 
   notifyStatus("Streaming...");
 
@@ -575,10 +575,9 @@ function onViewResolution(){
 
 function download(box=null){
   sel_level = parseInt(document.getElementById('resolution').value)
-
   data_url = ""
   if(dataset.dim==2)
-    data_url = visus1.download_query(sel_level, box)
+    data_url = visus1.download_query(sel_level, box, visus1.dtype.includes("int8"))
   else
     data_url = visus1.refresh(sel_level)
 
@@ -591,13 +590,17 @@ function download(box=null){
     data_url=data_url.split("compression=raw").join("compression=png");
     out_ext_file = ".png"
   }
-  else if(dataset.dim==2){
-    //TODO use dtype also for 2D
+  else if(dataset.dim==2 && visus1.dtype.includes("int8")){
     data_url=data_url.split("compression=raw").join("compression=png");
     out_ext_file = ".png"
   }
+  else{
+    data_url=data_url.split("compression=png").join("compression=raw");
+
+  }
 
   notifyStatus("Downloading data...");
+  console.log(data_url)
 
   fetch(data_url, { method: 'GET'
         }).then(response => {

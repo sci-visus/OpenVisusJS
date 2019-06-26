@@ -184,6 +184,7 @@ function visusAsyncLoadDataset(url)
           
           var field={};
           field.name=s[0];
+          field.dtype=s[1];
           field.min=0;
           field.max=0;
           for (var k=1;k<s.length;k++) 
@@ -303,6 +304,7 @@ function VisusOSD(params)
   self.palette_min    = params['palette_min']    || '0';
   self.palette_max    = params['palette_max']    || '0';
   self.palette_interp = params['palette_interp'] || 'Default';
+  self.dtype          = params['dtype']          || 'uint8';
   
   if (self.dataset.dim==2)
   {
@@ -386,17 +388,19 @@ function VisusOSD(params)
   }; 
   
   //download_query
-  self.download_query=function(req_lev=self.level, box=null)  { 
+  self.download_query=function(req_lev=self.level, box=null, is_rgb=true)  { 
     base_url=self.dataset.base_url
       +'&dataset='+self.dataset.name
       +'&compression='+self.compression             
       +'&maxh='+ self.dataset.maxh
       +'&time='+self.time
       +'&field='+self.field
-      +'&palette='+self.palette
-      +'&palette_min='+self.palette_min
-      +'&palette_max='+self.palette_max
-      +'&palette_interp='+self.palette_interp;
+
+      if(is_rgb)
+        base_url+='&palette='+self.palette
+        +'&palette_min='+self.palette_min
+        +'&palette_max='+self.palette_max
+        +'&palette_interp='+self.palette_interp;
     
       toh=clamp(req_lev,0,self.maxLevel*2);
       
@@ -444,6 +448,11 @@ function VisusOSD(params)
     return (mag*sample_size)/1024.0/1024.0
 
   }
+
+  self.setDType=function(value) {
+    self.dtype=value;
+  }
+
   //getAxis
   self.getAxis=function() {
     return self.axis; 
@@ -473,6 +482,12 @@ function VisusOSD(params)
   //setField
   self.setField=function(value) {
     self.field=value;
+    for(f of self.dataset.fields)
+      if(f.name==value){
+        self.setDType(f.dtype)
+        break;
+      }
+    console.log("dtype = "+self.dtype)
   };
   
   //getTime
