@@ -229,6 +229,47 @@ function updateInfo(dataset) {
     </ul>";
 }
 
+function addSelectionOSD(){
+  selection = visus1.osd.selection({
+      onSelection:  function(rect) { 
+        //console.log(selection.rect); 
+        rectToSelection(selection.rect);
+
+        $('#downloadModal').modal();
+
+      },
+      keyboardShortcut:        's',
+      prefixUrl:               null, 
+      allowRotation:           false,
+      showConfirmDenyButtons:  false,
+      navImages:               { // overwrites OpenSeadragon's options
+        selection: {
+            REST:   '../images/selection_rest.png',
+            GROUP:  '../images/selection_grouphover.png',
+            HOVER:  '../images/selection_hover.png',
+            DOWN:   '../images/selection_pressed.png'
+        },
+        selectionConfirm: {
+            REST:   '../images/selection_confirm_rest.png',
+            GROUP:  '../images/selection_confirm_grouphover.png',
+            HOVER:  '../images/selection_confirm_hover.png',
+            DOWN:   '../images/selection_confirm_pressed.png'
+        },
+        selectionCancel: {
+            REST:   '../images/selection_cancel_rest.png',
+            GROUP:  '../images/selection_cancel_grouphover.png',
+            HOVER:  '../images/selection_cancel_hover.png',
+            DOWN:   '../images/selection_cancel_pressed.png',
+        },
+      }
+    });
+
+    selection.cancel = function(){ 
+      selection.toggleState(); console.log("CANCEL"); 
+      return this.outerTracker.setTracking(!1),this.outerTracker.setTracking(!0),this.viewer.raiseEvent("selection_cancel",!1),this.undraw()
+    };
+}
+
 ///////////////////////////////////////////////////////
 function setDataset(value, presets=false) 
 {
@@ -296,6 +337,8 @@ function setDataset(value, presets=false)
         showNavigator : false,
         debugMode : false
       }); 
+
+      addSelectionOSD();
 
       document.getElementById('resolution').step=2;
 
