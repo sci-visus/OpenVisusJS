@@ -285,6 +285,19 @@ function setDataset(value, presets=false)
   //document.getElementById('slice').disabled=true
   //document.getElementById('edit_slice').disabled=true
 
+  // if MIDX
+  if(value.includes("*")){
+    console.log("MIDX not supported\n")
+    value=value.replace("*","")
+    dataset_url=getServer()+'action=read_dataset&dataset='+value
+    query_str = visusAsyncLoadMIDXDataset(dataset_url).then(function (midx) {
+      console.log("found datasets: ", midx.datasets)
+      setDataset(value+"/"+midx.datasets[0])
+    });
+
+    return;
+  }
+
   dataset_url=getServer()+'action=read_dataset&dataset='+value
 
   query_str = visusAsyncLoadDataset(dataset_url).then(function (dataset) {

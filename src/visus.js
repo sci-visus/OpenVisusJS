@@ -55,7 +55,16 @@ function visusAsyncGetListOfDatasets(url)
       if (item.name == "group" && 'childs' in item)
         arr = item.childs.concat(arr);
       else if (item.name == "dataset"){
-        ret.push(item.attributes.name);
+        push_midx=0
+        if ('childs' in item && item.childs.length>0){
+          if(push_midx==0){
+            ret.push(item.attributes.name+"*");
+            push_midx=1;
+          }
+          arr = item.childs.concat(arr);
+        }
+        else
+          ret.push(item.attributes.name);
       }
       else if ('childs' in item){
         arr = item.childs.concat(arr);
@@ -72,9 +81,82 @@ function visusAsyncGetListOfDatasets(url)
 }
 
 
+function visusAsyncLoadMIDXDataset(url) 
+{
+  return fetch(url,{method:'get'})
+  .then(function (response) {
+    
+    if (response.headers.get("content-type").indexOf("application/octet-stream")==-1) 
+      throw new TypeError('Response from "' + url + '" is not application/octet-stream"');
+      
+    return response.text();
+  })
+  .then(function (content) {
+    
+    console.log(content)
+    if (window.DOMParser)
+    {
+      parser = new DOMParser();
+      xmlDoc = parser.parseFromString(content, "text/xml");
+    }
+    else // Internet Explorer
+    {
+      xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+      xmlDoc.async = false;
+      xmlDoc.loadXML(content);
+    }
 
-//////////////////////////////////////////////////////////////////////
-//example http://atlantis.sci.utah.edu/mod_visus?action=readdataset&dataset=2kbit1
+    childs=xmlDoc.getElementsByTagName("dataset")
+
+    ret={};
+
+    ret.url=url;
+    
+    //"http://example.com:3000/pathname/?search=test#hash"; 
+    var parseUrl=function(url) {
+      
+      var a = document.createElement('a');
+      a.href = url;  
+      
+      ret={};
+      ret.protocol = a.protocol; // "http:"
+      ret.hostname = a.hostname; // "example.com"
+      ret.port     = a.port;     // "3000"
+      ret.pathname = a.pathname; // "/pathname/"
+      ret.search   = a.search;   // "?search=test"
+      ret.hash     = a.hash;     // "#hash"
+      ret.host     = a.host;     // "example.com:3000"   
+      
+      ret.getSearchVariable=function(name) 
+      {
+        var query = ret.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) 
+        {
+          var pair = vars[i].split('=');
+          if (decodeURIComponent(pair[0]) == name) {
+            return decodeURIComponent(pair[1]);
+          }
+        }
+      };
+      
+      return ret; 
+    };    
+    
+    parse_url= parseUrl(ret.url);  
+    ret.name=parse_url.getSearchVariable("dataset");
+    
+    ret.datasets=[]
+
+    for (i = 0; i < childs.length; i++) { 
+      if(childs[i].getAttribute('name'))
+        ret.datasets.push(childs[i].getAttribute('name'))
+    }
+    
+    return ret;
+  })
+}
+
 function visusAsyncLoadDataset(url) 
 {
   return fetch(url,{method:'get'})
