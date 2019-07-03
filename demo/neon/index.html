@@ -190,7 +190,8 @@ body{
           <ul class="dropdown-menu">
             <li><a href='javascript:loadScenePreset("NEON_MOAB")'>MOAB</a></li>
             <li><a href='javascript:loadScenePreset("NEON_REDB")'>REDB</a></li>
-            <li><a href='javascript:loadScenePreset("NEON_ABBA")'>ABBA</a></li>
+            <li><a href='javascript:loadScenePreset("NEON_VEGIDX")'>REDB_VEGIDX</a></li>
+            <li><a href='javascript:loadScenePreset("NEON_ABBA")'>ABBY</a></li>
           </ul>
        </div>
       </li>
@@ -425,6 +426,9 @@ body{
 
       else if(preset_name=="NEON_REDB")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_redb&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
+
+      else if(preset_name=="NEON_VEGIDX")
+        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_redb_vegidx&field=ARVI'
         
       else if(preset_name=="NEON_ABBA")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_abba&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
