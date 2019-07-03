@@ -408,6 +408,7 @@ dvr(canvas, renderingMode, backgroundColor)
         let p0
         let q = quat(1.0, 0.0, 0.0, 0.0)
         let q_down
+        let q_move
 
         let data_extent
 
@@ -425,7 +426,7 @@ dvr(canvas, renderingMode, backgroundColor)
 
                 const rect = canvas.getBoundingClientRect()
                 const p1 = arcball_screen_to_sphere(arcball_circle, e.clientX - rect.left, e.clientY - rect.top)
-                const q_move = arcball_quat(p0, p1)
+                q_move = arcball_quat(p0, p1)
 
                 q = quat_mul(q_move, q_down)
 
@@ -861,18 +862,21 @@ dvr(canvas, renderingMode, backgroundColor)
                 })
         }*/
 
-        let curr_rotation=0.0;
+        //let curr_rotation=0.0;
         
         dvr.rotate = (axis) =>{
+            q_down = q
 
-            const rect = canvas.getBoundingClientRect()
-
-            a=(3.14/2.0)+curr_rotation
-            curr_rotation += 0.1
+            /*
+            a=(3.14/2.0)*0.1//+curr_rotation
+            //curr_rotation += 0.05
             f = Math.sin(a/2)
-
-            q_down = quat(1.0, 0.0, 0.0, 0.0)
+            */
             
+            if(q_move==undefined)
+              q_move = quat(1.0, 0.1, 0.0, 0.0)
+            //q_down = quat(1.0, 0.0, 0.0, 0.0)
+            /*
             q_move = quat(Math.cos(a/2), f, 0.0, 0.0)
             
             //console.log("axis", axis)
@@ -880,8 +884,8 @@ dvr(canvas, renderingMode, backgroundColor)
               q_move = quat(Math.cos(a/2), 0.0, f, 0.0)
             else if(axis==2)
               q_move = quat(Math.cos(a/2), 0.0, 0.0, f)
-            
-            q = quat_mul(q_down, q_move)
+            */
+            q = quat_mul(q_move, q_down)
 
             // console.log(q_down)
             // console.log(q_move)
