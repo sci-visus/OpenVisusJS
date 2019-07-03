@@ -326,12 +326,12 @@ body{
             <div class="col">
               <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
-                  <span class="input-group-text">AutoRefresh</span>
-                </div>
-                <div class="input-group-append">
                   <div class="input-group-text">
                     <input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);'></input>
                   </div>
+                </div>
+                <div class="input-group-append">
+                  <span class="input-group-text">AutoRefresh</span>
                 </div>
               </div>
             </div>
@@ -339,6 +339,28 @@ body{
               <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
             </div>
           </div>
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">
+                        <input id='auto_spin' type='checkbox' size=32 onchange='onSpinChange(this.value);'></input>
+                      </div>
+                    </div>
+                    <div class="input-group-append input-group-sm">
+                      <select id='spin_axis' onchange='onSpinChangeAxis(this.value);' class='custom-select'>
+                        <option value='0'>X</option>
+                        <option value='1'>Y</option>
+                        <option value='2'>Z</option>
+                      </select>
+                    </div>
+                    <div class="input-group-append">
+                      <span class="input-group-text">AutoSpin</span>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
         </div>
       </div>
     </div>

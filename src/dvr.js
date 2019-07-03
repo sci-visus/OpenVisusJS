@@ -861,6 +861,39 @@ dvr(canvas, renderingMode, backgroundColor)
                 })
         }*/
 
+        let curr_rotation=0.0;
+        
+        dvr.rotate = (axis) =>{
+
+            const rect = canvas.getBoundingClientRect()
+
+            a=(3.14/2.0)+curr_rotation
+            curr_rotation += 0.1
+            f = Math.sin(a/2)
+
+            q_down = quat(1.0, 0.0, 0.0, 0.0)
+            
+            q_move = quat(Math.cos(a/2), f, 0.0, 0.0)
+            
+            //console.log("axis", axis)
+            if(axis==1)
+              q_move = quat(Math.cos(a/2), 0.0, f, 0.0)
+            else if(axis==2)
+              q_move = quat(Math.cos(a/2), 0.0, 0.0, f)
+            
+            q = quat_mul(q_down, q_move)
+
+            // console.log(q_down)
+            // console.log(q_move)
+
+            matrices.view = quat_to_mat4(q)
+            /* translate camera */
+            /* TODO: bit error prone as we have it in another place (`present` function) */
+            matrices.view[14] = -viewDistance;
+
+            render(new Float32Array(matrices.view), new Float32Array(matrices.projection), fbos, 0, 0, canvas.width, canvas.height)
+        }
+
         /* setup scene for 2D view */
         dvr.resetView = () =>{
             q = quat(1.0, 0.0, 0.0, 0.0)
