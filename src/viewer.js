@@ -451,9 +451,9 @@ function onRefreshChange(){
   else clearInterval(intervalID);
 }
 
-function onSpinChange(axis=0){
+function onSpinChange(){
   if(document.getElementById('auto_spin').checked && renderer)
-    intervalID = setInterval(function(){renderer.rotate(axis)}, 200);
+    intervalID = setInterval(function(){renderer.rotate(document.getElementById('spin_axis').value)}, 200);
   else clearInterval(intervalID);
 }
 
@@ -463,7 +463,7 @@ function onAxisChange(value){
 
 function onSpinChangeAxis(value){
   clearInterval(intervalID)
-  onSpinChange(value)
+  onSpinChange()
 }
 
 
