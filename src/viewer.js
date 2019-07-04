@@ -453,19 +453,13 @@ function onRefreshChange(){
 
 function onSpinChange(){
   if(document.getElementById('auto_spin').checked && renderer)
-    intervalID = setInterval(function(){renderer.rotate(document.getElementById('spin_axis').value)}, 200);
+    intervalID = setInterval(function(){renderer.rotate()}, 200);
   else clearInterval(intervalID);
 }
 
 function onAxisChange(value){
   visus1.setAxis(value); refreshAll(0);
 }
-
-function onSpinChangeAxis(value){
-  clearInterval(intervalID)
-  onSpinChange()
-}
-
 
 function setDefaultResolution(){
   onResolutionChange(document.getElementById('resolution').min*1.0+14);

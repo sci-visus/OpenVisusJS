@@ -864,7 +864,7 @@ dvr(canvas, renderingMode, backgroundColor)
 
         //let curr_rotation=0.0;
         
-        dvr.rotate = (axis) =>{
+        dvr.rotate = () =>{
             q_down = q
 
             /*
@@ -872,7 +872,7 @@ dvr(canvas, renderingMode, backgroundColor)
             //curr_rotation += 0.05
             f = Math.sin(a/2)
             */
-            
+
             if(q_move==undefined)
               q_move = quat(1.0, 0.1, 0.0, 0.0)
             //q_down = quat(1.0, 0.0, 0.0, 0.0)
