@@ -572,6 +572,7 @@ function onPaletteChange(){
   visus1.setPalette(document.getElementById('palette').value); 
   visus1.setPaletteMin(pal_min); 
   visus1.setPaletteMax(pal_max); 
+  //console.log("setting palette min max", pal_min, pal_max)
   // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
 
   if(renderer)
@@ -817,14 +818,19 @@ function loadPresets(){
     onPaletteChange()
   }
 
-  if(pre_palette_min!=null && pre_palette_min!="NaN"){
+  if(pre_palette_min!=null){
     document.getElementById('palette_min').value=pre_palette_min
     onPaletteChange()
   }
 
-  if(pre_palette_max!=null && pre_palette_max!="NaN"){
+  if(pre_palette_max!=null){
     document.getElementById('palette_max').value=pre_palette_max
     onPaletteChange()
+  }
+
+  if(document.getElementById('palette_max').value == document.getElementById('palette_min').value){
+    document.getElementById('palette_max').value=NaN;
+    document.getElementById('palette_min').value=NaN;
   }
 
   if(pre_vpoint!=null && isRendererDefined()){

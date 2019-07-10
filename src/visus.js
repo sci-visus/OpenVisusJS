@@ -976,6 +976,7 @@ function VisusVR(params)
   self.setPaletteMin(NaN);
   self.setPaletteMax(NaN);
   self.setPaletteInterp("Default");
+  self.setDType("uint8")
   
   self.refresh();
   
