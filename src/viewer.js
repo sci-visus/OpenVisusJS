@@ -869,7 +869,8 @@ document.getElementById('3dCanvas').addEventListener('webglcontextrestored', fun
   parent.removeChild(document.getElementById('3dCanvas'))
   parent.innerHTML=savedhtml
 
-  delete renderer
+  //console.log("restored correctly", document.getElementById('3dCanvas'))
+  //delete renderer
   renderer=null
   refreshAll();
 }, false)
