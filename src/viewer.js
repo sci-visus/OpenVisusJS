@@ -435,8 +435,6 @@ function setDataset(value, presets=false)
       loadPresets();
     }
 
-    refresh();
-
     refreshAll(!presets);
 
   });  
@@ -861,3 +859,18 @@ function loadPresets(){
   setTimeout(function(){ onViewResolution(); }, 3000);
 
 }
+
+document.getElementById('3dCanvas').addEventListener('webglcontextlost', function(event) { event.preventDefault()}, false)
+document.getElementById('3dCanvas').addEventListener('webglcontextrestored', function(event) {
+  console.log("Restored WebGl context")
+
+  parent=document.getElementById('3dCanvas').parentNode
+  savedhtml=parent.innerHTML
+  parent.removeChild(document.getElementById('3dCanvas'))
+  parent.innerHTML=savedhtml
+
+  delete renderer
+  renderer=null
+  refreshAll();
+}, false)
+
