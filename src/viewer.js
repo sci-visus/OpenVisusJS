@@ -570,8 +570,6 @@ function onPaletteChange(){
   visus1.setPalette(document.getElementById('palette').value); 
   visus1.setPaletteMin(pal_min); 
   visus1.setPaletteMax(pal_max); 
-
-  if(visus1.osd) visus1.refresh(1);
   //console.log("setting palette min max", pal_min, pal_max)
   // visus1.setPaletteInterp(document.getElementById('palette_interp').value); 
 

@@ -698,7 +698,7 @@ function VisusOSD(params)
   self.pre_bounds = null;
     
   //see https://github.com/openseadragon/openseadragon/issues/866
-  self.refresh=function(clear=0) 
+  self.refresh=function() 
   { 
     guessRange();
 
@@ -709,12 +709,9 @@ function VisusOSD(params)
       success : function() {
         if (oldImage){
           self.osd.world.removeItem(oldImage);
-
-          if(clear){
-            // we are keeping only one item to avoid rendering of mixed tiles
-            while(visus1.osd.world.getItemCount() > 1)
-             visus1.osd.world.removeItem(self.osd.world.getItemAt(1))
-          }
+          // we are keeping only one item to avoid rendering of mixed tiles
+          while(visus1.osd.world.getItemCount() > 1)
+            visus1.osd.world.removeItem(self.osd.world.getItemAt(1))
         }
       }    
     });  
