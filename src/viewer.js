@@ -219,7 +219,8 @@ function updateInfo(dataset) {
   dims_str=dataset.dims[0]+" x "+dataset.dims[1];
   if (dataset.dim > 2) dims_str += " x "+dataset.dims[2];
 
-  var dataset_url=DEFAULT_SERVER+"dataset="+dataset.name;
+  var dataset_url=getServer()+"dataset="+dataset.name;
+
   document.getElementById('info').innerHTML="\
     <span style=\"font-size:20px; padding-left:5px\" onclick=\"openNav()\">"+dataset.name+"</span> \
     <ul> \
