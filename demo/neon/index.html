@@ -39,13 +39,12 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
+  <link rel="stylesheet" href="https://bootswatch.com/3/paper/bootstrap.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
 <style type="text/css">
-/*  .datagrid table { border-collapse: collapse; text-align: left; width: 100%; } .datagrid {font: normal 12px/150% Arial, Helvetica, sans-serif; background: #fff; overflow: hidden; -webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; }.datagrid table td, .datagrid table th { padding: 3px 10px; }.datagrid table thead th {background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');background-color:#006699; color:#FFFFFF; font-size: 15px; font-weight: bold; border-left: 1px solid #0070A8; } .datagrid table thead th:first-child { border: none; }.datagrid table tbody td { color: #00557F; border-left: 1px solid #E1EEF4;font-size: 12px;font-weight: normal; }.datagrid table tbody .alt td { background: #E1EEF4; color: #00557F; }.datagrid table tbody td:first-child { border-left: none; }.datagrid table tbody tr:last-child td { border-bottom: none; }.datagrid table tfoot td div { border-top: 1px solid #006699;background: #E1EEF4;} .datagrid table tfoot td { padding: 0; font-size: 12px } .datagrid table tfoot td div{ padding: 2px; }.datagrid table tfoot td ul { margin: 0; padding:0; list-style: none; text-align: right; }.datagrid table tfoot  li { display: inline; }.datagrid table tfoot li a { text-decoration: none; display: inline-block;  padding: 2px 8px; margin: 1px;color: #FFFFFF;border: 1px solid #006699;-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px; background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #006699), color-stop(1, #00557F) );background:-moz-linear-gradient( center top, #006699 5%, #00557F 100% );filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#006699', endColorstr='#00557F');background-color:#006699; }.datagrid table tfoot ul.active, .datagrid table tfoot ul a:hover { text-decoration: none;border-color: #00557F; color: #FFFFFF; background: none; background-color:#006699;}div.dhtmlx_window_active, div.dhx_modal_cover_dv { position: fixed !important; }*/
-
 body{
   background: black;
 }
@@ -170,7 +169,7 @@ body{
           </div>
         </div>
 
-  <nav class="navbar navbar-inverse navbar-fixed-top">
+  <nav class="navbar navbar-default navbar-fixed-top">
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle collapsed " data-toggle="collapse" data-target="#main-navbar" aria-expanded="false">
@@ -213,7 +212,7 @@ body{
         <button type="button" class="btn btn-info navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()">Share</button>
       </li>
       <li>
-        <div class="form-group" style="margin-top:15px">
+        <div class="form-group" style="margin-top:22px">
           <input class="slider form-control-sm navbar-btn" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/> 
         </div>
       </li>
@@ -232,7 +231,7 @@ body{
   <div id="viewer">
     <div class="container">
       <div class="row row-centered pos">
-        <div class="col-lg h-100" id='2dCanvas' style='background: black; margin-top:50px'></div>
+        <div class="col-lg h-100" id='2dCanvas' style='background: black'></div>
         <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px'></canvas></div>
       </div>
     </div>
@@ -361,12 +360,12 @@ body{
   <!-- <details ontoggle="load_dataset(this, &#39;aneurism&#39;, {level: 24, width: 256, height: 256, depth: 256}, &#39;uint8&#39;, {width: 256.0, height: 256.0, depth: 256.0})"/> -->
 
   <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
-  <script src="../../src/selection/openseadragonselection.js"></script>
-  <script src="../../src/colormaps.js"></script>
-  <script src="../../src/dvr.js"></script>
-  <script src="../../src/visus.js"></script>
+  <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/selection/openseadragonselection.js"></script>
+  <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/colormaps.js"></script>
+  <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/dvr.js"></script>
+  <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/visus.js"></script>
   <script src="../../config.js"></script>
-  <script src="../../src/viewer.js"></script>
+  <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/viewer.js"></script>
 
   <script>
     

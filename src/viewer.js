@@ -203,7 +203,9 @@ function getDataset() {
 
 ///////////////////////////////////////////////////////
 function updateInfo(dataset) {
-  console.log("updateInfo()");
+
+  if(!$('#info').length)
+    return;
 
   num_timesteps=1+dataset.timesteps[1]-dataset.timesteps[0]; // todo: / stepsize (not yet passed by visusAsyncLoadDataset)
 
