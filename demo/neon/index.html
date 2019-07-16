@@ -41,8 +41,19 @@
   
   <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
   <link rel="stylesheet" href="https://bootswatch.com/3/paper/bootstrap.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css" />
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script> 
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 
 <style type="text/css">
 body{
@@ -122,9 +133,59 @@ h6: {
   padding-left: 10px;
 }
 
+.sidenav {
+  height: 100%; /* Full-height: remove this if you want "auto" height */
+  /*width: 160px; /* Set the width of the sidebar */
+  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
+  z-index: 1; /* Stay on top */
+  top: 0; /* Stay at the top */
+  left: 0;
+  background-color: #f3f5f5; 
+  overflow-x: hidden; /* Disable horizontal scroll */
+  padding-top: 20px;
+  margin-top: 50px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+/* The navigation menu links */
+.sidenav a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+}
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+/* Style page content */
+.main {
+  margin-left: 160px; /* Same as the width of the sidebar */
+  padding: 0px 10px;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
 </style>
 
 </head>
+  
+  <div id="viewer">
+    <div class="container">
+      <div class="row row-centered pos">
+        <div class="col-lg h-100" id='2dCanvas' style='background: #f3f5f5'></div>
+        <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px'></canvas></div>
+      </div>
+    </div>
+  </div>
 
 <script>
   var selection_box= new Array();
@@ -133,6 +194,7 @@ h6: {
 </script>
 
 <body>
+
   <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
           <div class="modal-dialog">
 
@@ -146,7 +208,7 @@ h6: {
                 <div class="col" style="padding:20px">
                   <div class="row-md-6 text-center">
                     <div class="slidecontainer">
-                      <input  id='resolution' type='range' step='1' min='0' step='1' max='33' class="slider" oninput='updateDownloadResolution(this.value);'/> 
+                      <input  id='resolution' type='range' step='1' min='0' step='1' max='33' class="slider form-control-sm navbar-btn" oninput='updateDownloadResolution(this.value);'/> 
                     </div>
                   </div>
                   <div class="row-md-6 text-center">
@@ -208,7 +270,7 @@ h6: {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#"><image src="neon_logo.png" height="130%"/></a>
+      <a class="navbar-brand" href="#"><image src="logo--blue-neon-data.png" height="160%"/></a>
     </div>
     <div class="collapse navbar-collapse" id="main-navbar">
     <ul class="nav navbar-nav">
@@ -235,20 +297,7 @@ h6: {
           <input id='edit_resolution' size=2 onchange='onResolutionChange(this.value);' class='input-group-sm' hidden/>
         </div>
       </li> -->
-      <li>
-        <button type="button" class="btn btn-primary navbar-btn" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()">Download</button>
-      </li>
-      <li>
-        <button type="button" class="btn btn-info navbar-btn" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()">Share</button>
-      </li>
-      <li>
-        <div class="form-group" style="margin-top:22px">
-          <input class="slider form-control-sm navbar-btn" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/> 
-        </div>
-      </li>
-      <li>
-         <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn'/>
-      </li>
+        
     </ul>
   
     <ul class="nav navbar-nav navbar-right">
@@ -258,13 +307,7 @@ h6: {
     </div>
   </div>
 </nav>
-  <div id="viewer">
-    <div class="container">
-      <div class="row row-centered pos">
-        <div class="col-lg h-100" id='2dCanvas' style='background: #f3f5f5'></div>
-        <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px'></canvas></div>
-      </div>
-    </div>
+  
       
       <table hidden> 
      
@@ -274,11 +317,6 @@ h6: {
             <div class="datagrid">
               <table width='100%'>
                 <tr>
-                  <td>Presets:&nbsp;&nbsp;<select id='preset_select' onchange='loadScenePreset(this.value);' onload='javascript:loadScenePreset(NATURE_2007_AER_PRESET)' class='toolbar_value'>
-                      <option value='NEON_MOAB'>NEON MOAB</option>
-                      <option value='NEON_REDB'>NEON REDB</option>
-                    </select> 
-                  </td>
                   <td disabled> <label>Server</label> <input id='server' size=32 onchange='setServer(this.value);' class='toolbar_value'/>
                   <td hidden> <label>Render</label> 
                     <select id='render_type' onchange='onVRChange(this.value);' class='toolbar_value'>
@@ -287,7 +325,7 @@ h6: {
                       <option value="2">Iso Contour</option>
                     </select>
                   <td> <label>Dataset</label> <select id='dataset' onchange='setDataset(this.value);' class='toolbar_value' disabled/>
-                  <td hidden><label>Field</label> <select id='field' onchange='onFieldChange(this.value);' class='toolbar_value' /> 
+                  
                   <td hidden><input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);' class='toolbar_value'>auto</input> <input type='button' value='Refresh' onclick="refreshAll(0)"/> </td>
                   <td id='range_panel'><label>Range</label> <label id="comp_range"> [...] </label>
                   <td id='resolution_panel'><label>Resolution</label>
@@ -325,78 +363,108 @@ h6: {
                       </tr>
                     </table>
                   
-                    
-                  <td><label>Palette</label>     
-                  <td>
-                    <select id='palette' onchange='onPaletteChange();' class='toolbar_value'>
-                      <option value=''></option>
-                      <option value='rich' selected="selected">rich</option>
-                      <option value='hsl'>hsl</option>
-                      <option value='banded'>banded</option>
-                      <option value='bry'>bry</option>
-                      <option value='bgry'>bgry</option> 
-                      <option value='gamma'>gamma</option>
-                      <option value='hot1'>hot1</option>
-                      <option value='hot2'>hot2</option>
-                      <option value='ice'>ice</option>
-                      <option value='lighthues'>lighthues</option> 
-                      <option value='smoothrich'>smoothrich</option>
-                      <option value='lut16'>lut16</option>
-                      <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
-                      <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option> 
-                      <option value='GreenGold'>GreenGold</option>
-                      <option value='LinearGreen'>LinearGreen</option>
-                      <option value='LinearTurquois'>LinearTurquois</option>
-                      <option value='MutedBlueGreen'>MutedBlueGreen</option>
-                      <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
-                      <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
-                      <option value='LinearYellow'>LinearYellow</option>
-                      <option value='LinearGray5'>LinearGray5</option>
-                      <option value='LinearGray4'>LinearGray4</option>  
-                      <option value='grayopaque'>grayopaque</option>
-                      <option value='graytransparent'>graytransparent</option> 
-                      <option value='scivis_magic_colormap'>magic color map</option>
-                    </select>
-                    
-                  <td><label>Min</label>
-                  <td><input id='palette_min' size=2 onchange='onPaletteChange();' class='toolbar_value'>
-                    
-                  <td><label>Max</label> 
-                  <td><input id='palette_max' size=2 onchange='onPaletteChange();' class='toolbar_value'>
-                    
-                    <!-- <td><label>Interpolation</label>    
-                         <td>
-                           <select id='palette_interp' onchange='onPaletteChange();' class='toolbar_value'>
-                             <option value='Default'>Default</option>
-                             <option value='Flat'>Flat</option>
-                             <option value='Inverted'>Inverted</option>
-                           </select>  -->
                 </tr>
               </table>
             </div>
           </td>
         </tr>
-        
-        <table>
-          <!-- 
-               <label>Resolution:<input id="resolution_select" type="range" step="1"></label>
-               <button>Submit</button>
-               <label>Isovalue:<input id="isovalue_select" type="range" step="0.01"></label> -->
-          <!-- <a onclick="vr_present()">VR</a> -->
-        </table>
       </table>
-    </div>
-  </div>
+
   <!-- <details ontoggle="load_dataset(this, &#39;aneurism&#39;, {level: 24, width: 256, height: 256, depth: 256}, &#39;uint8&#39;, {width: 256.0, height: 256.0, depth: 256.0})"/> -->
 
-  <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
+  <div class="sidenav">
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h3 class="panel-title">Settings</h3>
+    </div>
+    <div class="panel-body">
+       <span class="input-group-text form-control-sm">Field</span>
+
+       <select id='field' onchange='onFieldChange(this.value);' class='custom-select'></select> 
+
+       <div class="input-group input-group-sm">
+        <div class="input-group-prepend">
+          <span class="input-group-text form-control-sm">Colormap</span>
+        </div>
+        <div class="input-group-append input-group-sm">
+          <select id='palette' onchange='onPaletteChange();' class='custom-select'>
+            <option value='NaN' selected="selected"></option>
+            <option value='rich'>rich</option>
+            <option value='hsl'>hsl</option>
+            <option value='banded'>banded</option>
+            <option value='bry'>bry</option>
+            <option value='bgry'>bgry</option> 
+            <option value='gamma'>gamma</option>
+            <option value='hot1'>hot1</option>
+            <option value='hot2'>hot2</option>
+            <option value='ice'>ice</option>
+            <option value='lighthues'>lighthues</option> 
+            <option value='smoothrich'>smoothrich</option>
+            <option value='lut16'>lut16</option>
+            <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
+            <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option> 
+            <option value='GreenGold'>GreenGold</option>
+            <option value='LinearGreen'>LinearGreen</option>
+            <option value='LinearTurquois'>LinearTurquois</option>
+            <option value='MutedBlueGreen'>MutedBlueGreen</option>
+            <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
+            <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
+            <option value='LinearYellow'>LinearYellow</option>
+            <option value='LinearGray5'>LinearGray5</option>
+            <option value='LinearGray4'>LinearGray4</option>  
+            <option value='grayopaque'>grayopaque</option>
+            <option value='graytransparent'>graytransparent</option> 
+            <option value='scivis_magic_colormap'>magic color map</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="input-group input-group-sm" style="padding-top:5px">
+        <div class="input-group-prepend">
+          <span class="input-group-text form-control-sm">Range</span>
+        </div>
+        <div class="row">
+          <div class="form-group col-xs-6">
+            <input id='palette_min' type="text" size=8 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Min"/>
+          </div>
+          <div class="form-group col-xs-6">
+            <input id='palette_max' type="text" size=8 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Max"/>
+          </div>
+        </div>
+        
+      </div>
+
+      <div class="form-group" >
+        <div class="input-group-prepend">
+          <span class="input-group-text form-control-sm">Time</span>
+        </div>
+        <div class="row">
+          <div class="form-group col-xs-6">
+            <input class="slider form-control-sm navbar-btn" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/> 
+          </div>
+          <div class="form-group col-xs-6">
+            <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn' style="margin-top: 0px;"/>
+          </div>
+       </div>
+      </div>
+
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()">Download</button>
+  <button type="button" class="btn btn-info" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()">Share</button>
+
+  </div>
+</div>
+
+<script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
   <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/selection/openseadragonselection.js"></script>
   <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/colormaps.js"></script>
   <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/dvr.js"></script>
   <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/visus.js"></script>
-  <script src="../../config.js"></script>
   <script src="https://rawgit.com/sci-visus/visus_javascript/master/src/viewer.js"></script>
-
+  <script src="../../config.js"></script>
   <script>
     
 
@@ -451,7 +519,7 @@ h6: {
       config_str=''
 
       if(preset_name=="NEON_MOAB")
-        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_moab_2017_2018&field=data&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
+        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_moab_2017_2018&field=data&time=2017&palette=rich&palette_min=NaN&palette_max=NaN'
 
       else if(preset_name=="NEON_REDB")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_redb&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
@@ -543,7 +611,7 @@ h6: {
       //selection.enable();
 
       // visualize slider if time varying dataset
-      if($("#time")[0].max > $("#time")[0].min){
+      /*if($("#time")[0].max > $("#time")[0].min){
        $("#time").show()
        $("#time").val($("#time")[0].min)
        $("#time").change()
@@ -552,7 +620,7 @@ h6: {
       else{
         $("#time").hide()
         $("#edit_time").hide()
-      }
+      }*/
 
     }, 1000);
   
