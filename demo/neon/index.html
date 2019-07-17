@@ -60,168 +60,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 
 <style type="text/css">
-body{
-  background: #f3f5f5;
-  fontFamily: '"Source Sans Pro",Helvetica,Arial,sans-serif';
-  fontWeightLight: 200;
-  fontWeightRegular: 400;
-  fontWeightMedium: 600;
-  fontWeightBold: 700;
-}
-h1: {
-  fontWeight: 200,
-  fontSize: '4.125rem',
-}
-h2: {
-  fontWeight: 200,
-  fontSize: '3.5rem',
-}
-h3: {
-  fontWeight: 400,
-  fontSize: '2.75rem',
-}
-h4: {
-  fontWeight: 400,
-  fontSize: '2.125rem',
-}
-h5: {
-  fontWeight: 600,
-  fontSize: '1.5rem',
-}
-h6: {
-  fontWeight: 700,
-  fontSize: '1.15rem',
+.modal-full {
+    min-width: 100%;
+    margin: 0;
 }
 
-
-.slidecontainer {
-  width: 100%; /* Width of the outside container */
-}
-
-.slider {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 15px;
-  border-radius: 5px;   
-  background: #d3d3d3;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-  display: table-cell;
-  vertical-align: middle;
-}
-
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%; 
-  background: #4CAF50;
-  cursor: pointer;
-  vertical-align: middle;
-}
-
-.slider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: #4CAF50;
-  cursor: pointer;
-  vertical-align: middle;
-}
-
-/*
-.nav>li{
-  padding-right: 10px;
-  padding-left: 10px;
-}*/
-
-/* Style page content */
-.main {
-  margin-left: 160px; /* Same as the width of the sidebar */
-  padding: 0px 10px;
-}
-
-/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-
-#body-row {
-    margin-left:0;
-    margin-right:0;
-}
-
-#sidebar-container {
-    min-height: 100vh;   
-    background-color: #f3f5f5;
-    padding: 0;
-    float: right;
-}
-
-/* Sidebar sizes when expanded and expanded */
-.sidebar-expanded {
-    width: 250px;
-}
-.sidebar-collapsed {
-    width: 60px;
-}
-
-/* Menu item*/
-#sidebar-container .list-group a {
-    height: 50px;
-    color: black;
-}
-
-/* Submenu item*/
-#sidebar-container .list-group .sidebar-submenu a {
-    height: 45px;
-    padding-left: 30px;
-}
-.sidebar-submenu {
-    font-size: 0.9rem;
-}
-
-/* Separators */
-.sidebar-separator-title {
-    background-color: #f3f5f5;
-    height: 35px;
-}
-.sidebar-separator {
-    background-color: #f3f5f5;
-    height: 25px;
-}
-.logo-separator {
-    background-color: #f3f5f5;    
-    height: 60px;
-}
-
-/* Closed submenu icon */
-#sidebar-container .list-group .list-group-item[aria-expanded="false"] .submenu-icon::after {
-  content: " \f0d7";
-  font-family: FontAwesome;
-  display: inline;
-  text-align: right;
-  padding-left: 10px;
-}
-/* Opened submenu icon */
-#sidebar-container .list-group .list-group-item[aria-expanded="true"] .submenu-icon::after {
-  content: " \f0da";
-  font-family: FontAwesome;
-  display: inline;
-  text-align: right;
-  padding-left: 10px;
-}
-
-a.bg-light.list-group-item.list-group-item-action.flex-column.align-items-start {
-    padding-left: 2.1em;
-}
-
-small {
-    color: black;
+.modal-full .modal-content {
+    min-height: 100vh;
 }
 
 </style>
@@ -251,20 +96,53 @@ small {
            </div>
           </li>
             
+            <li>
+              <button class="btn btn-success navbar-btn" type="button" data-toggle="testModal" onClick='javascript:openModal()'>Open in Modal</button>
+            </li>
         </ul>
 
       </div>
     </div>
   </nav>
 
-  <div class="embed-responsive embed-responsive-16by9">
-    <iframe id="visus-frame" class="embed-responsive-item" src="visus-frame.html"></iframe>
+  <div  style="margin-top:75px"> <!-- margin for navbar -->
+    <div class="embed-responsive embed-responsive-16by9">
+      <iframe id="visus-frame" class="embed-responsive-item" src="visus-frame.html"></iframe>
+    </div>
   </div>
 
+  <div id="testModal" class="modal fade" role="dialog">
+      <div class="modal-dialog modal-full">
+
+    <!-- Download Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Interactive viewer as modal</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe id="visus-frame-modal" class="embed-responsive-item" src="visus-frame.html"></iframe>
+        </div>
+      </div>
+
+      <!-- <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div> -->
+    </div>
+
+  </div>
+</div>
+
   <script>
+    let demo_id="NEON_MOAB";
 
     function loadScenePreset(preset_name){
       config_str=''
+      demo_id=preset_name
 
       if(preset_name=="NEON_MOAB")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_moab_2017_2018&field=data&time=2017&palette=rich&palette_min=NaN&palette_max=NaN'
@@ -283,16 +161,25 @@ small {
       gotourl = HOST_URL+dataset_url
       //window.location=gotourl
 
-      $("#visus-frame").attr('src', "visus-frame.html"+dataset_url);
+      if(($("#testModal").data('bs.modal') || {})._isShown )
+        $("#visus-frame-modal").attr('src', "visus-frame.html"+dataset_url);
+      else
+        $("#visus-frame").attr('src', "visus-frame.html"+dataset_url);
+
       console.log("setting src ", frame_url)
 
+    }
+
+    function openModal(){
+      $("#testModal").modal("show");
+      loadScenePreset(demo_id);
     }
 
     // demo_id = getParameterByName('demoid')
     // dataset_param = getParameterByName('dataset')
 
     // if(demo_id==null && dataset_param==null){
-      loadScenePreset("NEON_MOAB")
+      loadScenePreset(demo_id)
     //}
 
   </script>
