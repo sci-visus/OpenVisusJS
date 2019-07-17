@@ -40,9 +40,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
   <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
-  <link rel="stylesheet" href="https://bootswatch.com/3/paper/bootstrap.min.css">
+  <!--<link rel="stylesheet" href="https://bootswatch.com/3/paper/bootstrap.min.css">-->
+  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"> -->
+
+  <link rel="stylesheet" href="bootstrap.min.flatly.css">
+
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
-  
+    
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css" />
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -128,39 +132,11 @@ h6: {
   vertical-align: middle;
 }
 
+/*
 .nav>li{
   padding-right: 10px;
   padding-left: 10px;
-}
-
-.sidenav {
-  height: 100%; /* Full-height: remove this if you want "auto" height */
-  /*width: 160px; /* Set the width of the sidebar */
-  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
-  z-index: 1; /* Stay on top */
-  top: 0; /* Stay at the top */
-  left: 0;
-  background-color: #f3f5f5; 
-  overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 20px;
-  margin-top: 50px;
-  padding-left: 5px;
-  padding-right: 5px;
-}
-
-/* The navigation menu links */
-.sidenav a {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-}
-
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover {
-  color: #f1f1f1;
-}
+}*/
 
 /* Style page content */
 .main {
@@ -174,109 +150,97 @@ h6: {
   .sidenav a {font-size: 18px;}
 }
 
+#body-row {
+    margin-left:0;
+    margin-right:0;
+}
+
+#sidebar-container {
+    min-height: 100vh;   
+    background-color: #f3f5f5;
+    padding: 0;
+    float: right;
+}
+
+/* Sidebar sizes when expanded and expanded */
+.sidebar-expanded {
+    width: 250px;
+}
+.sidebar-collapsed {
+    width: 60px;
+}
+
+/* Menu item*/
+#sidebar-container .list-group a {
+    height: 50px;
+    color: black;
+}
+
+/* Submenu item*/
+#sidebar-container .list-group .sidebar-submenu a {
+    height: 45px;
+    padding-left: 30px;
+}
+.sidebar-submenu {
+    font-size: 0.9rem;
+}
+
+/* Separators */
+.sidebar-separator-title {
+    background-color: #f3f5f5;
+    height: 35px;
+}
+.sidebar-separator {
+    background-color: #f3f5f5;
+    height: 25px;
+}
+.logo-separator {
+    background-color: #f3f5f5;    
+    height: 60px;
+}
+
+/* Closed submenu icon */
+#sidebar-container .list-group .list-group-item[aria-expanded="false"] .submenu-icon::after {
+  content: " \f0d7";
+  font-family: FontAwesome;
+  display: inline;
+  text-align: right;
+  padding-left: 10px;
+}
+/* Opened submenu icon */
+#sidebar-container .list-group .list-group-item[aria-expanded="true"] .submenu-icon::after {
+  content: " \f0da";
+  font-family: FontAwesome;
+  display: inline;
+  text-align: right;
+  padding-left: 10px;
+}
+
+a.bg-light.list-group-item.list-group-item-action.flex-column.align-items-start {
+    padding-left: 2.1em;
+}
+
+small {
+    color: black;
+}
+
 </style>
 
 </head>
   
-  <div id="viewer">
-    <div class="container">
-      <div class="row row-centered pos">
-        <div class="col-lg h-100" id='2dCanvas' style='background: #f3f5f5'></div>
-        <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px'></canvas></div>
-      </div>
-    </div>
-  </div>
-
-<script>
-  var selection_box= new Array();
-  // Selection widget
-  var selection;
-</script>
-
-<body>
-
-  <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
-          <div class="modal-dialog">
-
-            <!-- Download Modal content-->
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Select resolution to download</h4>
-              </div>
-              
-                <div class="col" style="padding:20px">
-                  <div class="row-md-6 text-center">
-                    <div class="slidecontainer">
-                      <input  id='resolution' type='range' step='1' min='0' step='1' max='33' class="slider form-control-sm navbar-btn" oninput='updateDownloadResolution(this.value);'/> 
-                    </div>
-                  </div>
-                  <div class="row-md-6 text-center">
-                    <label style="color:green">Resolution:&nbsp;</label><label style="color:green" id='res_lbl'>&nbsp;</label>
-                  </div>
-                  <div class="row-md-6 text-center">
-                    <label>Size:&nbsp;</label><label id="size_est" > ... KB </label>
-                  </div>
-                </div>
-                
-              <div class="modal-footer">
-                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='callDownload()'>Download</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <div id="shareModal" class="modal fade modal-fullscreen" role="dialog">
-          <div class="modal-dialog">
-            <!-- Share Modal content-->
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Share link</h4>
-              </div>
-              
-
-              <div class="col" style="padding:20px">
-                <div class="input-group">
-                <input type="text" id='link_text' class="form-control"
-                    value="/path/to/foo/bar" placeholder="Some path">
-                  <span class="input-group-btn">
-                  <button class="btn btn-default" type="button" id="copy-button"
-                      data-toggle="tooltip" data-placement="button"
-                      title="Copy to Clipboard" onclick="copyClick()">
-                    Copy
-                  </button>
-                </span>
-              </div>
-                <!-- <input id='link_text' style='width:100%' />  -->
-              </div>
-                
-              <div class="modal-footer">
-                <!-- <button id="copy_btn" class="btn btn-primary" onclick='onCopy()' glyphicon="glyphicon-ok">Copy</button> -->
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-  <nav class="navbar navbar-default navbar-fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
   <div class="container-fluid">
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed " data-toggle="collapse" data-target="#main-navbar" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
+      <a class="navbar-brand" href="#"><image src="logo--blue-neon-data.png" height="30px"/></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor03" aria-controls="navbarColor03" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
       </button>
-      <a class="navbar-brand" href="#"><image src="logo--blue-neon-data.png" height="160%"/></a>
     </div>
     <div class="collapse navbar-collapse" id="main-navbar">
     <ul class="nav navbar-nav">
       <li>
         <div class="dropdown">
-          <button class="btn btn-success dropdown-toggle navbar-btn" type="button" data-toggle="dropdown">
+          <button class="btn btn-primary dropdown-toggle navbar-btn" type="button" data-toggle="dropdown">
             Select Dataset&nbsp;<span class="caret"></span></button>
           <ul class="dropdown-menu">
             <li><a href='javascript:loadScenePreset("NEON_MOAB")'>MOAB</a></li>
@@ -299,14 +263,279 @@ h6: {
       </li> -->
         
     </ul>
-  
-    <ul class="nav navbar-nav navbar-right">
-      <li><a href="https://www.visus.org">powered by OpenViSUS</a></li>
-    </ul>
 
     </div>
   </div>
 </nav>
+
+  <div class="container" style="margin-top:80px">
+
+      <div id="sidebar-container" class="sidebar-expanded d-none d-md-block">
+      <!-- d-* hiddens the Sidebar in smaller devices. Its itens can be kept on the Navbar 'Menu' -->
+            <!-- Bootstrap List Group -->
+        <ul class="list-group">
+          <!-- Logo -->
+            <li class="list-group-item logo-separator d-flex justify-content-center">
+              <div class="row">
+                <div class="col">
+                  <img src='neon-logo.png' width="60" class="menu-collapsed"/> 
+                </div>
+                <div class="col" style="text-align: left">
+                  <button type="button" data-toggle="sidebar-colapse" class="btn btn-sm">
+                      <div class="d-flex w-100 justify-content-start align-items-center">
+                        <span id="collapse-text" class="menu-collapsed text-muted">Collapse&nbsp;&nbsp;&nbsp;</span>
+                        <span id="collapse-icon" class="fa fa-2x mr-3 text-muted"></span>
+                      </div>
+                  </button>
+                </div>
+                
+              </div>
+            </li>   
+            
+            <!-- /END Separator -->
+            <!-- Menu with submenu -->
+            <!-- <a href="#submenu1" data-toggle="collapse" aria-expanded="false" class="bg-light list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-start align-items-center">
+                    <span class="fa fa-database fa-fw mr-3"></span> 
+                    <span class="menu-collapsed">Field</span>
+                    <span class="submenu-icon ml-auto"></span>
+                </div>
+            </a> -->
+            <li class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed"> 
+                <small><span class="fa fa-database fa-fw mr-3"></span> Field</small>
+            </li>
+            <!-- Submenu content -->
+            <li class="list-group-item text-muted align-items-center menu-collapsed"> 
+                <div class="input-group input-group-sm">
+                  <!-- <div class="input-group-prepend">
+                    <span class="input-group-text form-control-sm">Field</span>
+                  </div> -->
+                   <div class="input-group-append input-group-sm" style="width:100%" >
+                     <select id='field' onchange='onFieldChange(this.value);' class='custom-select'></select> 
+                   </div>
+                 </div>
+                    
+            </li>
+
+            <li class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed"> 
+                <small><span class="fa fa-palette fa-fw mr-3"></span> Palette</small>
+            </li>
+
+            <!-- Submenu content -->
+            <li class="list-group-item text-muted align-items-center menu-collapsed"> 
+              <!-- <br />
+                <div class="input-group input-group-sm"> -->
+                  <!-- <div class="input-group-prepend">
+                    <span class="input-group-text form-control-sm">Color</span>
+                  </div> -->
+                  <div class="input-group-append input-group-sm">
+                    <select id='palette' onchange='onPaletteChange();' class='custom-select'>
+                      <option value='NaN' selected="selected"></option>
+                      <option value='rich'>rich</option>
+                      <option value='hsl'>hsl</option>
+                      <option value='banded'>banded</option>
+                      <option value='bry'>bry</option>
+                      <option value='bgry'>bgry</option> 
+                      <option value='gamma'>gamma</option>
+                      <option value='hot1'>hot1</option>
+                      <option value='hot2'>hot2</option>
+                      <option value='ice'>ice</option>
+                      <option value='lighthues'>lighthues</option> 
+                      <option value='smoothrich'>smoothrich</option>
+                      <option value='lut16'>lut16</option>
+                      <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
+                      <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option> 
+                      <option value='GreenGold'>GreenGold</option>
+                      <option value='LinearGreen'>LinearGreen</option>
+                      <option value='LinearTurquois'>LinearTurquois</option>
+                      <option value='MutedBlueGreen'>MutedBlueGreen</option>
+                      <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
+                      <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
+                      <option value='LinearYellow'>LinearYellow</option>
+                      <option value='LinearGray5'>LinearGray5</option>
+                      <option value='LinearGray4'>LinearGray4</option>  
+                      <option value='grayopaque'>grayopaque</option>
+                      <option value='graytransparent'>graytransparent</option> 
+                      <option value='scivis_magic_colormap'>magic color map</option>
+                    </select>
+                  </div>
+                <!-- </div> -->
+              <br />
+               <div class="input-group input-group-sm" >
+                  <div class="input-group-prepend">
+                    <span class="input-group-text form-control-sm">Range</span>
+                  </div>
+                    <div class="form-group input-group-append col-xs-6" style="width:40%">
+                      <input id='palette_min' type="text" size=7 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Min"/>
+                    </div>
+                    <div class="form-group input-group-append col-xs-6" style="width:35%">
+                      <input id='palette_max' type="text" size=7 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Max"/>
+                    </div>
+                </div> 
+            </li>            
+           <!--  <a href="#" class="bg-light list-group-item list-group-item-action">
+                <div class="d-flex w-100 justify-content-start align-items-center">
+                    <span class="fa fa-tasks fa-fw mr-3"></span>
+                    <span class="menu-collapsed">Tasks</span>    
+                </div>
+            </a> -->
+
+            <li class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed"> 
+                <small><span class="fa fa-clock fa-fw mr-3"></span> Time</small>
+            </li>
+            <!-- Submenu content -->
+            <li class="list-group-item text-muted align-items-center menu-collapsed"> 
+              <div class="input-group input-group-sm" >
+                <div class="input-group-prepend">
+                  <span class="input-group-text form-control-sm">Time</span>
+                </div>
+                <div class="input-group-append col-xs-6" style="width:53%">
+                  <input class="slider form-control-sm navbar-btn" style="margin-top:8px" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/> 
+                </div>
+                <div class="input-group-append col-xs-6">
+                  <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn' style="margin-top: 0px;"/>
+                </div>
+              </div>
+            </li>
+
+            <li class="list-group-item sidebar-separator-title text-muted d-flex align-items-center menu-collapsed"> 
+                <small><span class="fa fa-download fa-fw mr-3"></span> Download & Share</small>
+            </li>
+
+            <li class="list-group-item text-muted align-items-center menu-collapsed" >
+                <button type="button" class="btn btn-primary" style="width:49%" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()">Download</button>
+                    <button type="button" class="btn btn-info" style="width:49%" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()">Share</button>
+            </li>
+
+            
+
+            <!-- Separator with title -->
+            <li class="list-group-item text-muted align-items-center menu-collapsed" style="text-align: right;"> 
+                <small >powered by <a href="https://www.visus.org">OpenVisus &nbsp;&nbsp;&nbsp;<img src='visus.org-logo.png 'width="50"/> </a></small>
+            </li>
+            
+        </ul><!-- List Group END-->
+    </div><!-- sidebar-container END -->
+  
+  </div>
+
+  <div id="viewer">
+    <div class="container">
+      <div class="row row-centered pos">
+        <div id='2dCanvas' style='background: #f3f5f5; width:100%'></div>
+        <div class="col-lg h-100"><canvas id='3dCanvas' width='1000px' height='600px'></canvas></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  var selection_box= new Array();
+  // Selection widget
+  var selection;
+
+  // Hide submenus
+  $('#body-row .collapse').collapse('hide'); 
+
+  // Collapse/Expand icon
+  $('#collapse-icon').addClass('fa-angle-double-right'); 
+
+  // Collapse click
+  $('[data-toggle=sidebar-colapse]').click(function() {
+      SidebarCollapse();
+  });
+
+  function SidebarCollapse () {
+      $('.menu-collapsed').toggleClass('d-none');
+      $('.sidebar-submenu').toggleClass('d-none');
+      $('.submenu-icon').toggleClass('d-none');
+      $('#sidebar-container').toggleClass('sidebar-expanded sidebar-collapsed');
+      
+      // Treating d-flex/d-none on separators with title
+      var SeparatorTitle = $('.sidebar-separator-title');
+      if ( SeparatorTitle.hasClass('d-flex') ) {
+          SeparatorTitle.removeClass('d-flex');
+      } else {
+          SeparatorTitle.addClass('d-flex');
+      }
+      
+      // Collapse/Expand icon
+      $('#collapse-icon').toggleClass('fa-angle-double-right fa-angle-double-left');
+  }
+</script>
+
+<body>
+
+  <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
+          <div class="modal-dialog">
+
+            <!-- Download Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Select a resolution to download</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              
+              <div class="modal-body">
+                <div class="col" style="padding:20px">
+                  <div class="row-md-6 text-center">
+                    <div class="slidecontainer">
+                      <input  id='resolution' type='range' step='1' min='0' step='1' max='33' class="slider form-control-sm navbar-btn" oninput='updateDownloadResolution(this.value);'/> 
+                    </div>
+                  </div>
+                  <div class="row-md-6 text-center">
+                    <label style="color:green">Resolution:&nbsp;</label><label style="color:green" id='res_lbl'>&nbsp;</label>
+                  </div>
+                  <div class="row-md-6 text-center">
+                    <label>Size:&nbsp;</label><label id="size_est" > ... KB </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button class="btn btn-primary" id='download_btn' glyphicon="glyphicon-ok" onclick='callDownload()'>Download</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="shareModal" class="modal fade fullscreen" role="dialog">
+          <div class="modal-dialog">
+            <!-- Share Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Share Link</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              
+              <div class="modal-body">
+              <div class="col" style="padding:20px">
+                <div class="input-group">
+                <input type="text" id='link_text' class="form-control"
+                    value="/path/to/foo/bar" placeholder="Some path">
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="copy-button"
+                        data-toggle="tooltip" data-placement="button"
+                        title="Copy to Clipboard" onclick="copyClick()">
+                      Copy
+                    </button>
+                  </span>
+                </div>
+                <!-- <input id='link_text' style='width:100%' />  -->
+                 </div>
+              </div>
+              <div class="modal-footer">
+                <!-- <button id="copy_btn" class="btn btn-primary" onclick='onCopy()' glyphicon="glyphicon-ok">Copy</button> -->
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
   
       
       <table hidden> 
@@ -371,89 +600,6 @@ h6: {
       </table>
 
   <!-- <details ontoggle="load_dataset(this, &#39;aneurism&#39;, {level: 24, width: 256, height: 256, depth: 256}, &#39;uint8&#39;, {width: 256.0, height: 256.0, depth: 256.0})"/> -->
-
-  <div class="sidenav">
-
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <h3 class="panel-title">Settings</h3>
-    </div>
-    <div class="panel-body">
-       <span class="input-group-text form-control-sm">Field</span>
-
-       <select id='field' onchange='onFieldChange(this.value);' class='custom-select'></select> 
-
-       <div class="input-group input-group-sm">
-        <div class="input-group-prepend">
-          <span class="input-group-text form-control-sm">Colormap</span>
-        </div>
-        <div class="input-group-append input-group-sm">
-          <select id='palette' onchange='onPaletteChange();' class='custom-select'>
-            <option value='NaN' selected="selected"></option>
-            <option value='rich'>rich</option>
-            <option value='hsl'>hsl</option>
-            <option value='banded'>banded</option>
-            <option value='bry'>bry</option>
-            <option value='bgry'>bgry</option> 
-            <option value='gamma'>gamma</option>
-            <option value='hot1'>hot1</option>
-            <option value='hot2'>hot2</option>
-            <option value='ice'>ice</option>
-            <option value='lighthues'>lighthues</option> 
-            <option value='smoothrich'>smoothrich</option>
-            <option value='lut16'>lut16</option>
-            <option value='BlueGreenDivergent'>BlueGreenDivergent</option>
-            <option value='AsymmetricBlueGreenDivergent'>AsymmetricBlueGreenDivergent</option> 
-            <option value='GreenGold'>GreenGold</option>
-            <option value='LinearGreen'>LinearGreen</option>
-            <option value='LinearTurquois'>LinearTurquois</option>
-            <option value='MutedBlueGreen'>MutedBlueGreen</option>
-            <option value='ExtendedCoolWarm'>ExtendedCoolWarm</option>
-            <option value='AsymmetricBlueOrangeDivergent'>AsymmetricBlueOrangeDivergent</option>
-            <option value='LinearYellow'>LinearYellow</option>
-            <option value='LinearGray5'>LinearGray5</option>
-            <option value='LinearGray4'>LinearGray4</option>  
-            <option value='grayopaque'>grayopaque</option>
-            <option value='graytransparent'>graytransparent</option> 
-            <option value='scivis_magic_colormap'>magic color map</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="input-group input-group-sm" style="padding-top:5px">
-        <div class="input-group-prepend">
-          <span class="input-group-text form-control-sm">Range</span>
-        </div>
-        <div class="row">
-          <div class="form-group col-xs-6">
-            <input id='palette_min' type="text" size=8 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Min"/>
-          </div>
-          <div class="form-group col-xs-6">
-            <input id='palette_max' type="text" size=8 onchange='onPaletteChange();' class="form-control form-control-sm" placeholder="Max"/>
-          </div>
-        </div>
-        
-      </div>
-
-      <div class="form-group" >
-        <div class="input-group-prepend">
-          <span class="input-group-text form-control-sm">Time</span>
-        </div>
-        <div class="row">
-          <div class="form-group col-xs-6">
-            <input class="slider form-control-sm navbar-btn" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/> 
-          </div>
-          <div class="form-group col-xs-6">
-            <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn' style="margin-top: 0px;"/>
-          </div>
-       </div>
-      </div>
-
-    </div>
-  </div>
-
-  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()">Download</button>
-  <button type="button" class="btn btn-info" data-toggle="modal" id='download_btn' data-target="#shareModal" onclick="shareLink()">Share</button>
 
   </div>
 </div>
@@ -525,7 +671,7 @@ h6: {
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_redb&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
 
       else if(preset_name=="NEON_VEGIDX")
-        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_redb_vegidx&field=ARVI'
+        config_str='?server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_redb_vegidx&field=NDVI&time=0&palette=rich&palette_min=0&palette_max=1'
         
       else if(preset_name=="NEON_ABBA")
         config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=neon_abba&field=DATA&time=0&palette=rich&palette_min=NaN&palette_max=NaN'
