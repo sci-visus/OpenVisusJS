@@ -819,11 +819,17 @@ function VisusVR(params)
         }
         
         ret = base_url
-          +'&action=pointquery'
+          +'&action=boxquery'
           +'&box='
-          +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(y1, 0, self.dataset.dims[0]))+'%20'+clamp(z1, 0, self.dataset.dims[2])+'%20'
-          +clamp(x2, 0, self.dataset.dims[0]-1)+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
+          +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0]-1))+'%20'+clamp(y1, 0, self.dataset.dims[1])+'%20'
+          +clamp(y2, 0, self.dataset.dims[1]-1)+'%20'+(clamp(z1, 0, self.dataset.dims[2]))+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
           +'&toh='+toh;
+
+          // +'&action=pointquery'
+          // +'&box='
+          // +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(y1, 0, self.dataset.dims[0]))+'%20'+clamp(z1, 0, self.dataset.dims[2])+'%20'
+          // +clamp(x2, 0, self.dataset.dims[0]-1)+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)+'%20'+(clamp(z2, 0, self.dataset.dims[2])-1)
+          // +'&toh='+toh;
 
       }else{
         ret = base_url

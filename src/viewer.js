@@ -94,6 +94,12 @@ function fetch_and_draw(query_str, reset_view=1)
         
         var array = toArray(data, visus1.dtype)
         var phy_size = [data_size[0]*visus1.dataset.logic_to_physic[0], data_size[1]*visus1.dataset.logic_to_physic[5],data_size[2]*visus1.dataset.logic_to_physic[10]];
+
+        for(d=0;d<3;d++){
+          if(data_size[d]==1)
+            phy_size[d] = data_size[d]
+        }
+
         renderer.uploadData(array, visus1.dtype, data_size[0], data_size[1], data_size[2], phy_size[0], phy_size[1], phy_size[2]);
 
         viewer.style.display = 'block'
