@@ -168,7 +168,7 @@ function visusAsyncLoadDataset(url)
     return response.text();
   })
   .then(function (content) {
-    
+
     var lines = content.split('\n');
 
     ret={};
@@ -209,9 +209,60 @@ function visusAsyncLoadDataset(url)
     ret.name=parse_url.getSearchVariable("dataset");
     ret.base_url = parse_url.protocol+'//'+parse_url.hostname+':'+parse_url.port+parse_url.pathname+'?';
     ret.logic_to_physic=[1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1];  // initialize to identity
+    ret.dims=[1,1,1];
     
     ret.timesteps=[0,0];
-  
+
+    // try parsing as xml first
+    var parser = new DOMParser();
+    var xmlDoc = parser.parseFromString(content, "text/xml");
+
+    var boxElement = xmlDoc.getElementsByTagName("box")
+    if (boxElement.length == 1) {
+      var dims=boxElement[0].getAttribute("value").split(' ');
+      ret.dims[0]=parseInt(dims[1])+1;
+      ret.dims[1]=parseInt(dims[3])+1;
+      if (dims.length > 5)
+        ret.dims[2]=parseInt(dims[5])+1;
+    }
+
+    var physicalBoxElement = xmlDoc.getElementsByTagName("physic_box")
+    if (physicalBoxElement.length == 1) {
+      var dims=physicalBoxElement[0].getAttribute("value").split(' ');
+      var fdims=[1,1,1];
+      fdims[0]=parseFloat(dims[1])+1;
+      fdims[1]=parseFloat(dims[3])+1;
+      if (dims.length > 5)
+        fdims[2]=parseFloat(dims[5])+1;
+
+      ret.logic_to_physic[0] = fdims[0] / ret.dims[0];
+      ret.logic_to_physic[5] = fdims[1] / ret.dims[1];
+      ret.logic_to_physic[10] = fdims[2] / ret.dims[2];
+    }
+    
+    var bitsPerBlockElement = xmlDoc.getElementsByTagName("bitsperblock")
+    if (bitsPerBlockElement.length == 1) {
+      ret.bitsperblock=parseInt(bitsPerBlockElement[0].getAttribute("value"));
+    }
+
+    var bitmaskElement = xmlDoc.getElementsByTagName("bitmask")
+    if (bitmaskElement.length == 1) {
+      ret.bitmask=bitmaskElement[0].getAttribute("value");
+      ret.maxh=ret.bitmask.length-1;
+    }
+
+    var fieldElement = xmlDoc.getElementsByTagName("field")
+    ret.fields=[];
+    for (var i=0; i<fieldElement.length; i++) {
+      var field={};
+      field.name=fieldElement[i].getAttribute("name");
+      field.dtype=fieldElement[i].getAttribute("dtype");
+      field.min=0;
+      field.max=0;
+      ret.fields.push(field);
+    }
+
+    // still try parsing old format
     for(var i = 0;i < lines.length;i++)
     {
       //box
