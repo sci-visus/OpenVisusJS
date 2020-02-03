@@ -60,8 +60,12 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+ <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+   integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+   crossorigin=""></script>
 
 <style type="text/css">
 body{
@@ -137,6 +141,8 @@ body{
   background-color: rgba(255,255,255,.8);
   color:rgba(64,64,64,1.0);
 }
+
+.leaflet-tile { border: none; }
 
 </style>
 
@@ -533,6 +539,21 @@ ol.for-examples li {
           //     tileSources: getTileSources("https://molniya.sci.utah.edu", "neon_moab", 120000, 190000, 35, 512, bXRoad)
           // });
 
+          S = 2.495320233665337e-8
+          D = 57.29577951308232
+          R = 6378137
+          function world_unproject(x, y, z){
+            const scale = 256 * Math.pow(2, z);
+            const p = {
+              x: (x / scale - 0.5) / S,
+              y: (y / scale - 0.5) / -S,
+            };
+            return {
+              lat: (2 * Math.atan(Math.exp(p.y / R)) - (Math.PI / 2)) * D,
+              lng: p.x * D / R,
+            };
+          }
+
           var minZoom = 0
           var maxZoom = 10
           var img = [
@@ -556,12 +577,13 @@ ol.for-examples li {
           // assign map and image dimensions
           var rc = new L.RasterCoords(mymap, img)
           console.log("zoom level",rc.zoomLevel())
+          world_max_zoom=30
 
-          mymap.setMaxZoom(rc.zoomLevel())
+          mymap.setMaxZoom(world_max_zoom)//rc.zoomLevel())
           // all coordinates need to be unprojected using the `unproject` method
           // set the view in the lower right edge of the image
-          mymap.setView(rc.unproject([img[0], img[1]]), 0)
-
+          //mymap.setView(rc.unproject([img[0], img[1]]), 0)
+          mymap.setView([38.297937422435105, -109.4561444142454], 13);
           //mymap.setView(rc.unproject([4900, 3015]), 3)
 
 
@@ -574,21 +596,32 @@ ol.for-examples li {
 
           // var bounds = [[-60000,-95000], [60000,95000]];
           // mymap.fitBounds(bounds)
-/*
+
+          
           var mapLayer = new L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-              maxZoom: 18,
+              maxZoom: world_max_zoom,
               attribution: '',
-              id: 'mapbox.streets'
+              id: 'mapbox.streets',
             })
           mapLayer.addTo(mymap);
 
           map_tile_size=mapLayer.getTileSize().x;
 
-          //console.log("world bound", mymap.getPixelWorldBounds(18))
+          console.log("world bound", mymap.getPixelWorldBounds(world_max_zoom))
 
-          full_size=map_tile_size*Math.pow(2,18);
+          worldBounds=mymap.getPixelWorldBounds(world_max_zoom).max
+
+          worldBounds_min=mymap.layerPointToLatLng(mymap.getPixelWorldBounds(world_max_zoom).min, world_max_zoom);
+          worldBounds_max=mymap.layerPointToLatLng(mymap.getPixelWorldBounds(world_max_zoom).max, world_max_zoom);
+
+          full_size=map_tile_size*Math.pow(2,world_max_zoom);
           console.log("map layer tile size", mapLayer.getTileSize(), "full size", full_size);
-*/
+          console.log("worldBounds", worldBounds_min, worldBounds_max)
+
+          world_ratio=(worldBounds_max.lat-worldBounds_min.lat)/full_size
+          map_ratio=(38.30679548724762-38.297937422435105)/190000
+
+          console.log("ratios ", world_ratio, map_ratio, world_ratio/map_ratio)
           // tile_unit=180.0/Math.pow(2,18)
 
           // x_tile=38.297937422435105/tile_unit
@@ -598,13 +631,24 @@ ol.for-examples li {
             //L.marker([0.18402499582621254, 0.6684251047442432]).addTo(mymap);
             //L.marker([0.18422788160286332, 0.6685797071405766]).addTo(mymap);
 
-          //   L.polygon([
-          //     [ 38.297937422435105 ,  -109.44451991552009 ],
-          // [ 38.297937422435105 ,  -109.4561444142454 ],
-          //     [ 38.30679548724762 ,  -109.4561444142454 ],
-          // [ 38.30679548724762 ,  -109.44451991552009 ],
+            // var myMarker = L.marker([38.297937422435105,-109.4561444142454], {title: "MyPoint", alt: "sw", draggable: true}).addTo(mymap)
 
-          //   ]).addTo(mymap);
+            rectangle = L.polygon([
+              [ 38.297937422435105 ,  -109.44451991552009 ],
+              [ 38.297937422435105 ,  -109.4561444142454 ],
+              [ 38.30679548724762 ,  -109.4561444142454 ],
+              [ 38.30679548724762 ,  -109.44451991552009 ],
+            ])
+            rectangle.addTo(mymap);
+
+            var southWest = [38.297937422435105,-109.4561444142454] //map.unproject([ 0, mapHeight], getMaxZoom());
+            var northEast = [38.30679548724762, -109.44451991552009]//map.unproject([ mapWidth, 0 ], getMaxZoom());
+            var mapBounds = new L.LatLngBounds(rectangle.getBounds().getSouthWest(), rectangle.getBounds().getNorthEast());
+
+            console.log("map bounds", mapBounds)
+
+            L.marker(mapBounds.getSouthWest()).addTo(mymap);
+            L.marker(mapBounds.getNorthEast()).addTo(mymap);
 
           // mymap.on('click', function(e){
           //   var coord = e.latlng;
@@ -618,42 +662,65 @@ ol.for-examples li {
                       width: 120000,
                       height: 190000,
                       imageFormat: 'jpg',
-                      tileSize: 256,
-                      minZoom: 1,
-                      maxZoom: 10
+                      tileSize: 64,
+                      minZoom: 0,
+                      maxZoom: world_max_zoom,//rc.zoomLevel(),
+                      detectRetina: true
                     },
+                    bounds: mapBounds,
                   getTileUrl: function(coords) {
                       server="https://molniya.sci.utah.edu"
                       dataset="neon_moab"
                       w=120000
                       h=190000
                       max_levels=35
-                      tile_size=256
-                      level=coords.z // - 8
-                      x=coords.x
-                      y=coords.y
+                      tile_size=64
+
+                      factor_offset = 20
+                      level=coords.z - factor_offset
+                      x=coords.x//parseInt(coords.x / Math.pow(2,factor_offset))
+                      y=coords.y//parseInt(coords.y / Math.pow(2,factor_offset))
                       num_levels = rc.zoomLevel();//parseInt(Math.pow(2,18)/tile_size, 10);//parseInt(Math.log2(h/tile_size))//parseInt(max_levels / 2, 10);
                       //console.log("num levels", num_levels)
 
                       //console.log(mymap.project(coords))
                       var tilePos = this._getTilePos(coords);
+
                       var key = this._tileCoordsToKey(coords);
+
+                      // if(key[0] == 2 && key[1] == 3)
+                      //   console.log("key", key, "coords",coords)
                       //console.log("tilepos", tilePos, "key", key)
                       //console.log("coords",coords)
-                      /*
-                      var latLng = mymap.layerPointToLatLng(coords);
-                      console.log("latlng coords", latLng)
+                      
+                      // var latLng = mymap.layerPointToLatLng([0,0,0]);
+                      // console.log("latlng coords", latLng, "level",level)
+                      // var latLng = mymap.layerPointToLatLng([64,64,0]);
+                      // console.log("latlng coords", latLng, "level",level)
+                      
+                      //console.log("coords ", coords, tilePos)
+                      var curr_xyz = [coords.x*tile_size,coords.y*tile_size,coords.z]
+                      var latLng = mymap.unproject([coords.x*tile_size,coords.y*tile_size],coords.z) //mymap.layerPointToLatLng(coords); 
 
-                      orig_xyz=mymap.project([ 38.297937422435105 ,  -109.44451991552009 ],coords.z)
-                      curr_xyz=mymap.project(latLng,coords.z)
+                      if(! mapBounds.contains(latLng)) return NaN;
+                      
+                      L.marker(latLng).addTo(mymap);
+
+                      orig_xyz=mymap.project(mapBounds.getSouthWest(),coords.z)
+                      //curr_xyz=mymap.project(latLng,coords.z)
                       //mymap.latLngToLayerPoint([ 38.297937422435105 ,  -109.44451991552009 ])
-                      offset=[(curr_xyz.x-orig_xyz.x)/tile_size,(curr_xyz.y-orig_xyz.y)/tile_size]
+                      factor=tile_size*Math.pow(2,level)
+                      offset=[parseInt((curr_xyz.x-orig_xyz.x)/factor),parseInt((curr_xyz.y-orig_xyz.y)/factor)]
+                      console.log("orig,curr",orig_xyz, curr_xyz)
                       console.log("offset", offset)
+                      console.log("xy", x, y)
                       x=parseInt(x-offset[0])
                       y=parseInt(y-offset[1])
-                      */
+
+                      console.log("check contains", mapBounds, latLng)
+                      
                       //console.log("proj coords", rc.unproject([x,y]))
-                      console.log("requesting tile ", coords.z, coords.x, coords.y, tilePos, key);
+                      //console.log("requesting tile ", coords.z, coords.x, coords.y, tilePos, key);
                       //return "";
                       var scale = Math.pow(2, num_levels - level);
                       var level_tile_size = tile_size * scale;
@@ -668,10 +735,36 @@ ol.for-examples li {
                       url += "&box=" + x1 + "%20" + x2 + "%20" + y1 + "%20" + y2;
                       url += "&dataset=" + encodeURIComponent(dataset);
                       url += "&maxh=" + max_levels;
-                      url += "&toh=" + Math.max(20, Math.min(max_levels,parseInt((level+1)* Math.ceil(max_levels/num_levels))));
+                      url += "&toh=" + 7;//Math.max(20, Math.min(max_levels,parseInt((level+1)* Math.ceil(max_levels/num_levels))));
 
                       return url;
                   },
+                  /*_isValidTile: function (coords) {
+                      w=120000
+                      h=190000
+                      max_levels=35
+                      tile_size=64
+                      level=coords.z // - 8
+                      x=coords.x
+                      y=coords.y
+                      num_levels = rc.zoomLevel();
+                      //console.log(mymap.project(coords))
+                      var tilePos = this._getTilePos(coords);
+                      var key = this._tileCoordsToKey(coords);
+                      
+                      var scale = Math.pow(2, num_levels - level);
+                      var level_tile_size = tile_size * scale;
+                      //console.log("tile size level:", level_tile_size)
+                      var x1 = level_tile_size * x; var x2 = Math.min(level_tile_size * (x + 1) - 1, w)
+                      var y2 = h - level_tile_size * y; var y1 = h - Math.min(level_tile_size * (y + 1) - 1, h);
+                      
+                      //console.log("proj coords", rc.unproject([coords.x,coords.y]))
+                      if(x1 >= 0 && x2 <= w && y1 >= 0 && y2 <= h)
+                        return true;
+                      else 
+                        return false
+
+                  }*/
 
                   // _getGridSize: function (imageSize) {
                   //   var tileSize = this.options.tileSize;
