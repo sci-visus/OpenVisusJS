@@ -686,9 +686,9 @@ let pre_server = getParameterByName('server');
 let pre_dataset = getParameterByName('dataset'); 
 
 if(pre_server==null)
-  setServer(DEFAULT_SERVER)
-else
-  setServer(pre_server, pre_dataset)
+    pre_server = DEFAULT_SERVER
+
+setServer(pre_server, pre_dataset)
 
 function shareLink(){
 
