@@ -308,56 +308,6 @@ body{
     </div>
   </div> 
 
-  <div id="serverModal" class="modal fade myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div id="server-modal-dialog" class="modal-dialog my-modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-body">
-          <div class="row">
-              <div class="col">
-              <div class="input-group input-group-sm mb-3">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">Server</span>
-                </div>
-                <input id='server' type="text" size=32 onchange='setServer(this.value);' class='form-control'/>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <div class="input-group input-group-sm">
-                <div class="input-group-prepend">
-                  <div class="input-group-text">
-                    <input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);'></input>
-                  </div>
-                </div>
-                <div class="input-group-append">
-                  <span class="input-group-text">AutoRefresh</span>
-                </div>
-              </div>
-            </div>
-            <div class="col">
-              <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <div class="input-group input-group-sm">
-                    <div class="input-group-prepend">
-                      <div class="input-group-text">
-                        <input id='auto_spin' type='checkbox' size=32 onchange='onSpinChange(this.value);'></input>
-                      </div>
-                    </div>
-                    <div class="input-group-append">
-                      <span class="input-group-text">AutoSpin</span>
-                    </div>
-                    
-                  </div>
-                </div>
-              </div>
-        </div>
-      </div>
-    </div>
-  </div> 
 
   <nav hidden class="navbar navbar-expand-sm navbar-dark bg-dark rounded fixed-top">
 
@@ -366,12 +316,10 @@ body{
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-          <button id="serverbtn" type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal"><span class="fa fa-server"></span></button>
-        </li>
-        <li class="nav-item">
+	<li class="nav-item">
           <div class="input-group input-group-sm">
-            <select id='dataset' onchange='setDataset(this.value);' class='custom-select' style="max-width: 200px"></select>
+	    <input id='server' type="text" size=32 class='form-control' readonly/>
+            <input id='dataset' type="text" size=32 class='form-control' readonly/>
             <div class="input-group-append input-group-sm">
               <select id='field' onchange='onFieldChange(this.value);' class='custom-select' style="max-width: 100px" ></select> 
             </div>
