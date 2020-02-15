@@ -435,7 +435,7 @@ body{
             <div class="input-group-append" hidden>
               <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn'/>
             </div>
-            <div class="input-group-append" hidden>
+            <div class="input-group-append">
               <div class="input-group-text form-control-sm">
                 <input class="custom-range" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/>  
               </div>
@@ -589,7 +589,7 @@ body{
     $('#playtime').click(function() {
       playingtime = true
 
-      setInterval(function(){ if(playingtime==true) $('#fwdtime').click(); }, 1000);
+      setInterval(function(){ if(playingtime==true) $('#fwdtime').click(); }, 2000);
     });
 
     $('#stoptime').click(function() {
