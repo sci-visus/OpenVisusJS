@@ -760,9 +760,13 @@ function VisusOSD(params)
       success : function() {
         if (oldImage){
           self.osd.world.removeItem(oldImage);
+
+          // NOTE: Time varying 2d, if you uncomment this you refresh every timestep (which should be the right thing to do)
+          // Instead (when commented) we are piling up tiles to make the transition in time more smooth ...
+
           // we are keeping only one item to avoid rendering of mixed tiles
-          while(visus1.osd.world.getItemCount() > 1)
-            visus1.osd.world.removeItem(self.osd.world.getItemAt(1))
+          // while(visus1.osd.world.getItemCount() > 1)
+          //   visus1.osd.world.removeItem(self.osd.world.getItemAt(1))
         }
       }    
     });  
