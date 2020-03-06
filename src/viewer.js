@@ -355,15 +355,28 @@ function setDataset(value, presets=false)
       }
 
       console.log("USE 2D canvas")
-      visus1=VisusOSD({
-        id : '2dCanvas',
-        dataset : dataset,
-        compression : 'png',
-        showNavigator : false,
-        debugMode : false
-      }); 
 
-      addSelectionOSD();
+      if($("2dCanvas")){
+        visus1=VisusOSD({
+          id : '2dCanvas',
+          dataset : dataset,
+          compression : 'png',
+          showNavigator : false,
+          debugMode : false
+        }); 
+
+        addSelectionOSD();
+      }
+      
+      if($("leafletCanvas")){
+        visus1=VisusLeaflet({
+          id : 'leafletCanvas',
+          dataset : dataset,
+          compression : 'png',
+          showNavigator : false,
+          debugMode : false
+        }); 
+      }
 
       document.getElementById('resolution').step=2;
 
