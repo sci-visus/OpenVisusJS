@@ -1137,9 +1137,16 @@ function VisusLeaflet(params)
   self.VisusLayer = function() { return new self.tileLayer(); }
 
   self.map = L.map(self.id)
-  //self.map.setMaxZoom(18);
+  self.rc = new L.RasterCoords(self.map, [ self.dataset.dims[X], self.dataset.dims[Y] ])
 
-  //self.map.setView([0, 0], 13);
+  
+  console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
+  console.log("zoom level", rc.zoomLevel())
+  console.log(rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]))
+  self.map.setView(rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]), rc.zoomLevel())
+
+  //var bounds = [[0,0], [self.dataset.dims[X], self.dataset.dims[Y]]];
+  //self.map.fitBounds(bounds)
 
   self.rc = new L.RasterCoords(self.map, [ self.dataset.dims[X], self.dataset.dims[Y] ])
   self.VisusLayer().addTo(self.map);
