@@ -734,7 +734,7 @@ function VisusOSD(params)
   {
     console.log("Creating OpenSeadragon instance");
     var osd_id=self.id+"_osd";
-    document.getElementById(self.id).innerHTML="<div id='"+osd_id+"' style='width: 100%;height: 85vh;'></div>";     
+    document.getElementById(self.id).innerHTML="<div id='"+osd_id+"' style='width: 100%;height: 100vh;'></div>";     
     
     self.osd=OpenSeadragon({
       id : osd_id,
