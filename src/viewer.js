@@ -3,6 +3,9 @@ var visus1;
 let renderer;
 let curr_render_type;
 
+//TODO rename 2dCanvas to osdCanvas
+let canvas2d_name="leafletCanvas";//"2dCanvas";
+
 function
 toArray(buffer, dataType)
 {
@@ -34,7 +37,7 @@ toArray(buffer, dataType)
 
 function notifyStatus(new_text)
 {
-  if(document.getElementById('2dCanvas').hidden==true){
+  if(document.getElementById(canvas2d_name).hidden==true){
     document.getElementById('status_bar').hidden=false
     document.getElementById('status').innerHTML="  "+new_text
   }
@@ -344,7 +347,7 @@ function setDataset(value, presets=false)
     }   
 
     if(dataset.dim==2){
-      document.getElementById('2dCanvas').hidden=false
+      document.getElementById(canvas2d_name).hidden=false
       document.getElementById('3dCanvas').hidden=true
       document.getElementById('view_btn').hidden=true;
       document.getElementById('range_panel').hidden=true;
@@ -356,7 +359,7 @@ function setDataset(value, presets=false)
 
       console.log("USE 2D canvas")
 
-      if($("2dCanvas")){
+      if(document.getElementById("2dCanvas")){
         visus1=VisusOSD({
           id : '2dCanvas',
           dataset : dataset,
@@ -371,6 +374,7 @@ function setDataset(value, presets=false)
       if($("leafletCanvas")){
         visus1=VisusLeaflet({
           id : 'leafletCanvas',
+          url: getServer(),
           dataset : dataset,
           compression : 'png',
           showNavigator : false,
@@ -389,7 +393,7 @@ function setDataset(value, presets=false)
 
     }else {
       console.log("USE 3D canvas")
-      document.getElementById('2dCanvas').hidden=true;
+      document.getElementById(canvas2d_name).hidden=true;
       document.getElementById('3dCanvas').hidden=false;
       document.getElementById('view_btn').hidden=false;
       document.getElementById('range_panel').hidden=false;
@@ -883,18 +887,21 @@ function loadPresets(){
 
 }
 
-document.getElementById('3dCanvas').addEventListener('webglcontextlost', function(event) { event.preventDefault()}, false)
-document.getElementById('3dCanvas').addEventListener('webglcontextrestored', function(event) {
-  console.log("Restored WebGl context")
+if(document.getElementById('3dCanvas')){
+  document.getElementById('3dCanvas').addEventListener('webglcontextlost', function(event) { event.preventDefault()}, false)
+  document.getElementById('3dCanvas').addEventListener('webglcontextrestored', function(event) {
+    console.log("Restored WebGl context")
 
-  parent=document.getElementById('3dCanvas').parentNode
-  savedhtml=parent.innerHTML
-  parent.removeChild(document.getElementById('3dCanvas'))
-  parent.innerHTML=savedhtml
+    parent=document.getElementById('3dCanvas').parentNode
+    savedhtml=parent.innerHTML
+    parent.removeChild(document.getElementById('3dCanvas'))
+    parent.innerHTML=savedhtml
 
-  //console.log("restored correctly", document.getElementById('3dCanvas'))
-  //delete renderer
-  renderer=null
-  refreshAll();
-}, false)
+
+    //console.log("restored correctly", document.getElementById('3dCanvas'))
+    //delete renderer
+    renderer=null
+    refreshAll();
+  }, false)
+}
 

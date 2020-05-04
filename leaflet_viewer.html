@@ -60,8 +60,15 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+  integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+  crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+  integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+  crossorigin=""></script>
+
+  <script src="src/SmoothWheelZoom.js"></script>
+
 
 <style type="text/css">
 body{
@@ -137,6 +144,8 @@ body{
   background-color: rgba(255,255,255,.8);
   color:rgba(64,64,64,1.0);
 }
+
+.leaflet-tile { border: none; } #//solid yellow 5px; }
 
 </style>
 
@@ -453,8 +462,8 @@ body{
   <div id="viewer">
     <div class="container">
       <div class="row row-centered pos">
-        <div id="leafletCanvas" style="width: 600px; height: 400px; z-index:0"></div>
-        <div class="col-lg h-100" id='2dCanvas' style='background: black;'></div>
+        <div id="leafletCanvas" style="width: 800px; height: 600px; z-index:0"></div>
+        <!-- <div class="col-lg h-100" id='2dCanvas' style='background: black;'></div> -->
           <script>
             document.write('<canvas id="3dCanvas" style="background: black" width="' + $(window).width()*.9 + '"  height="' + $(window).height()*.9+ '"/>');
           </script>
@@ -468,6 +477,7 @@ body{
   <script src="src/dvr.js"></script>
   <script src="src/visus.js"></script>
   <script src="config.js"></script>
+  <script src="src/VisusGetTileLayer.js"></script>
   <script src="src/viewer.js"></script>
 
   <script>

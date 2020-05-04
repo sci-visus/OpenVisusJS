@@ -913,27 +913,26 @@ function VisusLeaflet(params)
       y=coords.y
 
       num_levels = self.rc.zoomLevel();
-      var tilePos = this._getTilePos(coords);
-      var key = this._tileCoordsToKey(coords);
-
+      var tilePos = self._getTilePos(coords);
+      var key = self._tileCoordsToKey(coords);
 
       w = self.dataset.dims[X]
       h = self.dataset.dims[Y]
 
       var scale = Math.pow(2, self.maxLevel - level);
-      var level_tile_size = tile_size * scale;
+      var level_tile_size = self.tile_size * scale;
       //console.log("tile size level:", level_tile_size)
       var x1 = self.tile_size[X] * x; var x2 = Math.min(self.tile_size[X] * (x + 1) - 1, w)
       var y2 = h - self.tile_size[Y] * y; var y1 = h - Math.min(self.tile_size[Y] * (y + 1) - 1, h);
 
-      var url = server + "/mod_visus?";
+      var url = self.dataset.base_url + "/mod_visus?";
 
       url += "&action=boxquery";
       url += "&compression=jpg";
       url += "&box=" + x1 + "%20" + x2 + "%20" + y1 + "%20" + y2;
       url += "&dataset=" + encodeURIComponent(dataset);
       url += "&maxh=" + self.maxLevel;
-      url += "&toh=" + Math.max(20, Math.min(self.maxLevel,parseInt((level+1)* Math.ceil(self.maxLevel/num_levels))));
+      url += "&toh=" + Math.max(20, Math.min(self.maxLevel,parseInt((level+1)* Math.ceil(self.maxLevel/self.num_levels))));
 
       return url;
   };
@@ -1121,37 +1120,48 @@ function VisusLeaflet(params)
   Y = permutation[self.axis][1];
   Z = permutation[self.axis][2];  
   
-  self.tileLayer= L.TileLayer.extend({
+  dimX = Math.pow(2, Math.ceil(Math.log(self.dataset.dims[X])/Math.log(2)));
+  dimY = Math.pow(2, Math.ceil(Math.log(self.dataset.dims[Y])/Math.log(2)));
+  //console.log(dimX, dimY)
+
+  if (self.map != undefined) { self.map.remove(); } 
+  self.map = L.map(self.id, {
+      scrollWheelZoom: false, // disable original zoom function
+      smoothWheelZoom: true,  // enable smooth zoom 
+      smoothSensitivity: 1,   // zoom speed. default is 1
+    })
+
+  self.rc = new L.RasterCoords(self.map, [self.dataset.dims[X], self.dataset.dims[Y]], self.tile_size[X])
+
+  console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
+  console.log("zoom level", self.rc.zoomLevel(), self.dataset.maxh)
+  console.log("min level", self.minLevel, "max level", self.maxLevel)
+  console.log("tile_size", self.tile_size)
+  console.log(self.rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]))
+  self.map.setView(self.rc.unproject([self.dataset.dims[X]/2, self.dataset.dims[Y]/2]), self.minLevel/2)
+
+  // var bounds = [[0,0], [self.dataset.dims[X], self.dataset.dims[Y]]];
+  // self.map.fitBounds(bounds)
+
+  self.tileLayer= VisusGetTileLayer(self.dataset.base_url, self.dataset.name,
+          self.dataset.dims[X],self.dataset.dims[Y], self.dataset.maxh, self.minLevel, rc.zoomLevel(), self.tile_size[X])
+
+  /*self.tileLayer = L.TileLayer.extend({
           options: {
               width: self.dataset.dims[X],
               height: self.dataset.dims[Y],
               imageFormat: 'png',
               tileSize: tile_size,
-              minZoom: self.minLevel,
-              maxZoom: self.maxLevel,
-              zoom: self.maxLevel/2
+              minZoom: 1,
+              maxZoom: self.rc.zoomLevel(),
+              zoom: self.rc.zoomLevel()/2
             },
           getTileUrl: self.getTileUrl
-    });
+    });*/
 
   self.VisusLayer = function() { return new self.tileLayer(); }
-
-  self.map = L.map(self.id)
-  self.rc = new L.RasterCoords(self.map, [ self.dataset.dims[X], self.dataset.dims[Y] ])
-
-  
-  console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
-  console.log("zoom level", rc.zoomLevel())
-  console.log(rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]))
-  self.map.setView(rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]), rc.zoomLevel())
-
-  //var bounds = [[0,0], [self.dataset.dims[X], self.dataset.dims[Y]]];
-  //self.map.fitBounds(bounds)
-
-  self.rc = new L.RasterCoords(self.map, [ self.dataset.dims[X], self.dataset.dims[Y] ])
   self.VisusLayer().addTo(self.map);
 
-    
   //see https://github.com/openseadragon/openseadragon/issues/866
   self.refresh=function() 
   { 
