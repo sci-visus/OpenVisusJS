@@ -3,8 +3,8 @@ var visus1;
 let renderer;
 let curr_render_type;
 
-//TODO rename 2dCanvas to osdCanvas
-let canvas2d_name="2dCanvas";
+//TODO rename osdCanvas to osdCanvas
+let canvas2d_name="osdCanvas";
 
 if(document.getElementById("leafletCanvas"))
   canvas2d_name="leafletCanvas";
@@ -362,9 +362,9 @@ function setDataset(value, presets=false)
 
       console.log("USE 2D canvas")
 
-      if(document.getElementById("2dCanvas")){
+      if(document.getElementById("osdCanvas")){
         visus1=VisusOSD({
-          id : '2dCanvas',
+          id : 'osdCanvas',
           dataset : dataset,
           compression : 'png',
           showNavigator : false,
@@ -606,7 +606,7 @@ function onPaletteChange(){
   if(renderer)
     renderer.updateColorMap(colormap,pal_min, pal_max);
 
-  //if(document.getElementById('2dCanvas').hidden==false)
+  //if(document.getElementById('osdCanvas').hidden==false)
     refreshAll(0);
 }
 

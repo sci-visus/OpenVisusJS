@@ -395,11 +395,11 @@ function VisusLeaflet(params)
   //console.log(dimX, dimY)
 
   if (self.map != undefined) { self.map.remove(); } 
-  self.map = L.map(self.id, {
+  self.map = L.map(self.id)/*, {
       scrollWheelZoom: false, // disable original zoom function
       smoothWheelZoom: true,  // enable smooth zoom 
       smoothSensitivity: 1,   // zoom speed. default is 1
-    })
+    })*/
 
   self.rc = new L.RasterCoords(self.map, [self.dataset.dims[X], self.dataset.dims[Y]], 256)
 

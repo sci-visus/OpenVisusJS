@@ -552,21 +552,22 @@ ol.for-examples li {
           //   maxZoom: maxZoom
           // })
 
-          var mymap = L.map(mapid)
+          var mymap = L.map("mapid")
 
           // assign map and image dimensions
           var rc = new L.RasterCoords(mymap, img)
           console.log("zoom level",rc.zoomLevel())
 
-          mymap.setMaxZoom(18);//rc.zoomLevel())
+          //mymap.setMaxZoom(18);//rc.zoomLevel())
+
           // all coordinates need to be unprojected using the `unproject` method
           // set the view in the lower right edge of the image
           //mymap.setView(rc.unproject([img[0], img[1]]), 0)
           //console.log(rc.unproject([img[0], img[1]]))
           //mymap.setView(rc.unproject([4900, 3015]), 3)
 
-          mymap.setView([38.297937422435105, -109.4561444142454], 13);
-
+          //mymap.setView([38.297937422435105, -109.4561444142454], 13);
+          mymap.setView(self.rc.unproject([img[0]/2,img[1]/2]), rc.zoomLevel()/2)
           //var mymap = L.map('mapid').setView([38.297937422435105, -109.4561444142454], 13);
 
           // var mymap = L.map('mapid', {
