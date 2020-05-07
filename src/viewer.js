@@ -4,7 +4,10 @@ let renderer;
 let curr_render_type;
 
 //TODO rename 2dCanvas to osdCanvas
-let canvas2d_name="leafletCanvas";//"2dCanvas";
+let canvas2d_name="2dCanvas";
+
+if(document.getElementById("leafletCanvas"))
+  canvas2d_name="leafletCanvas";
 
 function
 toArray(buffer, dataType)

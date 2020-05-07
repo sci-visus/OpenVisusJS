@@ -145,7 +145,8 @@ body{
   color:rgba(64,64,64,1.0);
 }
 
-.leaflet-tile { border: none; } #//solid yellow 5px; }
+.leaflet-tile { border: none } /* solid yellow 5px; }*/
+.leaflet-container { background: black; }
 
 </style>
 
@@ -460,9 +461,12 @@ body{
 </nav>
 
   <div id="viewer">
-    <div class="container">
+    <div class="container" style="margin-top:50px">
       <div class="row row-centered pos">
-        <div id="leafletCanvas" style="width: 800px; height: 600px; z-index:0"></div>
+        <script>
+            document.write('<div id="leafletCanvas" style="width: 100%; height: ' + $(window).height()*.9+ 'px; z-index:0"></div> ');
+          </script>
+
         <!-- <div class="col-lg h-100" id='2dCanvas' style='background: black;'></div> -->
           <script>
             document.write('<canvas id="3dCanvas" style="background: black" width="' + $(window).width()*.9 + '"  height="' + $(window).height()*.9+ '"/>');
@@ -471,11 +475,12 @@ body{
     </div>
   </div>
 
-  <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
-  <script src="src/selection/openseadragonselection.js"></script>
+  <!-- <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
+  <script src="src/selection/openseadragonselection.js"></script> -->
   <script src="src/colormaps.js"></script>
   <script src="src/dvr.js"></script>
   <script src="src/visus.js"></script>
+  <script src="src/visus_leaflet.js"></script>
   <script src="config.js"></script>
   <script src="src/VisusGetTileLayer.js"></script>
   <script src="src/viewer.js"></script>
