@@ -244,7 +244,8 @@ function updateInfo(dataset) {
       <li>Timesteps: "+num_timesteps+"</li> \
       <li>Fields: "+dataset.fields.length+"</li> \
     </ul> \
-    <p style=\"padding-left:5px\">ViSUS URL: <a href=\""+dataset_url+"\">"+dataset_url+"</a></p>";
+    <p style=\"padding-left:5px\">ViSUS URL: <a href=\""+dataset_url+"\">"+dataset_url+"</a></p> \
+    <a href=\"https://visus.org\"><img src=\"images/site_logo.gif\" width=\"80px\"/></a>";
 }
 
 function addSelectionOSD(){
