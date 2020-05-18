@@ -3,6 +3,12 @@ var visus1;
 let renderer;
 let curr_render_type;
 
+//TODO rename osdCanvas to osdCanvas
+let canvas2d_name="osdCanvas";
+
+if(document.getElementById("leafletCanvas"))
+  canvas2d_name="leafletCanvas";
+
 function
 toArray(buffer, dataType)
 {
@@ -34,7 +40,7 @@ toArray(buffer, dataType)
 
 function notifyStatus(new_text)
 {
-  if(document.getElementById('2dCanvas').hidden==true){
+  if(document.getElementById(canvas2d_name).hidden==true){
     document.getElementById('status_bar').hidden=false
     document.getElementById('status').innerHTML="  "+new_text
   }
@@ -238,7 +244,8 @@ function updateInfo(dataset) {
       <li>Timesteps: "+num_timesteps+"</li> \
       <li>Fields: "+dataset.fields.length+"</li> \
     </ul> \
-    <p style=\"padding-left:5px\">ViSUS URL: <a href=\""+dataset_url+"\">"+dataset_url+"</a></p>";
+    <p style=\"padding-left:5px\">ViSUS URL: <a href=\""+dataset_url+"\">"+dataset_url+"</a></p> \
+    <a href=\"https://visus.org\"><img src=\"images/site_logo.gif\" width=\"80px\"/></a>";
 }
 
 function addSelectionOSD(){
@@ -344,7 +351,7 @@ function setDataset(value, presets=false)
     }   
 
     if(dataset.dim==2){
-      document.getElementById('2dCanvas').hidden=false
+      document.getElementById(canvas2d_name).hidden=false
       document.getElementById('3dCanvas').hidden=true
       document.getElementById('view_btn').hidden=true;
       document.getElementById('range_panel').hidden=true;
@@ -355,15 +362,29 @@ function setDataset(value, presets=false)
       }
 
       console.log("USE 2D canvas")
-      visus1=VisusOSD({
-        id : '2dCanvas',
-        dataset : dataset,
-        compression : 'png',
-        showNavigator : false,
-        debugMode : false
-      }); 
 
-      addSelectionOSD();
+      if(document.getElementById("osdCanvas")){
+        visus1=VisusOSD({
+          id : 'osdCanvas',
+          dataset : dataset,
+          compression : 'png',
+          showNavigator : false,
+          debugMode : false
+        }); 
+
+        addSelectionOSD();
+      }
+      
+      if($("leafletCanvas")){
+        visus1=VisusLeaflet({
+          id : 'leafletCanvas',
+          url: getServer(),
+          dataset : dataset,
+          compression : 'png',
+          showNavigator : false,
+          debugMode : false
+        }); 
+      }
 
       document.getElementById('resolution').step=2;
 
@@ -376,7 +397,7 @@ function setDataset(value, presets=false)
 
     }else {
       console.log("USE 3D canvas")
-      document.getElementById('2dCanvas').hidden=true;
+      document.getElementById(canvas2d_name).hidden=true;
       document.getElementById('3dCanvas').hidden=false;
       document.getElementById('view_btn').hidden=false;
       document.getElementById('range_panel').hidden=false;
@@ -586,7 +607,7 @@ function onPaletteChange(){
   if(renderer)
     renderer.updateColorMap(colormap,pal_min, pal_max);
 
-  //if(document.getElementById('2dCanvas').hidden==false)
+  //if(document.getElementById('osdCanvas').hidden==false)
     refreshAll(0);
 }
 
@@ -870,18 +891,21 @@ function loadPresets(){
 
 }
 
-document.getElementById('3dCanvas').addEventListener('webglcontextlost', function(event) { event.preventDefault()}, false)
-document.getElementById('3dCanvas').addEventListener('webglcontextrestored', function(event) {
-  console.log("Restored WebGl context")
+if(document.getElementById('3dCanvas')){
+  document.getElementById('3dCanvas').addEventListener('webglcontextlost', function(event) { event.preventDefault()}, false)
+  document.getElementById('3dCanvas').addEventListener('webglcontextrestored', function(event) {
+    console.log("Restored WebGl context")
 
-  parent=document.getElementById('3dCanvas').parentNode
-  savedhtml=parent.innerHTML
-  parent.removeChild(document.getElementById('3dCanvas'))
-  parent.innerHTML=savedhtml
+    parent=document.getElementById('3dCanvas').parentNode
+    savedhtml=parent.innerHTML
+    parent.removeChild(document.getElementById('3dCanvas'))
+    parent.innerHTML=savedhtml
 
-  //console.log("restored correctly", document.getElementById('3dCanvas'))
-  //delete renderer
-  renderer=null
-  refreshAll();
-}, false)
+
+    //console.log("restored correctly", document.getElementById('3dCanvas'))
+    //delete renderer
+    renderer=null
+    refreshAll();
+  }, false)
+}
 
