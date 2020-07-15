@@ -58,7 +58,7 @@ function visusAsyncGetListOfDatasets(url)
         push_midx=0
         if ('childs' in item && item.childs.length>0){
           if(push_midx==0){
-            ret.push(item.attributes.name+"*");
+            ret.push(item.attributes.name);//+"*");
             push_midx=1;
           }
           arr = item.childs.concat(arr);
@@ -216,6 +216,11 @@ function visusAsyncLoadDataset(url)
     // try parsing as xml first
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(content, "text/xml");
+
+    // test if this is an midx
+    var fieldElement = xmlDoc.getElementsByTagName("field")
+    if(fieldElement.length==1 && fieldElement[0].parentNode.nodeName=="dataset")
+      console.log("found MIDX with field", fieldElement[0].getAttribute("name"))
 
     var boxElement = xmlDoc.getElementsByTagName("box")
     if (boxElement.length == 1) {
