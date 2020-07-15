@@ -148,7 +148,7 @@ async function refreshAll(reset_view=1)
 {
 
   if(dataset.dim==2)
-    query_str = visus1.refresh();
+    query_str = visus1.refresh(document.getElementById('auto_refresh').checked); //if auto refresh make hard osd refresh
   else
     query_str = visus1.refresh(level);
 
