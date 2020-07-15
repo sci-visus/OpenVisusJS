@@ -294,18 +294,11 @@ function setDataset(value, presets=false)
 {
   document.getElementById('dataset').value=value;
 
-  // reset palette
-  // document.getElementById('palette_min').value="";
-  // document.getElementById('palette_max').value="";
+  // old MIDX handling, selecting the first dataset
+  // now we just request the default field from the MIDX
+  // Note: if no default field in MIDX the viewer might not work
 
-  //document.getElementById('render_type').checked=true
-  //document.getElementById('axis').disabled=true
-  //document.getElementById('axis').value='2'
-  //document.getElementById('slice').disabled=true
-  //document.getElementById('edit_slice').disabled=true
-
-  // if MIDX
-  if(value.includes("*")){
+  /*if(value.includes("*")){
     console.log("MIDX not supported\n")
     value=value.replace("*","")
     dataset_url=getServer()+'action=read_dataset&dataset='+value
@@ -315,7 +308,7 @@ function setDataset(value, presets=false)
     });
 
     return;
-  }
+  }*/
 
   dataset_url=getServer()+'action=read_dataset&dataset='+value
 
@@ -375,7 +368,7 @@ function setDataset(value, presets=false)
         addSelectionOSD();
       }
       
-      if($("leafletCanvas")){
+      if($("#leafletCanvas").attr('value')){
         visus1=VisusLeaflet({
           id : 'leafletCanvas',
           url: getServer(),
