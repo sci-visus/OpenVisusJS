@@ -488,6 +488,9 @@ function VisusOSD(params)
       vs = Math.pow(2, self.maxLevel-level); 
       w=self.tile_size[0] * vs; x1=x * w; x2=x1 + w;
       h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
+
+      if(self.dataset.maxh == (toh+1))
+        toh=self.dataset.maxh
       
       //mirror y
     	{
