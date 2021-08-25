@@ -368,7 +368,7 @@ function setDataset(value, presets=false)
         addSelectionOSD();
       }
       
-      if($("#leafletCanvas").attr('value')){
+      if(document.getElementById("leafletCanvas")) {
         visus1=VisusLeaflet({
           id : 'leafletCanvas',
           url: getServer(),
@@ -378,7 +378,7 @@ function setDataset(value, presets=false)
           debugMode : false
         }); 
       }
-
+	
       document.getElementById('resolution').step=2;
 
       if(dataset.pow2dims[0] < dataset.pow2dims[1])
