@@ -583,7 +583,7 @@ function onVRChange(ren_type){
 }
 
 function onPaletteChange(){
-
+  console.log("calling OnPalette Change" )
   var colormap = get_palette_data(document.getElementById('palette').value)
   let pal_min= parseFloat(document.getElementById('palette_min').value)
   let pal_max= parseFloat(document.getElementById('palette_max').value)
@@ -599,6 +599,8 @@ function onPaletteChange(){
 
   if(renderer)
     renderer.updateColorMap(colormap,pal_min, pal_max);
+  console.log("calling OnPalette Change", pal_min, pal_max);
+  updatePaletteView(document.getElementById('palette').value)
 
   //if(document.getElementById('osdCanvas').hidden==false)
     refreshAll(0);

@@ -94,8 +94,12 @@ function VisusLeaflet(params)
   self.palette_max    = params['palette_max']    || '0';
   self.palette_interp = params['palette_interp'] || 'Default';
   self.dtype          = params['dtype']          || 'uint8';
-  
-  if (self.dataset.dim==2)
+  self.ADD_SCALE_LEGEND = 1;
+  self.ADD_NORTH_LEGEND = 1;
+  self.ADD_TITLE_LEGEND = 1;
+  self.ADD_CAPTION_LEGEND = 1;
+
+    if (self.dataset.dim==2)
   {
     self.tile_size=[1,1,1];
     for (I=0;I<self.dataset.bitsperblock;I++) 
@@ -217,7 +221,7 @@ function VisusLeaflet(params)
       +'&time='+self.time
       +'&field='+self.field
 
-      if(is_rgb)
+      //if(is_rgb)
         base_url+='&palette='+self.palette
         +'&palette_min='+self.palette_min
         +'&palette_max='+self.palette_max
@@ -434,6 +438,26 @@ function VisusLeaflet(params)
   self.VisusLayer = function() { return new self.tileLayer(); }
 
   self.VisusLayer().addTo(self.map);
+
+    // self.ADD_SCALE_LEGEND = TRUE;
+    // self.ADD_NORTH_LEGEND = TRUE;
+    // self.ADD_TITLE_LEGEND = TRUE;
+    // self.ADD_CAPTION_LEGEND = TRUE;
+  if (self.ADD_SCALE_LEGEND == 1)
+    L.control.scale().addTo(self.map);  //AAG: 9.26.2021
+
+
+  self.addNorth = function( map){ //AAG: 9.26.2021
+      var north = L.control({position: "bottomright"});
+      north.onAdd = function (map) {
+          var div = L.DomUtil.create("div", "info legend");
+          div.innerHTML = '<img width=110 height=""110 src="src/icons/North.png">';
+          return div;
+      }
+      north.addTo( map);
+  }
+  if (self.ADD_NORTH_LEGEND ==1)
+    self.addNorth(self.map)
 
   //see https://github.com/openseadragon/openseadragon/issues/866
   self.refresh=function() 
