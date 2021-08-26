@@ -123,6 +123,88 @@ function VisusLeaflet(params)
       }
     }
   }
+  
+  //see https://github.com/openseadragon/openseadragon/issues/866
+  self.refresh=function() 
+  { 
+    guessRange();
+
+    //self.VisusLayer = function() { return new self.tileLayer(); }
+
+    if(self.pre_bounds != null){
+      self.setBounds(self.pre_bounds)
+      setTimeout(self.selfpresetbounds, 2000)
+    }
+
+    let viewCenter = null;
+    let viewZoom = null;
+    if (self.map != undefined) {
+      viewCenter = self.map.getCenter();
+      viewZoom = self.map.getZoom();
+      self.map.remove();
+    } 
+    self.map = L.map(self.id)/*, {
+			       scrollWheelZoom: false, // disable original zoom function
+			       smoothWheelZoom: true,  // enable smooth zoom 
+			       smoothSensitivity: 1,   // zoom speed. default is 1
+			       })*/
+
+    self.rc = new L.RasterCoords(self.map, [self.dataset.dims[X], self.dataset.dims[Y]], 256)
+
+    // console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
+    // console.log("zoom level", self.rc.zoomLevel(), self.dataset.maxh)
+    // console.log("min level", self.minLevel, "max level", self.maxLevel)
+    // console.log("tile_size", self.tile_size)
+    // console.log(self.rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]))
+    if (viewCenter != null) {
+      self.map.setView(viewCenter, viewZoom)
+    }
+    else {
+      self.map.setView(self.rc.unproject([self.dataset.dims[X]/2, self.dataset.dims[Y]/2]), self.minLevel/2)
+    }
+
+    // var bounds = [[0,0], [self.dataset.dims[X], self.dataset.dims[Y]]];
+    // self.map.fitBounds(bounds)
+
+    //self.tileLayer= VisusGetTileLayer(self.dataset.base_url, self.dataset.name,
+    //        self.dataset.dims[X],self.dataset.dims[Y], self.dataset.maxh, self.minLevel, rc.zoomLevel(), 256)
+
+    self.tileLayer =  L.TileLayer.extend({
+      options: {
+        imageFormat: self.compression,
+        tileSize: self.tile_size[X],
+        noWrap: true,
+        minZoom: (self.minLevel%2)+2,
+        maxZoom: rc.zoomLevel(),
+        updateWhenIdle: false,
+        continuousWorld: false,
+        fitBounds: false,
+        setMaxBounds: false
+      },
+      getTileUrl: self.getTileUrl
+    });
+
+    self.VisusLayer = function() { return new self.tileLayer(); }
+
+    self.VisusLayer().addTo(self.map);
+
+    if (self.ADD_SCALE_LEGEND == 1)
+    	L.control.scale().addTo(self.map);  //AAG: 9.26.2021
+
+
+  	self.addNorth = function( map){ //AAG: 9.26.2021
+      var north = L.control({position: "bottomright"});
+      north.onAdd = function (map) {
+          var div = L.DomUtil.create("div", "info legend");
+          div.innerHTML = '<img width=110 height=""110 src="src/icons/North.png">';
+          return div;
+      }
+      north.addTo( map);
+  	}
+  	if (self.ADD_NORTH_LEGEND ==1)
+    	self.addNorth(self.map)
+	};
+  
 
   //getTileUrl
   self.getTileUrl= function(coords) {
@@ -398,79 +480,8 @@ function VisusLeaflet(params)
   dimY = Math.pow(2, Math.ceil(Math.log(self.dataset.dims[Y])/Math.log(2)));
   //console.log(dimX, dimY)
 
-  if (self.map != undefined) { self.map.remove(); } 
-  self.map = L.map(self.id)/*, {
-      scrollWheelZoom: false, // disable original zoom function
-      smoothWheelZoom: true,  // enable smooth zoom 
-      smoothSensitivity: 1,   // zoom speed. default is 1
-    })*/
+ 
+  self.refresh();
 
-  self.rc = new L.RasterCoords(self.map, [self.dataset.dims[X], self.dataset.dims[Y]], 256)
-
-  // console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
-  // console.log("zoom level", self.rc.zoomLevel(), self.dataset.maxh)
-  // console.log("min level", self.minLevel, "max level", self.maxLevel)
-  // console.log("tile_size", self.tile_size)
-  // console.log(self.rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]))
-  self.map.setView(self.rc.unproject([self.dataset.dims[X]/2, self.dataset.dims[Y]/2]), self.minLevel/2)
-
-  // var bounds = [[0,0], [self.dataset.dims[X], self.dataset.dims[Y]]];
-  // self.map.fitBounds(bounds)
-
-  //self.tileLayer= VisusGetTileLayer(self.dataset.base_url, self.dataset.name,
-  //        self.dataset.dims[X],self.dataset.dims[Y], self.dataset.maxh, self.minLevel, rc.zoomLevel(), 256)
-
-  self.tileLayer =  L.TileLayer.extend({
-                                  options: {
-                                      imageFormat: self.compression,
-                                      tileSize: self.tile_size[X],
-                                      noWrap: true,
-                                      minZoom: (self.minLevel%2)+2,
-                                      maxZoom: rc.zoomLevel(),
-                                      updateWhenIdle: false,
-                                      continuousWorld: false,
-                                      fitBounds: false,
-                                      setMaxBounds: false
-                                    },
-                                    getTileUrl: self.getTileUrl
-                                  });
-
-  self.VisusLayer = function() { return new self.tileLayer(); }
-
-  self.VisusLayer().addTo(self.map);
-
-    // self.ADD_SCALE_LEGEND = TRUE;
-    // self.ADD_NORTH_LEGEND = TRUE;
-    // self.ADD_TITLE_LEGEND = TRUE;
-    // self.ADD_CAPTION_LEGEND = TRUE;
-  if (self.ADD_SCALE_LEGEND == 1)
-    L.control.scale().addTo(self.map);  //AAG: 9.26.2021
-
-
-  self.addNorth = function( map){ //AAG: 9.26.2021
-      var north = L.control({position: "bottomright"});
-      north.onAdd = function (map) {
-          var div = L.DomUtil.create("div", "info legend");
-          div.innerHTML = '<img width=110 height=""110 src="src/icons/North.png">';
-          return div;
-      }
-      north.addTo( map);
-  }
-  if (self.ADD_NORTH_LEGEND ==1)
-    self.addNorth(self.map)
-
-  //see https://github.com/openseadragon/openseadragon/issues/866
-  self.refresh=function() 
-  { 
-    guessRange();
-
-    //self.VisusLayer = function() { return new self.tileLayer(); }
-
-    if(self.pre_bounds != null){
-      self.setBounds(self.pre_bounds)
-      setTimeout(self.selfpresetbounds, 2000)
-    }
-  };
-  
   return self;
 };
