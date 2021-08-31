@@ -196,7 +196,7 @@ function VisusLeaflet(params)
       var north = L.control({position: "bottomright"});
       north.onAdd = function (map) {
           var div = L.DomUtil.create("div", "info legend");
-          div.innerHTML = '<img width=110 height=""110 src="src/icons/North.png">';
+          div.innerHTML = '<img width=110 height=""110 src="visus/src/icons/North.png">';
           return div;
       }
       north.addTo( map);

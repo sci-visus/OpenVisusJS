@@ -159,39 +159,9 @@ function updatePaletteView(cmaptype) {
     ];
     }
     else if (cmaptype == 'LinearGray4') {
+        console.log('Generating map for LinearGray4')
         var stops = getStopsFromFile('/Users/amygooch/GIT/SCI/VISUS/SVN/2021_BattelleNeon/SCI_palettes/linearGray4.transfer_function')
-        var  stops = [   //NDVI_BlueGreen
-            {
-                "color": "#ffffff",
-                "offset": "0%"
-            }
-            , {
-                "color": "#000000",
-                "offset": "50%"
-            },
-            {
-                "color": "#8e4a93",
-                "offset": "51%"
-            }, {
-                "color": "#bd200f",
-                "offset": "62%"
-            }
-            , {
-                "color": "#eb7d2e",
-                "offset": "73%"
-            }, {
-                "color": "#fffb00",
-                "offset": "84%"
-            }
-            , {
-                "color": "#199410",
-                "offset": "95%"
-            }, {
-                "color": "#134721",
-                "offset": "100%"
-            }
 
-        ];
     }
 
     else {
