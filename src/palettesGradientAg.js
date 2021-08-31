@@ -158,6 +158,42 @@ function updatePaletteView(cmaptype) {
 
     ];
     }
+    else if (cmaptype == 'LinearGray4') {
+        var stops = getStopsFromFile('/Users/amygooch/GIT/SCI/VISUS/SVN/2021_BattelleNeon/SCI_palettes/linearGray4.transfer_function')
+        var  stops = [   //NDVI_BlueGreen
+            {
+                "color": "#ffffff",
+                "offset": "0%"
+            }
+            , {
+                "color": "#000000",
+                "offset": "50%"
+            },
+            {
+                "color": "#8e4a93",
+                "offset": "51%"
+            }, {
+                "color": "#bd200f",
+                "offset": "62%"
+            }
+            , {
+                "color": "#eb7d2e",
+                "offset": "73%"
+            }, {
+                "color": "#fffb00",
+                "offset": "84%"
+            }
+            , {
+                "color": "#199410",
+                "offset": "95%"
+            }, {
+                "color": "#134721",
+                "offset": "100%"
+            }
+
+        ];
+    }
+
     else {
         var stops = [{
             "color": "#ffffff",
@@ -184,4 +220,37 @@ function updatePaletteView(cmaptype) {
     }
 
 
+}
+
+function convertToHex (rgb) {
+    return hex(rgb[0]) + hex(rgb[1]) + hex(rgb[2]);
+}
+
+
+function getStopsFromFile(txt){
+    var stops = [];
+    var reader = new FileReader();
+    reader.onload = (event) => {
+        const file = event.target.result;
+        const allLines = file.split(/\r\n|\n/);
+        // Reading line by line
+        var whichline = 0
+        allLines.forEach((line) => {
+            whichline =  whichline+1
+            console.log(line);
+            rgb= line.split(' ');
+            console.log('r = '+ rgb[0]+ ' b= '+ rgb[1]+ ' b= '+ rgb[2])
+            stops.add({
+                "color": convertToHex(rgb),
+                "offset": whichline/(allLines.length) + "%"
+            })
+        });
+    };
+
+    reader.onerror = (event) => {
+        alert(event.target.error.name);
+    };
+
+    reader.readAsText(txt);
+    console.log(stops);
 }
