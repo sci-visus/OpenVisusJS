@@ -589,7 +589,7 @@ function onPaletteChange(){
   let pal_max= parseFloat(document.getElementById('palette_max').value)
 
   if(isNaN(pal_min)) pal_min = 0;
-  if(isNaN(pal_max)) pal_max = 0;
+  if(isNaN(pal_max)) pal_max = 1;
 
   visus1.setPalette(document.getElementById('palette').value); 
   visus1.setPaletteMin(pal_min); 
@@ -739,8 +739,8 @@ function shareLink(){
     link=link+"&bH="+bounds.height+"&bW="+bounds.width+"&bX="+bounds.x+"&bY="+bounds.y+"&bD="+bounds.degrees;
   }
 
-  pmin=isNaN(visus1.palette_min) ? "NaN" : visus1.palette_min
-  pmax=isNaN(visus1.palette_max) ? "NaN" : visus1.palette_max
+  pmin=isNaN(visus1.palette_min) ? "0" : visus1.palette_min
+  pmax=isNaN(visus1.palette_max) ? "1" : visus1.palette_max
 
   link=link+"&time="+visus1.time+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
 
@@ -853,8 +853,8 @@ function loadPresets(){
   }
 
   if(document.getElementById('palette_max').value == document.getElementById('palette_min').value){
-    document.getElementById('palette_max').value=NaN;
-    document.getElementById('palette_min').value=NaN;
+    document.getElementById('palette_max').value=1;
+    document.getElementById('palette_min').value=0;
   }
 
   if(pre_vpoint!=null && isRendererDefined()){

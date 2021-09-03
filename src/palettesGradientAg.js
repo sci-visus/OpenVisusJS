@@ -1,4 +1,5 @@
 
+
 //Updates svg element with new linear gradient based upon text name cmaptype
 function updatePaletteView(cmaptype) {
     var svgns = 'http://www.w3.org/2000/svg';
@@ -158,11 +159,25 @@ function updatePaletteView(cmaptype) {
 
     ];
     }
-    else if (cmaptype == 'LinearGray4') {
-        console.log('Generating map for LinearGray4')
-        var stops = getStopsFromFile('/Users/amygooch/GIT/SCI/VISUS/SVN/2021_BattelleNeon/SCI_palettes/linearGray4.transfer_function')
+    else if (cmaptype == 'LinearGray4')
+        var stops = createStopsFromViSUSColorMaps(LinearGray4_colormap);
+    else if (cmaptype == 'LinearGray5')
+        var stops = createStopsFromViSUSColorMaps(LinearGray5_colormap);
+    else if (cmaptype == 'AsymmetricBlueGreenDivergent')
+        var stops = createStopsFromViSUSColorMaps(AsymmetricBlueGreenDivergent_colormap);
+    else if (cmaptype == 'AsymmetricBlueOrangeDivergent')
+        var stops = createStopsFromViSUSColorMaps(AsymmetricBlueOrangeDivergent_colormap);
+    else if (cmaptype == 'brg')
+        var stops = createStopsFromViSUSColorMaps(bry_colormap);
 
-    }
+    else if (cmaptype == 'red')
+        var stops = createStopsFromViSUSColorMaps(red_colormap);
+
+    else if (cmaptype == 'green')
+        var stops = createStopsFromViSUSColorMaps(green_colormap);
+
+    else if (cmaptype == 'blue')
+        var stops = createStopsFromViSUSColorMaps(blue_colormap);
 
     else {
         var stops = [{
@@ -192,35 +207,74 @@ function updatePaletteView(cmaptype) {
 
 }
 
+function createStopsFromViSUSColorMaps(visuscolormap) {
+    var stops = [];
+    var num_stops = visuscolormap.length / 4;
+    var stopnum = 0;
+    for (var i = 0, length = visuscolormap.length; i < length; i = i + 4) {
+        stops.push({
+            "color": "rgba("+parseInt(visuscolormap[i+0]  )+", "
+            + parseInt(visuscolormap[i + 1]  )+", "+ parseInt(visuscolormap[i + 2]  )+", "+ parseInt(visuscolormap[i + 3]  )+")",
+            "offset": 100*( stopnum / (num_stops-1) )+ "%"
+        })
+        stopnum ++;
+    }
+    return(stops);
+}
+
 function convertToHex (rgb) {
-    return hex(rgb[0]) + hex(rgb[1]) + hex(rgb[2]);
+    return hex(rgb[0]) + hex(rgb[1]) + hex(rgb[2])
+}
+
+function getStopsFromFile(txt) {
+    var stops = [];
+    return fetch('file:/'+txt)
+        .then(function(response){
+            conosle.log('here');
+            return(response.text())
+        })
+        .then(function (text) {
+            console.log('Using :'+ text);
+            stops = processStopsFromFile(text);
+            return (stops);
+        })
+        .catch(function (error) {
+            console.log("Catch on getStopsFromFile: " +txt+ '   ' + error);
+        });
+    // outputs the content of the text file
+
+//     const fs = require('fs');
+// // First I want to read the file
+//     fs.readFile(txt, function read(err, data) {
+//         if (err) {
+//             throw err;
+//         }
+//         const content = data;
+//
+//         // Invoke the next step here however you like
+//         console.log(content);   // Put all of the code here (not the best solution)
+//         return (processStopsFromFile(content));   // Or put the next step in a function and invoke it
+//     });
+
 }
 
 
-function getStopsFromFile(txt){
+function processStopsFromFile(content){
     var stops = [];
-    var reader = new FileReader();
-    reader.onload = (event) => {
-        const file = event.target.result;
-        const allLines = file.split(/\r\n|\n/);
-        // Reading line by line
-        var whichline = 0
-        allLines.forEach((line) => {
-            whichline =  whichline+1
-            console.log(line);
-            rgb= line.split(' ');
-            console.log('r = '+ rgb[0]+ ' b= '+ rgb[1]+ ' b= '+ rgb[2])
-            stops.add({
-                "color": convertToHex(rgb),
-                "offset": whichline/(allLines.length) + "%"
-            })
-        });
-    };
 
-    reader.onerror = (event) => {
-        alert(event.target.error.name);
-    };
+    var textByLine = content.split("\n");
+    var whichline = 0;
+    textByLine.forEach((line) => {
+        whichline = whichline + 1;
+        console.log(line);
+        rgb = line.split(' ');
+        console.log('r = ' + rgb[0] + ' b= ' + rgb[1] + ' b= ' + rgb[2]);
+        stops.add({
+            "color": convertToHex(rgb),
+            "offset": whichline / (textByLine.length) + "%"
+        })
+    });
 
-    reader.readAsText(txt);
     console.log(stops);
+    return(stops);
 }

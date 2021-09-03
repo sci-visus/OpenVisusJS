@@ -204,7 +204,6 @@ function VisusLeaflet(params)
   	if (self.ADD_NORTH_LEGEND ==1)
     	self.addNorth(self.map)
 	};
-  
 
   //getTileUrl
   self.getTileUrl= function(coords) {
@@ -265,6 +264,8 @@ function VisusLeaflet(params)
           +box[0][1]+'%20'+box[1][1]+'%20'+box[2][1]
         +'&toh='+toh;    
     }
+
+    self.setTitle();
     return ret;
 /*
     var xDiff = (x2 - x1);
@@ -461,16 +462,35 @@ function VisusLeaflet(params)
   self.selfpresetbounds=function(){
     self.osd.viewport.fitBounds(self.pre_bounds,true);
   }
-  
+
+  self.setTitle=function() {
+      var title = getUrlParameter('title');
+
+      if (title)
+          $("#titlelbl").html("<b>" + decodeURI(title) + "</b>");
+      else {
+          title = getUrlParameter('dataproduct');
+          if (title)
+              $("#titlelbl").html("<b>" + decodeURI(title) + "</b>");
+          var title2 = getUrlParameter('dataset');
+          if (title2)
+              $("#titlelbl").html("<b>" + decodeURI(title) + ' : '+decodeURI(title2) +"</b>");
+
+          else
+            $("#titlelbl").html("<b>" + 'Data Title' + "</b>");
+      }
+  }
+
   self.setAxis(2);
   self.setSlice(0);
   self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
-  self.setPalette("");
+  self.setPalette("NDVI_Beach");
   self.setPaletteMin(0);
-  self.setPaletteMax(0);
-  self.setPaletteInterp("Default");   
-  
+  self.setPaletteMax(1);
+  self.setPaletteInterp("Default");
+  self.setTitle('Viewer')
+
   permutation=[[1,2,0],[0,2,1],[0,1,2]];
   X = permutation[self.axis][0];
   Y = permutation[self.axis][1];

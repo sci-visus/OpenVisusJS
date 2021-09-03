@@ -807,9 +807,9 @@ function VisusVR(params)
   self.compression    = params['compression']    || 'raw';
   self.showNavigator  = params['showNavigator']  || true;
   self.debugMode      = params['debugMode']      || false;
-  self.palette        = params['palette']        || "";
-  self.palette_min    = params['palette_min']    || NaN;
-  self.palette_max    = params['palette_max']    || NaN;
+  self.palette        = params['palette']        || "rich";
+  self.palette_min    = params['palette_min']    || 0;
+  self.palette_max    = params['palette_max']    || 1;
   self.palette_interp = params['palette_interp'] || 'Default';
   
   if (self.dataset.dim==2)
@@ -1044,9 +1044,9 @@ function VisusVR(params)
   self.setSlice(50);
   self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
-  self.setPalette("");
-  self.setPaletteMin(NaN);
-  self.setPaletteMax(NaN);
+  self.setPalette("rich");
+  self.setPaletteMin(0);
+  self.setPaletteMax(1);
   self.setPaletteInterp("Default");
   self.setDType("uint8")
   
