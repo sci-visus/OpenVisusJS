@@ -472,7 +472,7 @@ function VisusLeaflet(params)
           title = getUrlParameter('dataproduct');
           if (title)
               $("#titlelbl").html("<b>" + decodeURI(title) + "</b>");
-          var title2 = getUrlParameter('dataset');
+          var title2 = getUrlParameter('datasitemonth');
           if (title2)
               $("#titlelbl").html("<b>" + decodeURI(title) + ' : '+decodeURI(title2) +"</b>");
 
