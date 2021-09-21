@@ -132,7 +132,7 @@ function VisusLeaflet(params)
   };
 
   //getTileUrl
-  self.getTileUrl= function(coords) {
+  self.getTileUrl = function(coords) {
     base_url=self.dataset.base_url
       +'&dataset='+self.dataset.name
       +'&compression='+self.compression             
@@ -148,19 +148,21 @@ function VisusLeaflet(params)
     x=coords.x;
     y=coords.y;
 
+    
     if (self.dataset.dim==2)
     {
+      
       //toh=level*2;
-      toh = Math.min(self.dataset.maxh, self.minLevel*2 + level*2);
-      vs = Math.pow(2, this.options.maxZoom-level); 
+      toh = self.dataset.maxh - 2 * (self.maxLevel - level);
+      vs = Math.pow(2, self.maxLevel-level);
 
       w = self.tile_size[0] * vs;
-      x1 = x * w - self.datasetCorner[0];
-      x2 = x1 + w;
+      x1 = x * w;// - self.datasetCorner[0];
+      x2 = x1 + w - 1;
 
       h = self.tile_size[1] * vs;
-      y1 = y * h + (self.datasetCorner[1] + self.dataset.dims[Y]);
-      y2 = y1 + h;
+      y1 = y * h;// + (self.datasetCorner[1] + self.dataset.dims[Y]);
+      y2 = y1 + h - 1;
       
       //mirror y
       {
@@ -205,31 +207,6 @@ function VisusLeaflet(params)
 
     self.setTitle();
     return ret;
-/*
-    var xDiff = (x2 - x1);
-    var yDiff = (y2 - y1);
-
-    var size = Math.ceil(xDiff / vs) + ',';
-    //if (_this.type === 'ImageService3') {
-      // Cannonical URI Syntax for v3
-      size = size + Math.ceil(yDiff / vs);
-    //}
-
-    // var sizex = Math.ceil(xDiff / vs);
-    // var sizey = Math.ceil(yDiff / vs);
-
-    temp = L.Util.template(ret, L.extend({
-      format: this.options.tileFormat,
-      //quality: this.quality,
-      region: [x1, y1, xDiff, yDiff].join(','),
-      rotation: 0,
-      size: size
-    }, this.options));
-
-    console.log(size, [x1, y1, xDiff, yDiff])
-
-    */
-
   };
 
   
@@ -263,11 +240,10 @@ function VisusLeaflet(params)
   
   if (self.dataset.dim==2)
   {
-    //each open sea dragon level is a "01" in visus
-    //euristic, for each OSD level I have two Visus levels, so I have to double the tile_size 
-    //in order to get the same number of samples
-    self.minLevel=Math.floor(self.dataset.bitsperblock/2);
-    self.maxLevel=Math.floor(self.dataset.maxh/2);
+    // the levels are pretty much arbitrary, as long as the max level maps to the finest resolution
+    // and the resolutions array has "1" as the finest 
+    self.minLevel=0;
+    self.maxLevel=8;
   }
   else
   {
@@ -457,6 +433,8 @@ function VisusLeaflet(params)
 			   datasetCRSSpec,
 			   {
 			     resolutions: resolutions,
+			     origin: [self.datasetCorner[0],
+				      self.datasetCorner[1] + self.dataset.dims[Y]],
 //			     bounds: L.bounds(L.point(546000, 5061000),
 //					      L.point(546000 + dimX*64, 5061000 + dimY*64))
 			   });
