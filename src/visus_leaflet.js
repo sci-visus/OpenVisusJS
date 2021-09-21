@@ -147,14 +147,20 @@ function VisusLeaflet(params)
     level=coords.z;
     x=coords.x;
     y=coords.y;
-    
+
     if (self.dataset.dim==2)
     {
       //toh=level*2;
       toh = Math.min(self.dataset.maxh, self.minLevel*2 + level*2);
       vs = Math.pow(2, this.options.maxZoom-level); 
-      w=self.tile_size[0] * vs; x1=x * w; x2=x1 + w;
-      h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
+
+      w = self.tile_size[0] * vs;
+      x1 = x * w - self.datasetCorner[0];
+      x2 = x1 + w;
+
+      h = self.tile_size[1] * vs;
+      y1 = y * h + (self.datasetCorner[1] + self.dataset.dims[Y]);
+      y2 = y1 + h;
       
       //mirror y
       {
@@ -166,6 +172,12 @@ function VisusLeaflet(params)
       // NOTE: removed clamp because Leflet always needs tiles of the same size
       // +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
       // +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)
+
+      if (x2 < 0 || x1 >= self.dataset.dims[0] ||
+	  y2 < 0 || y1 >= self.dataset.dims[1]) {
+	return null;
+      }
+      
       ret = base_url
         +'&action=boxquery'
         +'&box='
@@ -255,7 +267,7 @@ function VisusLeaflet(params)
     //euristic, for each OSD level I have two Visus levels, so I have to double the tile_size 
     //in order to get the same number of samples
     self.minLevel=Math.floor(self.dataset.bitsperblock/2);
-    self.maxLevel=Math.floor(self.dataset.maxh/2);  
+    self.maxLevel=Math.floor(self.dataset.maxh/2);
   }
   else
   {
@@ -432,46 +444,51 @@ function VisusLeaflet(params)
     setTimeout(self.selfpresetbounds, 2000)
   }
 
-  let viewCenter = null;
-  let viewZoom = null;
-  if (self.map != undefined) {
-    viewCenter = self.map.getCenter();
-    viewZoom = self.map.getZoom();
-    self.map.remove();
-  } 
-  self.map = L.map(self.id)/*, {
-			     scrollWheelZoom: false, // disable original zoom function
-			     smoothWheelZoom: true,  // enable smooth zoom 
-			     smoothSensitivity: 1,   // zoom speed. default is 1
-			     })*/
+  self.datasetCorner = [546000, 5061000]; // min projected coordinates
+  self.datasetCRSName = 'EPSG:32610';
+  self.datasetCRSSpec = '+proj=utm +zone=10 +ellps=WGS84 +datum=WGS84 +units=m +no_defs';
 
-  self.rc = new L.RasterCoords(self.map, [self.dataset.dims[X], self.dataset.dims[Y]], 256)
+  resolutions = []
+  for (i=0; i<=self.maxLevel; i++) {
+    resolutions.push(Math.pow(2, self.maxLevel-i));
+  }
+  
+  var crs = new L.Proj.CRS(datasetCRSName,
+			   datasetCRSSpec,
+			   {
+			     resolutions: resolutions,
+//			     bounds: L.bounds(L.point(546000, 5061000),
+//					      L.point(546000 + dimX*64, 5061000 + dimY*64))
+			   });
 
+  corner1 = crs.unproject(L.point(self.datasetCorner[0],
+				  self.datasetCorner[1]));
+  corner2 = crs.unproject(L.point(self.datasetCorner[0] + self.dataset.dims[X],
+				  self.datasetCorner[1] + self.dataset.dims[Y]));
+  
+  self.map = L.map(self.id,
+		   {
+		     crs: crs
+		   }).fitBounds(L.latLngBounds(corner1, corner2));
+
+  map.on('click', function(e) {
+    alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+  });
+  
   // console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
   // console.log("zoom level", self.rc.zoomLevel(), self.dataset.maxh)
   // console.log("min level", self.minLevel, "max level", self.maxLevel)
   // console.log("tile_size", self.tile_size)
   // console.log(self.rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]))
-  if (viewCenter != null) {
-    self.map.setView(viewCenter, viewZoom)
-  }
-  else {
-    self.map.setView(self.rc.unproject([self.dataset.dims[X]/2, self.dataset.dims[Y]/2]), self.minLevel/2)
-  }
 
-  // var bounds = [[0,0], [self.dataset.dims[X], self.dataset.dims[Y]]];
-  // self.map.fitBounds(bounds)
-
-  //self.tileLayer= VisusGetTileLayer(self.dataset.base_url, self.dataset.name,
-  //        self.dataset.dims[X],self.dataset.dims[Y], self.dataset.maxh, self.minLevel, rc.zoomLevel(), 256)
 
   self.tileLayer =  L.TileLayer.extend({
     options: {
       imageFormat: self.compression,
       tileSize: self.tile_size[X],
       noWrap: true,
-      minZoom: (self.minLevel%2)+2,
-      maxZoom: rc.zoomLevel(),
+      minZoom: self.minLevel,
+      maxZoom: self.maxLevel,
       updateWhenIdle: false,
       continuousWorld: false,
       fitBounds: false,
@@ -483,7 +500,18 @@ function VisusLeaflet(params)
   self.VisusLayer = new self.tileLayer();
 
   self.VisusLayer.addTo(self.map);
+  
 
+  /*
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    minZoom: self.minLevel,
+    maxZoom: self.maxLevel,
+    opacity: 0.5,
+    attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap co\
+ntributors</a>'
+  }).addTo(self.map);
+  */
+  
   if (self.ADD_SCALE_LEGEND == 1)
     L.control.scale().addTo(self.map);  //AAG: 9.26.2021
 
