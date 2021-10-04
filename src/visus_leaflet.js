@@ -1,5 +1,4 @@
 //////////////////////////////////////////////// Leaflet utils
-
 ;(function (factory) {
   var L
   if (typeof define === 'function' && define.amd) {
@@ -16,65 +15,7 @@
     }
     factory(window.L)
   }
-}(function (L) {
-  /**
-   * L.RasterCoords
-   * @param {L.map} map - the map used
-   * @param {Array} imgsize - [ width, height ] image dimensions
-   * @param {Number} [tilesize] - tilesize in pixels. Default=256
-   */
-  L.RasterCoords = function (map, imgsize, tilesize) {
-    this.map = map
-    this.width = imgsize[0]
-    this.height = imgsize[1]
-    this.tilesize = tilesize || 256
-    this.zoom = this.zoomLevel()
-    if (this.width && this.height) {
-      this.setMaxBounds()
-    }
-  }
-
-  L.RasterCoords.prototype = {
-    /**
-     * calculate accurate zoom level for the given image size
-     */
-    zoomLevel: function () {
-      return Math.ceil(
-        Math.log(
-          Math.max(this.width, this.height) /
-          this.tilesize
-        ) / Math.log(2)
-      )
-    },
-    /**
-     * unproject `coords` to the raster coordinates used by the raster image projection
-     * @param {Array} coords - [ x, y ]
-     * @return {L.LatLng} - internal coordinates
-     */
-    unproject: function (coords) {
-      return this.map.unproject(coords, this.zoom)
-    },
-    /**
-     * project `coords` back to image coordinates
-     * @param {Array} coords - [ x, y ]
-     * @return {L.LatLng} - image coordinates
-     */
-    project: function (coords) {
-      return this.map.project(coords, this.zoom)
-    },
-    /**
-     * sets the max bounds on map
-     */
-    setMaxBounds: function () {
-      var southWest = this.unproject([0, this.height])
-      var northEast = this.unproject([this.width, 0])
-      this.map.setMaxBounds(new L.LatLngBounds(southWest, northEast))
-    }
-  }
-
-  return L.RasterCoords
-}))
-////////////////////////////////////////////////
+})
 
 
 
@@ -157,11 +98,11 @@ function VisusLeaflet(params)
       vs = Math.pow(2, self.maxLevel-level);
 
       w = self.tile_size[0] * vs;
-      x1 = x * w;// - self.datasetCorner[0];
+      x1 = x * w - self.datasetCorner[0];
       x2 = x1 + w - 1;
 
       h = self.tile_size[1] * vs;
-      y1 = y * h;// + (self.datasetCorner[1] + self.dataset.dims[Y]);
+      y1 = y * h + (self.datasetCorner[1] + self.dataset.dims[Y]);
       y2 = y1 + h - 1;
       
       //mirror y
@@ -420,25 +361,21 @@ function VisusLeaflet(params)
     setTimeout(self.selfpresetbounds, 2000)
   }
 
+  self.crsName = 'EPSG:32610';
   self.datasetCorner = [546000, 5061000]; // min projected coordinates
-  self.datasetCRSName = 'EPSG:32610';
-  self.datasetCRSSpec = '+proj=utm +zone=10 +ellps=WGS84 +datum=WGS84 +units=m +no_defs';
 
   resolutions = []
   for (i=0; i<=self.maxLevel; i++) {
     resolutions.push(Math.pow(2, self.maxLevel-i));
   }
-  
-  var crs = new L.Proj.CRS(datasetCRSName,
-			   datasetCRSSpec,
+
+  var crs = new L.Proj.CRS(proj4list[self.crsName][0],
+			   proj4list[self.crsName][1],
 			   {
 			     resolutions: resolutions,
-			     origin: [self.datasetCorner[0],
-				      self.datasetCorner[1] + self.dataset.dims[Y]],
-//			     bounds: L.bounds(L.point(546000, 5061000),
-//					      L.point(546000 + dimX*64, 5061000 + dimY*64))
 			   });
 
+  
   corner1 = crs.unproject(L.point(self.datasetCorner[0],
 				  self.datasetCorner[1]));
   corner2 = crs.unproject(L.point(self.datasetCorner[0] + self.dataset.dims[X],
@@ -478,17 +415,40 @@ function VisusLeaflet(params)
   self.VisusLayer = new self.tileLayer();
 
   self.VisusLayer.addTo(self.map);
+
+  //var layer = new L.StamenTileLayer("toner").addTo(map);
+  
+  var wmsLayer = L.tileLayer.wms('https://maps.omniscale.net/v2/private-john-schreiner-6525978d/style.default/map',
+				 {
+				   attribution: '&copy; 2021 &middot; <a href="https://maps.omniscale.com/">Omniscale</a> ' +
+            '&middot; Map data: <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+				   opacity: 0.5,
+				 }).addTo(map);
   
 
   /*
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    minZoom: self.minLevel,
-    maxZoom: self.maxLevel,
-    opacity: 0.5,
-    attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap co\
-ntributors</a>'
-  }).addTo(self.map);
+  var wmsLayer = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/wms?service=WMS&',
+				 {
+				   layers: 'NLCD_2019_Impervious_descriptor_L48',
+				   //layers: '',
+				   opacity: 0.5,
+				 }).addTo(map);
   */
+  
+  /*
+  var wmsLayer = L.tileLayer.wms('https://ows.terrestris.de/osm/service?',
+				 {
+				   layers: 'OSM-WMS',
+				   opacity: 0.5,
+				 }).addTo(map);
+  */
+  
+  /*
+  var wmsLayer = L.tileLayer.wms('http://ows.mundialis.de/services/service?', {
+    layers: 'TOPO-OSM-WMS'
+  }).addTo(map);
+  */
+  
   
   if (self.ADD_SCALE_LEGEND == 1)
     L.control.scale().addTo(self.map);  //AAG: 9.26.2021
