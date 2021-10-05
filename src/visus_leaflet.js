@@ -15,7 +15,64 @@
     }
     factory(window.L)
   }
-})
+}(function (L) {
+  /**
+   * L.RasterCoords
+   * @param {L.map} map - the map used
+   * @param {Array} imgsize - [ width, height ] image dimensions
+   * @param {Number} [tilesize] - tilesize in pixels. Default=256
+   */
+  L.RasterCoords = function (map, imgsize, tilesize) {
+    this.map = map
+    this.width = imgsize[0]
+    this.height = imgsize[1]
+    this.tilesize = tilesize || 256
+    this.zoom = this.zoomLevel()
+    if (this.width && this.height) {
+      this.setMaxBounds()
+    }
+  }
+
+  L.RasterCoords.prototype = {
+    /**
+     * calculate accurate zoom level for the given image size
+     */
+    zoomLevel: function () {
+      return Math.ceil(
+        Math.log(
+          Math.max(this.width, this.height) /
+          this.tilesize
+        ) / Math.log(2)
+      )
+    },
+    /**
+     * unproject `coords` to the raster coordinates used by the raster image projection
+     * @param {Array} coords - [ x, y ]
+     * @return {L.LatLng} - internal coordinates
+     */
+    unproject: function (coords) {
+      return this.map.unproject(coords, this.zoom)
+    },
+    /**
+     * project `coords` back to image coordinates
+     * @param {Array} coords - [ x, y ]
+     * @return {L.LatLng} - image coordinates
+     */
+    project: function (coords) {
+      return this.map.project(coords, this.zoom)
+    },
+    /**
+     * sets the max bounds on map
+     */
+    setMaxBounds: function () {
+      var southWest = this.unproject([0, this.height])
+      var northEast = this.unproject([this.width, 0])
+      this.map.setMaxBounds(new L.LatLngBounds(southWest, northEast))
+    }
+  }
+
+  return L.RasterCoords
+}))
 
 
 
@@ -94,16 +151,31 @@ function VisusLeaflet(params)
     {
       
       //toh=level*2;
-      toh = self.dataset.maxh - 2 * (self.maxLevel - level);
-      vs = Math.pow(2, self.maxLevel-level);
+      if (self.dataset.crs_name) {
+	toh = self.dataset.maxh - 2 * (self.maxLevel - level);
+	vs = Math.pow(2, self.maxLevel-level);
+	
+	w = self.tile_size[0] * vs;
+	x1 = x * w - self.datasetCorner[0];
+	x2 = x1 + w - 1;
 
-      w = self.tile_size[0] * vs;
-      x1 = x * w - self.datasetCorner[0];
-      x2 = x1 + w - 1;
+	h = self.tile_size[1] * vs;
+	y1 = y * h + (self.datasetCorner[1] + self.dataset.dims[Y]);
+	y2 = y1 + h - 1;
+      }
+      else {
+	toh = Math.min(self.dataset.maxh, self.minLevel*2 + level*2);
+	vs = Math.pow(2, this.options.maxZoom-level);
 
-      h = self.tile_size[1] * vs;
-      y1 = y * h + (self.datasetCorner[1] + self.dataset.dims[Y]);
-      y2 = y1 + h - 1;
+	w = self.tile_size[0] * vs;
+	x1 = x * w;
+	x2 = x1 + w - 1;
+
+	h = self.tile_size[1] * vs;
+	y1 = y * h;
+	y2 = y1 + h - 1;
+      }
+
       
       //mirror y
       {
@@ -361,36 +433,49 @@ function VisusLeaflet(params)
     setTimeout(self.selfpresetbounds, 2000)
   }
 
-  resolutions = []
-  for (i=0; i<=self.maxLevel; i++) {
-    resolutions.push(Math.pow(2, self.maxLevel-i));
-  }
-
   if (self.dataset.crs_name) {
     self.datasetCorner = self.dataset.crs_offset; // min projected coordinates
+
+    resolutions = []
+    for (i=0; i<=self.maxLevel; i++) {
+      resolutions.push(Math.pow(2, self.maxLevel-i));
+    }
+    
     var crs = new L.Proj.CRS(proj4list[self.dataset.crs_name][0],
 			     proj4list[self.dataset.crs_name][1],
 			     {
 			       resolutions: resolutions,
 			     });
 
+    corner1 = crs.unproject(L.point(self.datasetCorner[0],
+				    self.datasetCorner[1]));
+    corner2 = crs.unproject(L.point(self.datasetCorner[0] + self.dataset.dims[X],
+				    self.datasetCorner[1] + self.dataset.dims[Y]));
+    
+    self.map = L.map(self.id,
+		     {
+		       crs: crs
+		     }).fitBounds(L.latLngBounds(corner1, corner2));
+
+    self.minZoom = self.minLevel;
+    self.maxZoom = self.maxLevel;
   }
   else {
-    self.datasetCorner = [0,0];
-    var crs = L.CRS.EPSG3857;
-  }
+    self.minLevel=Math.floor(self.dataset.bitsperblock/2);
+    self.maxLevel=Math.floor(self.dataset.maxh/2);
+    
+    self.map = L.map(self.id);
+    self.rc = new L.RasterCoords(self.map, [self.dataset.dims[X], self.dataset.dims[Y]], 256);
 
-  
-  
-  corner1 = crs.unproject(L.point(self.datasetCorner[0],
-				  self.datasetCorner[1]));
-  corner2 = crs.unproject(L.point(self.datasetCorner[0] + self.dataset.dims[X],
-				  self.datasetCorner[1] + self.dataset.dims[Y]));
-  
-  self.map = L.map(self.id,
-		   {
-		     crs: crs
-		   }).fitBounds(L.latLngBounds(corner1, corner2));
+    self.maxLevel = self.rc.zoomLevel();
+    
+    self.map.setView(self.rc.unproject([self.dataset.dims[X]/2,
+					self.dataset.dims[Y]/2]),
+		     self.minLevel/2);
+
+    self.minZoom = (self.minLevel%2)+2;
+    self.maxZoom = rc.zoomLevel();
+  }
 
   
   // console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
@@ -405,8 +490,8 @@ function VisusLeaflet(params)
       imageFormat: self.compression,
       tileSize: self.tile_size[X],
       noWrap: true,
-      minZoom: self.minLevel,
-      maxZoom: self.maxLevel,
+      minZoom: self.minZoom,
+      maxZoom: self.maxZoom,
       updateWhenIdle: false,
       continuousWorld: false,
       fitBounds: false,

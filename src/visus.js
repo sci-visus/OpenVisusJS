@@ -381,7 +381,6 @@ function visusAsyncLoadDataset(url)
         continue;
       }
 
-      /*
       //crs name
       if (lines[i]=="(crs_name)") 
       {
@@ -398,7 +397,6 @@ function visusAsyncLoadDataset(url)
           ret.crs_offset[b]=parseFloat(val[b]);
         continue;
       }
-      */
     }
     
     correct_bitmask=ret.bitmask;
