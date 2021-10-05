@@ -361,20 +361,26 @@ function VisusLeaflet(params)
     setTimeout(self.selfpresetbounds, 2000)
   }
 
-  self.crsName = 'EPSG:32610';
-  self.datasetCorner = [546000, 5061000]; // min projected coordinates
-
   resolutions = []
   for (i=0; i<=self.maxLevel; i++) {
     resolutions.push(Math.pow(2, self.maxLevel-i));
   }
 
-  var crs = new L.Proj.CRS(proj4list[self.crsName][0],
-			   proj4list[self.crsName][1],
-			   {
-			     resolutions: resolutions,
-			   });
+  if (self.dataset.crs_name) {
+    self.datasetCorner = self.dataset.crs_offset; // min projected coordinates
+    var crs = new L.Proj.CRS(proj4list[self.dataset.crs_name][0],
+			     proj4list[self.dataset.crs_name][1],
+			     {
+			       resolutions: resolutions,
+			     });
 
+  }
+  else {
+    self.datasetCorner = [0,0];
+    var crs = L.CRS.EPSG3857;
+  }
+
+  
   
   corner1 = crs.unproject(L.point(self.datasetCorner[0],
 				  self.datasetCorner[1]));
@@ -386,9 +392,6 @@ function VisusLeaflet(params)
 		     crs: crs
 		   }).fitBounds(L.latLngBounds(corner1, corner2));
 
-  map.on('click', function(e) {
-    alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
-  });
   
   // console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
   // console.log("zoom level", self.rc.zoomLevel(), self.dataset.maxh)
@@ -416,38 +419,30 @@ function VisusLeaflet(params)
 
   self.VisusLayer.addTo(self.map);
 
-  //var layer = new L.StamenTileLayer("toner").addTo(map);
   
-  var wmsLayer = L.tileLayer.wms('https://maps.omniscale.net/v2/private-john-schreiner-6525978d/style.default/map',
-				 {
-				   attribution: '&copy; 2021 &middot; <a href="https://maps.omniscale.com/">Omniscale</a> ' +
-            '&middot; Map data: <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-				   opacity: 0.5,
-				 }).addTo(map);
+  // only add base layer if we have a crs that makes sense
+  if (self.dataset.crs_name) {
+    map.on('click', function(e) {
+      alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
+    });
   
+    var baseLayer = L.tileLayer.wms('https://maps.omniscale.net/v2/private-john-schreiner-6525978d/style.default/map',
+				    {
+				      attribution: '&copy; 2021 &middot; <a href="https://maps.omniscale.com/">Omniscale</a> ' +
+					'&middot; Map data: <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+				      opacity: 0.5,
+				    }).addTo(map);
+    
 
-  /*
-  var wmsLayer = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/wms?service=WMS&',
-				 {
-				   layers: 'NLCD_2019_Impervious_descriptor_L48',
-				   //layers: '',
-				   opacity: 0.5,
-				 }).addTo(map);
-  */
-  
-  /*
-  var wmsLayer = L.tileLayer.wms('https://ows.terrestris.de/osm/service?',
-				 {
-				   layers: 'OSM-WMS',
-				   opacity: 0.5,
-				 }).addTo(map);
-  */
-  
-  /*
-  var wmsLayer = L.tileLayer.wms('http://ows.mundialis.de/services/service?', {
-    layers: 'TOPO-OSM-WMS'
-  }).addTo(map);
-  */
+    /*
+      var wmsLayer = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/wms?service=WMS&',
+      {
+      layers: 'NLCD_2019_Impervious_descriptor_L48',
+      //layers: '',
+      opacity: 0.5,
+      }).addTo(map);
+    */
+  }
   
   
   if (self.ADD_SCALE_LEGEND == 1)
