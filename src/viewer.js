@@ -599,7 +599,10 @@ function onPaletteChange(){
   if(renderer)
     renderer.updateColorMap(colormap,pal_min, pal_max);
   
-  //updatePaletteView(document.getElementById('palette').value)
+  // Steve: this function only exists when used for the "Ag" viewer, otherwise it breaks the viewer @Amy
+  // I added a check to see if it exists, but I don't think it is the best solution
+  if (typeof updatePaletteView === "function")
+    updatePaletteView(document.getElementById('palette').value)
 
   //if(document.getElementById('osdCanvas').hidden==false)
     refreshAll(0);
