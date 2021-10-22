@@ -8,6 +8,9 @@ let canvas2d_name="osdCanvas";
 
 if(document.getElementById("leafletCanvas"))
   canvas2d_name="leafletCanvas";
+else if (document.getElementById("olCanvas"))
+  canvas2d_name="olCanvas";
+
 
 function
 toArray(buffer, dataType)
@@ -378,6 +381,17 @@ function setDataset(value, presets=false)
           debugMode : false
         }); 
       }
+
+	if (document.getElementById("olCanvas")) {
+	    visus1=VisusOL({
+		id : 'olCanvas',
+		url: getServer(),
+		dataset : dataset,
+		compression: 'png',
+		showNavigator : false,
+		debugMode : false
+	    });
+	}
 	
       document.getElementById('resolution').step=2;
 
