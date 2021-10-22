@@ -21,7 +21,7 @@ function VisusOL(params)
   self.ADD_TITLE_LEGEND = 1;
   self.ADD_CAPTION_LEGEND = 1;
 
-    if (self.dataset.dim==2)
+  if (self.dataset.dim==2)
   {
     self.tile_size=[1,1,1];
     for (I=0;I<self.dataset.bitsperblock;I++) 
@@ -66,9 +66,9 @@ function VisusOL(params)
       +'&palette_max='+self.palette_max
       +'&palette_interp='+self.palette_interp;
 
-    level=coords.z;
-    x=coords.x;
-    y=coords.y;
+    level=coords[0];
+    x=coords[1];
+    y=coords[2];
 
     
     if (self.dataset.dim==2)
@@ -357,103 +357,67 @@ function VisusOL(params)
     setTimeout(self.selfpresetbounds, 2000)
   }
 
-  if (self.dataset.crs_name) {
-    self.datasetCorner = self.dataset.crs_offset; // min projected coordinates
 
-    resolutions = []
-    for (i=0; i<=self.maxLevel; i++) {
-      resolutions.push(Math.pow(2, self.maxLevel-i));
-    }
-    
-    var crs = new L.Proj.CRS(proj4list[self.dataset.crs_name][0],
-			     proj4list[self.dataset.crs_name][1],
-			     {
-			       resolutions: resolutions,
-			     });
 
-    corner1 = crs.unproject(L.point(self.datasetCorner[0],
-				    self.datasetCorner[1]));
-    corner2 = crs.unproject(L.point(self.datasetCorner[0] + self.dataset.dims[X],
-				    self.datasetCorner[1] + self.dataset.dims[Y]));
-    
-    self.map = L.map(self.id,
-		     {
-		       crs: crs
-		     }).fitBounds(L.latLngBounds(corner1, corner2));
+  self.datasetCorner = self.dataset.crs_offset; // min projected coordinates
 
-    self.minZoom = self.minLevel;
-    self.maxZoom = self.maxLevel;
-  }
-  else {
-    self.minLevel=Math.floor(self.dataset.bitsperblock/2);
-    self.maxLevel=Math.floor(self.dataset.maxh/2);
-    
-    self.map = L.map(self.id);
-    self.rc = new L.RasterCoords(self.map, [self.dataset.dims[X], self.dataset.dims[Y]], 256);
-
-    self.maxLevel = self.rc.zoomLevel();
-    
-    self.map.setView(self.rc.unproject([self.dataset.dims[X]/2,
-					self.dataset.dims[Y]/2]),
-		     self.minLevel/2);
-
-    self.minZoom = (self.minLevel%2)+2;
-    self.maxZoom = rc.zoomLevel();
+  res = []
+  for (i=0; i<=self.maxLevel; i++) {
+    res.push(Math.pow(2, self.maxLevel-i));
   }
 
-  
-  // console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
-  // console.log("zoom level", self.rc.zoomLevel(), self.dataset.maxh)
-  // console.log("min level", self.minLevel, "max level", self.maxLevel)
-  // console.log("tile_size", self.tile_size)
-  // console.log(self.rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]))
+  var proj4def = proj4list[self.dataset.crs_name][1];
+  proj4.defs(self.dataset.crs_name, proj4def);
+  ol.proj.proj4.register(proj4);
+  var proj = new ol.proj.get(self.dataset.crs_name);
+  var ext = proj.getExtent();
 
-
-  self.tileLayer =  L.TileLayer.extend({
-    options: {
-      imageFormat: self.compression,
-      tileSize: self.tile_size[X],
-      noWrap: true,
-      minZoom: self.minZoom,
-      maxZoom: self.maxZoom,
-      updateWhenIdle: false,
-      continuousWorld: false,
-      fitBounds: false,
-      setMaxBounds: false
-    },
-    getTileUrl: self.getTileUrl
+  var proj_3857 = new ol.proj.get("EPSG:3857");
+  var ext_3857 = proj_3857.getExtent();
+      
+  var tileGrid = new ol.tilegrid.TileGrid({
+    resolutions: res,
+    tileSize: [256,256],
+    extent: [self.datasetCorner[0],
+	     self.datasetCorner[1],
+	     self.datasetCorner[0] + self.dataset.dims[X],
+	     self.datasetCorner[1] + self.dataset.dims[Y]],
+    origin: [0,
+	     0]
   });
 
-  self.VisusLayer = new self.tileLayer();
+  var tileSource = new ol.source.TileImage({
+    tileUrlFunction: self.getTileUrl,
+    tileGrid: tileGrid,
+    projection: proj
+  });
 
-  self.VisusLayer.addTo(self.map);
+  var tileLayer = new ol.layer.Tile({
+    source: tileSource,
+    projection: proj,
+    opacity: 0.5
+  });
+
+  var view = new ol.View({
+    projection: proj
+  });
+  view.fit([self.datasetCorner[0],
+	    self.datasetCorner[1],
+	    self.datasetCorner[0] + self.dataset.dims[X],
+	    self.datasetCorner[1] + self.dataset.dims[Y]]);
+  
+  var map = new ol.Map({
+    target: self.id,
+    layers: [
+      new ol.layer.Tile({ source: new ol.source.OSM() }),
+      tileLayer,
+      //new ol.layer.Tile({source: new ol.source.TileDebug()}),
+    ],
+    view: view
+  });
 
   
-  // only add base layer if we have a crs that makes sense
-  if (self.dataset.crs_name) {
-    map.on('click', function(e) {
-      alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
-    });
-  
-    var baseLayer = L.tileLayer.wms('https://maps.omniscale.net/v2/private-john-schreiner-6525978d/style.default/map',
-				    {
-				      attribution: '&copy; 2021 &middot; <a href="https://maps.omniscale.com/">Omniscale</a> ' +
-					'&middot; Map data: <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-				      opacity: 0.5,
-				    }).addTo(map);
-    
-
-    /*
-      var wmsLayer = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/wms?service=WMS&',
-      {
-      layers: 'NLCD_2019_Impervious_descriptor_L48',
-      //layers: '',
-      opacity: 0.5,
-      }).addTo(map);
-    */
-  }
-  
-  
+/*
   if (self.ADD_SCALE_LEGEND == 1)
     L.control.scale().addTo(self.map);  //AAG: 9.26.2021
 
@@ -470,6 +434,6 @@ function VisusOL(params)
   if (self.ADD_NORTH_LEGEND ==1)
     self.addNorth(self.map)
   
-
+*/
   return self;
 };
