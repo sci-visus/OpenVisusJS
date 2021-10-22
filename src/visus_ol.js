@@ -50,7 +50,7 @@ function VisusOL(params)
   self.refresh=function() 
   { 
     guessRange();
-    self.VisusLayer.redraw();
+    self.VisusLayer.getSource().refresh();
   };
 
   //getTileUrl
@@ -397,9 +397,10 @@ function VisusOL(params)
     projection: proj,
     opacity: 0.5
   });
+  self.VisusLayer = tileLayer;
 
   var view = new ol.View({
-    projection: proj
+    projection: proj,
   });
   view.fit([self.datasetCorner[0],
 	    self.datasetCorner[1],
@@ -417,11 +418,13 @@ function VisusOL(params)
   });
 
   
+
+  if (self.ADD_SCALE_LEGEND == 1) {
+    //map.addControl(new ol.control.ScaleLine({units: "metric"}));
+    map.addControl(new ol.control.ScaleLine({units: "us"}));
+  }
+
 /*
-  if (self.ADD_SCALE_LEGEND == 1)
-    L.control.scale().addTo(self.map);  //AAG: 9.26.2021
-
-
   self.addNorth = function( map){ //AAG: 9.26.2021
     var north = L.control({position: "bottomright"});
     north.onAdd = function (map) {
