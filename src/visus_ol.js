@@ -410,9 +410,15 @@ function VisusOL(params)
   var map = new ol.Map({
     target: self.id,
     layers: [
-      new ol.layer.Tile({ source: new ol.source.OSM() }),
-      tileLayer,
+      // open street maps
+      //new ol.layer.Tile({ source: new ol.source.OSM() }),
+      // google maps
+      new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}'})}),
+      // bing maps
+      //new ol.layer.Tile({ source: new ol.source.BingMaps({key: 'Ah-Mj3m-a7ptYFEBKfO87sGVN-evDw_GPi2uSaKvyf8xJ6jG-fIQI3M-Y1iELPmh', imagerySet: 'Road'})}),
+      // debug tile indexing layer
       //new ol.layer.Tile({source: new ol.source.TileDebug()}),
+      tileLayer
     ],
     view: view
   });
