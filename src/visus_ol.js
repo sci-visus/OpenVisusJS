@@ -1,4 +1,9 @@
 
+const container = document.getElementById('popup');
+const content = document.getElementById('popup-content');
+const closer = document.getElementById('popup-closer');
+
+
 
 //////////////////////////////////////////////////////////////////////
 function VisusOL(params) 
@@ -154,7 +159,7 @@ function VisusOL(params)
       +'&compression='+self.compression             
       +'&maxh='+ self.dataset.maxh
       +'&time='+self.time
-      +'&field='+self.field
+      +'&field='+self.field;
 
       //if(is_rgb)
         base_url+='&palette='+self.palette
@@ -372,9 +377,6 @@ function VisusOL(params)
   var proj = new ol.proj.get(self.dataset.crs_name);
   var ext = proj.getExtent();
 
-  var proj_3857 = new ol.proj.get("EPSG:3857");
-  var ext_3857 = proj_3857.getExtent();
-      
   var tileGrid = new ol.tilegrid.TileGrid({
     resolutions: res,
     tileSize: [256,256],
@@ -406,6 +408,22 @@ function VisusOL(params)
 	    self.datasetCorner[1],
 	    self.datasetCorner[0] + self.dataset.dims[X],
 	    self.datasetCorner[1] + self.dataset.dims[Y]]);
+
+  
+  const overlay = new ol.Overlay({
+    element: container,
+    autoPan: true,
+    autoPanAnimation: {
+      duration: 250,
+    },
+  });
+
+  closer.onclick = function () {
+    overlay.setPosition(undefined);
+    closer.blur();
+    return false;
+  };
+
   
   var map = new ol.Map({
     target: self.id,
@@ -420,7 +438,8 @@ function VisusOL(params)
       //new ol.layer.Tile({source: new ol.source.TileDebug()}),
       tileLayer
     ],
-    view: view
+    view: view,
+    overlays: [overlay],
   });
 
   
@@ -430,6 +449,52 @@ function VisusOL(params)
     map.addControl(new ol.control.ScaleLine({units: "us"}));
   }
 
+
+  // query the value under the cursor when the mouse is clicked
+  map.on('singleclick', function (evt) {
+    const coordinate = evt.coordinate;
+    const lonLat = ol.proj.toLonLat(coordinate, map.getView().getProjection())
+    const crsCoord = ol.proj.fromLonLat(lonLat, proj);
+
+    toh = self.dataset.maxh;
+    x = Math.trunc(crsCoord[0] - self.datasetCorner[0]);
+    y = Math.trunc(crsCoord[1] - self.datasetCorner[1]);
+
+    if (x < 0 || x >= self.dataset.dims[0] ||
+	y < 0 || y >= self.dataset.dims[1]) {
+      return;
+    }
+
+    base_url=self.dataset.base_url
+      +'&dataset='+self.dataset.name
+      +'&compression='//+self.compression             
+      +'&maxh='+ self.dataset.maxh
+      +'&time='+self.time
+      +'&field='+self.field;
+
+    url = base_url
+      +'&action=boxquery'
+      +'&box='
+      +x+'%20'+x+'%20'
+      +y+'%20'+y
+      +'&toh='+toh;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.onload = function(e) {
+      if (this.status == 200) {
+	dv = new DataView(this.response);
+	f = dv.getFloat32(0, true);
+	content.innerHTML = '<p>Coordinate: <code>' + lonLat[1] + ' ' + lonLat[0] + '</code></p><p>'+self.field+' Value: <code>'+f+'</code></p>';
+	overlay.setPosition(coordinate);
+	
+      }
+    };
+    xhr.send();
+  });
+  
+  
 /*
   self.addNorth = function( map){ //AAG: 9.26.2021
     var north = L.control({position: "bottomright"});
