@@ -124,6 +124,7 @@ function VisusOL(params)
       
       ret = base_url
         +'&action=boxquery'
+        +'&pad=1'
         +'&box='
           +x1+'%20'+x2+'%20'
           +y1+'%20'+y2
