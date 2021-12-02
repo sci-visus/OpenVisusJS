@@ -148,7 +148,6 @@ function VisusOL(params)
         +'&toh='+toh;    
     }
 
-    self.setTitle();
     return ret;
   };
 
@@ -326,15 +325,13 @@ function VisusOL(params)
       if (title)
           $("#titlelbl").html("<b>" + decodeURI(title) + "</b>");
       else {
-          title = getUrlParameter('dataproduct');
-          if (title)
-              $("#titlelbl").html("<b>" + decodeURI(title) + "</b>");
-          var title2 = getUrlParameter('datasitemonth');
-          if (title2)
-              $("#titlelbl").html("<b>" + decodeURI(title) + ' : '+decodeURI(title2) +"</b>");
-
-          else
-            $("#titlelbl").html("<b>" + 'Data Title' + "</b>");
+        dataproduct = getUrlParameter('dataproduct');
+        site = getUrlParameter('site');
+        month = getUrlParameter('month');
+        if (dataproduct && site && month)
+          $("#titlelbl").html("<b>" + dataproduct + " " + site + " " + month + "</b>");
+        else
+          $("#titlelbl").html("<b>" + 'Data Title' + "</b>");
       }
   }
 
@@ -410,6 +407,36 @@ function VisusOL(params)
 	    self.datasetCorner[0] + self.dataset.dims[X],
 	    self.datasetCorner[1] + self.dataset.dims[Y]]);
 
+  view.on('change', function(){
+    /*
+    console.log("center:" + JSON.stringify(view.getCenter()));
+    console.log("resolution:" + JSON.stringify(view.getResolution()));
+    console.log("rotation:" + JSON.stringify(view.getRotation()));
+    */
+    
+    sessionStorage.setItem("view-center", JSON.stringify(view.getCenter()));
+    sessionStorage.setItem("view-resolution", JSON.stringify(view.getResolution()));
+    sessionStorage.setItem("view-rotation", JSON.stringify(view.getRotation()));
+  });
+
+  dataproduct = getUrlParameter('dataproduct');
+  site = getUrlParameter('site');
+  if (dataproduct == sessionStorage.getItem("dataproduct") &&
+      site == sessionStorage.getItem("site")) {
+    center = JSON.parse(sessionStorage.getItem("view-center"));
+    resolution = JSON.parse(sessionStorage.getItem("view-resolution"));
+    rotation = JSON.parse(sessionStorage.getItem("view-rotation"));
+    if (center === null || resolution === null || rotation === null) {
+    }
+    else {
+      view.setCenter(center);
+      view.setResolution(resolution);
+      view.setRotation(rotation);
+    }
+  }
+
+  sessionStorage.setItem("dataproduct", dataproduct);
+  sessionStorage.setItem("site", site);
   
   const overlay = new ol.Overlay({
     element: container,
