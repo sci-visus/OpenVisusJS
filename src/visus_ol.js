@@ -6,6 +6,8 @@ const closer = document.getElementById('popup-closer');
 
 
 
+
+
 //////////////////////////////////////////////////////////////////////
 function VisusOL(params) 
 {
@@ -17,7 +19,7 @@ function VisusOL(params)
   self.compression    = params['compression']    || 'png';
   self.showNavigator  = params['showNavigator']  || true;
   self.debugMode      = params['debugMode']      || false;
-  self.baseMap        = params['basemap']        || "http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}";
+  self.baseMap        = params['basemap']        || "http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}";
   self.palette        = params['palette']        || "";
   self.palette_min    = params['palette_min']    || '0';
   self.palette_max    = params['palette_max']    || '0';
@@ -478,23 +480,16 @@ function VisusOL(params)
     return false;
   };
 
-  
   self.map = new ol.Map({
     target: self.id,
     layers: [
-      // open street maps
-      //new ol.layer.Tile({ source: new ol.source.OSM() }),
-      // google maps
-       // new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}'})}),
-        new ol.layer.Tile({ title: 'baseMap', source: new ol.source.XYZ({ url: self.baseMap})}),
-        // bing maps
-      //new ol.layer.Tile({ source: new ol.source.BingMaps({key: 'Ah-Mj3m-a7ptYFEBKfO87sGVN-evDw_GPi2uSaKvyf8xJ6jG-fIQI3M-Y1iELPmh', imagerySet: 'Road'})}),
-      // debug tile indexing layer
-      //new ol.layer.Tile({source: new ol.source.TileDebug()}),
-      tileLayer
+      new ol.layer.Tile({ title: 'baseMap', source: new ol.source.XYZ({ url: self.baseMap})}),
+      tileLayer,
+
     ],
     view: view,
     overlays: [overlay],
+    controls: [new ol.control.Rotate({ autoHide: false })],
   });
 
   //self.map.addControl(new ol.control.LayerSwitcher());
@@ -549,22 +544,6 @@ function VisusOL(params)
     };
     xhr.send();
   });
-  
-  
-/*
-  self.addNorth = function( map){ //AAG: 9.26.2021
-    var north = L.control({position: "bottomright"});
-    north.onAdd = function (map) {
-      var div = L.DomUtil.create("div", "info legend");
-      div.innerHTML = '<img width=110 height=""110 src="visus/src/icons/North.png">';
-      return div;
-    }
-    north.addTo( map);
-  }
-  if (self.ADD_NORTH_LEGEND ==1)
-    self.addNorth(self.map)
-  
-*/
 
     const mapScreenshotParam = {
         dim: [190, 160]
