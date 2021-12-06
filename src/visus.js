@@ -380,6 +380,23 @@ function visusAsyncLoadDataset(url)
         
         continue;
       }
+
+      //crs name
+      if (lines[i]=="(crs_name)") 
+      {
+        ret.crs_name=lines[++i];
+        continue;  
+      }
+
+      //crs offset
+      if (lines[i]=="(crs_offset)")
+      {
+        var val=lines[++i].split(' ');
+	ret.crs_offset=[0,0];
+        for(b=0;b<2;b++)
+          ret.crs_offset[b]=parseFloat(val[b]);
+        continue;
+      }
     }
     
     correct_bitmask=ret.bitmask;

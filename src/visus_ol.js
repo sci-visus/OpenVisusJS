@@ -1,83 +1,12 @@
-//////////////////////////////////////////////// Leaflet utils
-;(function (factory) {
-  var L
-  if (typeof define === 'function' && define.amd) {
-    // AMD
-    define(['leaflet'], factory)
-  } else if (typeof module !== 'undefined') {
-    // Node/CommonJS
-    L = require('leaflet')
-    module.exports = factory(L)
-  } else {
-    // Browser globals
-    if (typeof window.L === 'undefined') {
-      throw new Error('Leaflet must be loaded first')
-    }
-    factory(window.L)
-  }
-}(function (L) {
-  /**
-   * L.RasterCoords
-   * @param {L.map} map - the map used
-   * @param {Array} imgsize - [ width, height ] image dimensions
-   * @param {Number} [tilesize] - tilesize in pixels. Default=256
-   */
-  L.RasterCoords = function (map, imgsize, tilesize) {
-    this.map = map
-    this.width = imgsize[0]
-    this.height = imgsize[1]
-    this.tilesize = tilesize || 256
-    this.zoom = this.zoomLevel()
-    if (this.width && this.height) {
-      this.setMaxBounds()
-    }
-  }
 
-  L.RasterCoords.prototype = {
-    /**
-     * calculate accurate zoom level for the given image size
-     */
-    zoomLevel: function () {
-      return Math.ceil(
-        Math.log(
-          Math.max(this.width, this.height) /
-          this.tilesize
-        ) / Math.log(2)
-      )
-    },
-    /**
-     * unproject `coords` to the raster coordinates used by the raster image projection
-     * @param {Array} coords - [ x, y ]
-     * @return {L.LatLng} - internal coordinates
-     */
-    unproject: function (coords) {
-      return this.map.unproject(coords, this.zoom)
-    },
-    /**
-     * project `coords` back to image coordinates
-     * @param {Array} coords - [ x, y ]
-     * @return {L.LatLng} - image coordinates
-     */
-    project: function (coords) {
-      return this.map.project(coords, this.zoom)
-    },
-    /**
-     * sets the max bounds on map
-     */
-    setMaxBounds: function () {
-      var southWest = this.unproject([0, this.height])
-      var northEast = this.unproject([this.width, 0])
-      this.map.setMaxBounds(new L.LatLngBounds(southWest, northEast))
-    }
-  }
-
-  return L.RasterCoords
-}))
+const container = document.getElementById('popup');
+const content = document.getElementById('popup-content');
+const closer = document.getElementById('popup-closer');
 
 
 
 //////////////////////////////////////////////////////////////////////
-function VisusLeaflet(params) 
+function VisusOL(params) 
 {
   var self=this;
   
@@ -97,7 +26,7 @@ function VisusLeaflet(params)
   self.ADD_TITLE_LEGEND = 1;
   self.ADD_CAPTION_LEGEND = 1;
 
-    if (self.dataset.dim==2)
+  if (self.dataset.dim==2)
   {
     self.tile_size=[1,1,1];
     for (I=0;I<self.dataset.bitsperblock;I++) 
@@ -126,7 +55,7 @@ function VisusLeaflet(params)
   self.refresh=function() 
   { 
     guessRange();
-    self.VisusLayer.redraw();
+    self.VisusLayer.getSource().refresh();
   };
 
   //getTileUrl
@@ -142,9 +71,9 @@ function VisusLeaflet(params)
       +'&palette_max='+self.palette_max
       +'&palette_interp='+self.palette_interp;
 
-    level=coords.z;
-    x=coords.x;
-    y=coords.y;
+    level=coords[0];
+    x=coords[1];
+    y=coords[2];
 
     
     if (self.dataset.dim==2)
@@ -195,6 +124,7 @@ function VisusLeaflet(params)
       
       ret = base_url
         +'&action=boxquery'
+        +'&pad=1'
         +'&box='
           +x1+'%20'+x2+'%20'
           +y1+'%20'+y2
@@ -218,7 +148,6 @@ function VisusLeaflet(params)
         +'&toh='+toh;    
     }
 
-    self.setTitle();
     return ret;
   };
 
@@ -230,7 +159,7 @@ function VisusLeaflet(params)
       +'&compression='+self.compression             
       +'&maxh='+ self.dataset.maxh
       +'&time='+self.time
-      +'&field='+self.field
+      +'&field='+self.field;
 
       //if(is_rgb)
         base_url+='&palette='+self.palette
@@ -396,15 +325,13 @@ function VisusLeaflet(params)
       if (title)
           $("#titlelbl").html("<b>" + decodeURI(title) + "</b>");
       else {
-          title = getUrlParameter('dataproduct');
-          if (title)
-              $("#titlelbl").html("<b>" + decodeURI(title) + "</b>");
-          var title2 = getUrlParameter('datasitemonth');
-          if (title2)
-              $("#titlelbl").html("<b>" + decodeURI(title) + ' : '+decodeURI(title2) +"</b>");
-
-          else
-            $("#titlelbl").html("<b>" + 'Data Title' + "</b>");
+        dataproduct = getUrlParameter('dataproduct');
+        site = getUrlParameter('site');
+        month = getUrlParameter('month');
+        if (dataproduct && site && month)
+          $("#titlelbl").html("<b>" + dataproduct + " " + site + " " + month + "</b>");
+        else
+          $("#titlelbl").html("<b>" + 'Data Title' + "</b>");
       }
   }
 
@@ -433,107 +360,170 @@ function VisusLeaflet(params)
     setTimeout(self.selfpresetbounds, 2000)
   }
 
-  if (self.dataset.crs_name) {
-    self.datasetCorner = self.dataset.crs_offset; // min projected coordinates
 
-    resolutions = []
-    for (i=0; i<=self.maxLevel; i++) {
-      resolutions.push(Math.pow(2, self.maxLevel-i));
-    }
-    
-    var crs = new L.Proj.CRS(proj4list[self.dataset.crs_name][0],
-			     proj4list[self.dataset.crs_name][1],
-			     {
-			       resolutions: resolutions,
-			     });
 
-    corner1 = crs.unproject(L.point(self.datasetCorner[0],
-				    self.datasetCorner[1]));
-    corner2 = crs.unproject(L.point(self.datasetCorner[0] + self.dataset.dims[X],
-				    self.datasetCorner[1] + self.dataset.dims[Y]));
-    
-    self.map = L.map(self.id,
-		     {
-		       crs: crs
-		     }).fitBounds(L.latLngBounds(corner1, corner2));
+  self.datasetCorner = self.dataset.crs_offset; // min projected coordinates
 
-    self.minZoom = self.minLevel;
-    self.maxZoom = self.maxLevel;
-  }
-  else {
-    self.minLevel=Math.floor(self.dataset.bitsperblock/2);
-    self.maxLevel=Math.floor(self.dataset.maxh/2);
-    
-    self.map = L.map(self.id);
-    self.rc = new L.RasterCoords(self.map, [self.dataset.dims[X], self.dataset.dims[Y]], 256);
-
-    self.maxLevel = self.rc.zoomLevel();
-    
-    self.map.setView(self.rc.unproject([self.dataset.dims[X]/2,
-					self.dataset.dims[Y]/2]),
-		     self.minLevel/2);
-
-    self.minZoom = (self.minLevel%2)+2;
-    self.maxZoom = rc.zoomLevel();
+  res = []
+  for (i=0; i<=self.maxLevel; i++) {
+    res.push(Math.pow(2, self.maxLevel-i));
   }
 
-  
-  // console.log("dims", self.dataset.dims[X], self.dataset.dims[Y])
-  // console.log("zoom level", self.rc.zoomLevel(), self.dataset.maxh)
-  // console.log("min level", self.minLevel, "max level", self.maxLevel)
-  // console.log("tile_size", self.tile_size)
-  // console.log(self.rc.unproject([self.dataset.dims[X], self.dataset.dims[Y] ]))
+  var proj4def = proj4list[self.dataset.crs_name][1];
+  proj4.defs(self.dataset.crs_name, proj4def);
+  ol.proj.proj4.register(proj4);
+  var proj = new ol.proj.get(self.dataset.crs_name);
+  var ext = proj.getExtent();
 
-
-  self.tileLayer =  L.TileLayer.extend({
-    options: {
-      imageFormat: self.compression,
-      tileSize: self.tile_size[X],
-      noWrap: true,
-      minZoom: self.minZoom,
-      maxZoom: self.maxZoom,
-      updateWhenIdle: false,
-      continuousWorld: false,
-      fitBounds: false,
-      setMaxBounds: false
-    },
-    getTileUrl: self.getTileUrl
+  var tileGrid = new ol.tilegrid.TileGrid({
+    resolutions: res,
+    tileSize: [256,256],
+    extent: [self.datasetCorner[0],
+	     self.datasetCorner[1],
+	     self.datasetCorner[0] + self.dataset.dims[X],
+	     self.datasetCorner[1] + self.dataset.dims[Y]],
+    origin: [0,
+	     0]
   });
 
-  self.VisusLayer = new self.tileLayer();
+  var tileSource = new ol.source.TileImage({
+    tileUrlFunction: self.getTileUrl,
+    tileGrid: tileGrid,
+    projection: proj
+  });
 
-  self.VisusLayer.addTo(self.map);
+  var tileLayer = new ol.layer.Tile({
+    source: tileSource,
+    projection: proj,
+    opacity: 0.5
+  });
+  self.VisusLayer = tileLayer;
 
-  
-  // only add base layer if we have a crs that makes sense
-  if (self.dataset.crs_name) {
-    map.on('click', function(e) {
-      alert("Lat, Lon : " + e.latlng.lat + ", " + e.latlng.lng)
-    });
-  
-    var baseLayer = L.tileLayer.wms('https://maps.omniscale.net/v2/private-john-schreiner-6525978d/style.default/map',
-				    {
-				      attribution: '&copy; 2021 &middot; <a href="https://maps.omniscale.com/">Omniscale</a> ' +
-					'&middot; Map data: <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-				      opacity: 0.5,
-				    }).addTo(map);
-    
+  var view = new ol.View({
+    projection: proj,
+  });
+  view.fit([self.datasetCorner[0],
+	    self.datasetCorner[1],
+	    self.datasetCorner[0] + self.dataset.dims[X],
+	    self.datasetCorner[1] + self.dataset.dims[Y]]);
 
+  view.on('change', function(){
     /*
-      var wmsLayer = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/wms?service=WMS&',
-      {
-      layers: 'NLCD_2019_Impervious_descriptor_L48',
-      //layers: '',
-      opacity: 0.5,
-      }).addTo(map);
+    console.log("center:" + JSON.stringify(view.getCenter()));
+    console.log("resolution:" + JSON.stringify(view.getResolution()));
+    console.log("rotation:" + JSON.stringify(view.getRotation()));
     */
+    
+    sessionStorage.setItem("view-center", JSON.stringify(view.getCenter()));
+    sessionStorage.setItem("view-resolution", JSON.stringify(view.getResolution()));
+    sessionStorage.setItem("view-rotation", JSON.stringify(view.getRotation()));
+  });
+
+  dataproduct = getUrlParameter('dataproduct');
+  site = getUrlParameter('site');
+  if (dataproduct == sessionStorage.getItem("dataproduct") &&
+      site == sessionStorage.getItem("site")) {
+    center = JSON.parse(sessionStorage.getItem("view-center"));
+    resolution = JSON.parse(sessionStorage.getItem("view-resolution"));
+    rotation = JSON.parse(sessionStorage.getItem("view-rotation"));
+    if (center === null || resolution === null || rotation === null) {
+    }
+    else {
+      view.setCenter(center);
+      view.setResolution(resolution);
+      view.setRotation(rotation);
+    }
   }
+
+  sessionStorage.setItem("dataproduct", dataproduct);
+  sessionStorage.setItem("site", site);
   
+  const overlay = new ol.Overlay({
+    element: container,
+    autoPan: true,
+    autoPanAnimation: {
+      duration: 250,
+    },
+  });
+
+  closer.onclick = function () {
+    overlay.setPosition(undefined);
+    closer.blur();
+    return false;
+  };
+
   
-  if (self.ADD_SCALE_LEGEND == 1)
-    L.control.scale().addTo(self.map);  //AAG: 9.26.2021
+  var map = new ol.Map({
+    target: self.id,
+    layers: [
+      // open street maps
+      //new ol.layer.Tile({ source: new ol.source.OSM() }),
+      // google maps
+      new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}'})}),
+      // bing maps
+      //new ol.layer.Tile({ source: new ol.source.BingMaps({key: 'Ah-Mj3m-a7ptYFEBKfO87sGVN-evDw_GPi2uSaKvyf8xJ6jG-fIQI3M-Y1iELPmh', imagerySet: 'Road'})}),
+      // debug tile indexing layer
+      //new ol.layer.Tile({source: new ol.source.TileDebug()}),
+      tileLayer
+    ],
+    view: view,
+    overlays: [overlay],
+  });
+
+  
+
+  if (self.ADD_SCALE_LEGEND == 1) {
+    //map.addControl(new ol.control.ScaleLine({units: "metric"}));
+    map.addControl(new ol.control.ScaleLine({units: "us"}));
+  }
 
 
+  // query the value under the cursor when the mouse is clicked
+  map.on('singleclick', function (evt) {
+    const coordinate = evt.coordinate;
+    const lonLat = ol.proj.toLonLat(coordinate, map.getView().getProjection())
+    const crsCoord = ol.proj.fromLonLat(lonLat, proj);
+
+    toh = self.dataset.maxh;
+    x = Math.trunc(crsCoord[0] - self.datasetCorner[0]);
+    y = Math.trunc(crsCoord[1] - self.datasetCorner[1]);
+
+    if (x < 0 || x >= self.dataset.dims[0] ||
+	y < 0 || y >= self.dataset.dims[1]) {
+      return;
+    }
+
+    base_url=self.dataset.base_url
+      +'&dataset='+self.dataset.name
+      +'&compression='//+self.compression             
+      +'&maxh='+ self.dataset.maxh
+      +'&time='+self.time
+      +'&field='+self.field;
+
+    url = base_url
+      +'&action=boxquery'
+      +'&box='
+      +x+'%20'+x+'%20'
+      +y+'%20'+y
+      +'&toh='+toh;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.onload = function(e) {
+      if (this.status == 200) {
+	dv = new DataView(this.response);
+	f = dv.getFloat32(0, true);
+	content.innerHTML = '<p>Coordinate: <code>' + lonLat[1] + ' ' + lonLat[0] + '</code></p><p>'+self.field+' Value: <code>'+f+'</code></p>';
+	overlay.setPosition(coordinate);
+	
+      }
+    };
+    xhr.send();
+  });
+  
+  
+/*
   self.addNorth = function( map){ //AAG: 9.26.2021
     var north = L.control({position: "bottomright"});
     north.onAdd = function (map) {
@@ -546,6 +536,6 @@ function VisusLeaflet(params)
   if (self.ADD_NORTH_LEGEND ==1)
     self.addNorth(self.map)
   
-
+*/
   return self;
 };
