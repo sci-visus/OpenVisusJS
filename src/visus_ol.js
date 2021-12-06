@@ -368,10 +368,13 @@ function VisusOL(params)
   datamap_output.innerHTML = (parseFloat(datamap_slider.value)/100).toString();
   datamap_slider.oninput = function() {
       datamap_output.innerHTML = (parseFloat(this.value)/100).toString();
-      dataMapLayer = jQuery.grep(self.map.getLayers().getArray(), function(layer) {
-          return layer.get('title') == 'IDX';
+      test = self.map.getLayers().getArray();
+      allDataLayers = (test[1]).getLayers().getArray();
+      idxDataLayer = jQuery.grep(allDataLayers, function(layer) {
+              return layer.get('title') == 'IDX';
       })[0];
-      dataMapLayer.setOpacity(parseFloat(this.value)/100)
+
+      idxDataLayer.setOpacity(parseFloat(this.value)/100)
   };
 
   self.setAxis(2);
@@ -492,6 +495,7 @@ function VisusOL(params)
     return false;
   };
 
+  if (0)
   self.map = new ol.Map({
     target: self.id,
     layers: [
@@ -504,7 +508,107 @@ function VisusOL(params)
     controls: [new ol.control.Rotate({ autoHide: false })],
   });
 
-  //self.map.addControl(new ol.control.LayerSwitcher());
+  else
+    self.map = new ol.Map({
+        view: view,
+        overlays: [overlay],
+        controls: [new ol.control.Rotate({ autoHide: false })],
+        target: self.id,
+        layers: [
+            new ol.layer.Group({
+                title: 'Base map',
+                layers: [
+
+                    new ol.layer.Tile({
+                        title: 'World Topo Map (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'NatGeo (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'USA Topo (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/tile/{z}/{y}/{x}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Shaded Relief (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Street (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Terrain (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}"}),
+                        type: 'base'
+                    }),
+
+                    new ol.layer.Tile({
+                        title: 'Open Street Map',
+                        source: new ol.source.XYZ({ url: "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Road Map (Google)',
+                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=m&hl=pl&&x={x}&y={y}&z={z}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Road Names (Google)',
+                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=h&hl=pl&&x={x}&y={y}&z={z}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Road without Building (Google)',
+                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=r&hl=pl&&x={x}&y={y}&z={z}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Satellite & Roads (Google)',
+                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=y&hl=pl&&x={x}&y={y}&z={z}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Terrain & Roads (Google) ',
+                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=p&hl=pl&&x={x}&y={y}&z={z}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Terrain (Google)',
+                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=t&hl=pl&&x={x}&y={y}&z={z}"}),
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Satellite (Google) ',
+                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}"}),
+                        type: 'base'
+                    }),
+                ]
+            }),
+            new ol.layer.Group({
+                title: 'Data',
+                layers: [
+                    tileLayer,
+                    // new ol.layer.Vector({
+                    //     title: 'Natura biotopes',
+                    //     source: new ol.source.Vector({
+                    //         format: new ol.format.WFS(),
+                    //         url: naturaUrl
+                    //     })
+                    // })
+                ]
+            })
+        ],
+    });
+
+  self.map.addControl(new ol.control.LayerSwitcher());
   
 
   if (self.ADD_SCALE_LEGEND == 1) {
