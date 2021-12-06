@@ -596,12 +596,36 @@ function onVRChange(ren_type){
 
 }
 
+
 function onBaseMapChange(){
     console.log('onBaseMapChange()');
     visus1.setBaseMap(document.getElementById('baseMap').value);
     visus1.updateBaseMap();
     refreshAll(0);
 }
+
+
+function onTakeSnapshot(){
+    leafletImage(visus1.map, function(err, canvas) {
+        // now you have canvas
+        // example thing to do with that canvas:
+        var img = document.createElement('img');
+        var dimensions = map.getSize();
+        img.width = dimensions.x;
+        img.height = dimensions.y;
+
+        var imgElement = document.getElementById('snapshot');
+
+
+        img.setAttribute('download', 'VisusNeonDownload.png');
+        //img.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+        img.setAttribute('href', canvas.toDataURL("image/png"));
+        imgElement.innerHTML = '';
+        imgElement.appendChild(img);
+        img.click();
+    });
+}
+
 
 function onPaletteChange(){
   var colormap = get_palette_data(document.getElementById('palette').value)
@@ -930,4 +954,3 @@ if(document.getElementById('3dCanvas')){
     refreshAll();
   }, false)
 }
-
