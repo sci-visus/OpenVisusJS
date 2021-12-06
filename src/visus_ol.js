@@ -362,6 +362,18 @@ function VisusOL(params)
 
   };
 
+
+  datamap_slider = document.getElementById("datamapOpacitySlider");
+  datamap_output = document.getElementById("datamapOpacityValue");
+  datamap_output.innerHTML = (parseFloat(datamap_slider.value)/100).toString();
+  datamap_slider.oninput = function() {
+      datamap_output.innerHTML = (parseFloat(this.value)/100).toString();
+      dataMapLayer = jQuery.grep(self.map.getLayers().getArray(), function(layer) {
+          return layer.get('title') == 'IDX';
+      })[0];
+      dataMapLayer.setOpacity(parseFloat(this.value)/100)
+  };
+
   self.setAxis(2);
   self.setSlice(0);
   self.setField(self.dataset.fields[0].name);

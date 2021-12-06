@@ -517,7 +517,9 @@ function VisusLeaflet(params)
 					'&middot; Map data: <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 				      opacity: 0.5,
 				    }).addTo(map);
-    
+
+
+
 
     /*
       var wmsLayer = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/wms?service=WMS&',
@@ -528,7 +530,7 @@ function VisusLeaflet(params)
       }).addTo(map);
     */
   }
-  
+
   
   if (self.ADD_SCALE_LEGEND == 1)
     L.control.scale().addTo(self.map);  //AAG: 9.26.2021
