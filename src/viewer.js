@@ -133,7 +133,7 @@ function fetch_and_draw(query_str, reset_view=1)
           renderer.present();
         // else if(visus1.usePresets==false)
         //   onSliceChange(50);
-        
+
         hideStatus();
       }
 
@@ -596,6 +596,13 @@ function onVRChange(ren_type){
 
 }
 
+function onBaseMapChange(){
+    console.log('onBaseMapChange()');
+    visus1.setBaseMap(document.getElementById('baseMap').value);
+    visus1.updateBaseMap();
+    refreshAll(0);
+}
+
 function onPaletteChange(){
   var colormap = get_palette_data(document.getElementById('palette').value)
   let pal_min= parseFloat(document.getElementById('palette_min').value)
@@ -619,7 +626,11 @@ function onPaletteChange(){
     updatePaletteView(document.getElementById('palette').value)
 
   //if(document.getElementById('osdCanvas').hidden==false)
-    refreshAll(0);
+  refreshAll(0);
+}
+
+function onSaveScreenShot(){
+  visus1.onSaveScreenShot()
 }
 
 function onViewResolution(){
@@ -758,7 +769,7 @@ function shareLink(){
   pmin=isNaN(visus1.palette_min) ? "0" : visus1.palette_min
   pmax=isNaN(visus1.palette_max) ? "1" : visus1.palette_max
 
-  link=link+"&time="+visus1.time+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
+  link=link+"&time="+visus1.time+"&baseMap="+visus1.baseMap+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
 
   document.getElementById('link_text').value = link;
 

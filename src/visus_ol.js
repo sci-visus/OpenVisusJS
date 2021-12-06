@@ -1,4 +1,5 @@
 
+
 const container = document.getElementById('popup');
 const content = document.getElementById('popup-content');
 const closer = document.getElementById('popup-closer');
@@ -16,6 +17,7 @@ function VisusOL(params)
   self.compression    = params['compression']    || 'png';
   self.showNavigator  = params['showNavigator']  || true;
   self.debugMode      = params['debugMode']      || false;
+  self.baseMap        = params['basemap']        || "http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}";
   self.palette        = params['palette']        || "";
   self.palette_min    = params['palette_min']    || '0';
   self.palette_max    = params['palette_max']    || '0';
@@ -264,7 +266,17 @@ function VisusOL(params)
   self.setTime=function(value) {
     self.time=value;
   };
-  
+
+  //getBaseMap
+  self.getBaseMap=function() {
+     return self.baseMap;
+  };
+
+  //setBaseMap
+  self.setBaseMap=function(value) {
+     self.baseMap=value;
+  };
+
   //getPalette
   self.getPalette=function() {
     return self.palette;
@@ -274,7 +286,7 @@ function VisusOL(params)
   self.setPalette=function(value) {
     self.palette=value;
   };
-  
+
   //getPaletteMin
   self.getPaletteMin=function() {
     return self.palette_min;
@@ -336,7 +348,20 @@ function VisusOL(params)
           else
             $("#titlelbl").html("<b>" + 'Data Title' + "</b>");
       }
-  }
+  };
+
+  self.updateBaseMap = function(){
+
+      baseMapLayer = jQuery.grep(self.map.getLayers().getArray(), function(layer) {
+          return layer.get('title') == 'baseMap';
+      })[0];
+      baseMapLayer.setSource(new ol.source.XYZ({ url: self.baseMap}) );
+      // baseMapLayer.setOpacity(0.5);
+
+      self.map.changed();
+      self.map.getLayers().forEach(layer => layer.getSource().refresh());
+
+  };
 
   self.setAxis(2);
   self.setSlice(0);
@@ -346,7 +371,7 @@ function VisusOL(params)
   self.setPaletteMin(0);
   self.setPaletteMax(1);
   self.setPaletteInterp("Default");
-  self.setTitle('Viewer')
+  self.setTitle('Viewer');
 
   permutation=[[1,2,0],[0,2,1],[0,1,2]];
   X = permutation[self.axis][0];
@@ -398,7 +423,8 @@ function VisusOL(params)
   var tileLayer = new ol.layer.Tile({
     source: tileSource,
     projection: proj,
-    opacity: 0.5
+    opacity: 0.5,
+      title: 'IDX'
   });
   self.VisusLayer = tileLayer;
 
@@ -426,14 +452,15 @@ function VisusOL(params)
   };
 
   
-  var map = new ol.Map({
+  self.map = new ol.Map({
     target: self.id,
     layers: [
       // open street maps
       //new ol.layer.Tile({ source: new ol.source.OSM() }),
       // google maps
-      new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}'})}),
-      // bing maps
+       // new ol.layer.Tile({ source: new ol.source.XYZ({ url: 'http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}'})}),
+        new ol.layer.Tile({ title: 'baseMap', source: new ol.source.XYZ({ url: self.baseMap})}),
+        // bing maps
       //new ol.layer.Tile({ source: new ol.source.BingMaps({key: 'Ah-Mj3m-a7ptYFEBKfO87sGVN-evDw_GPi2uSaKvyf8xJ6jG-fIQI3M-Y1iELPmh', imagerySet: 'Road'})}),
       // debug tile indexing layer
       //new ol.layer.Tile({source: new ol.source.TileDebug()}),
@@ -443,18 +470,19 @@ function VisusOL(params)
     overlays: [overlay],
   });
 
+  //self.map.addControl(new ol.control.LayerSwitcher());
   
 
   if (self.ADD_SCALE_LEGEND == 1) {
     //map.addControl(new ol.control.ScaleLine({units: "metric"}));
-    map.addControl(new ol.control.ScaleLine({units: "us"}));
+    self.map.addControl(new ol.control.ScaleLine({units: "us"}));
   }
 
 
   // query the value under the cursor when the mouse is clicked
-  map.on('singleclick', function (evt) {
+  self.map.on('singleclick', function (evt) {
     const coordinate = evt.coordinate;
-    const lonLat = ol.proj.toLonLat(coordinate, map.getView().getProjection())
+    const lonLat = ol.proj.toLonLat(coordinate, self.map.getView().getProjection())
     const crsCoord = ol.proj.fromLonLat(lonLat, proj);
 
     toh = self.dataset.maxh;
@@ -510,5 +538,109 @@ function VisusOL(params)
     self.addNorth(self.map)
   
 */
+
+    const mapScreenshotParam = {
+        dim: [190, 160]
+    };
+
+    // document.getElementById('export-jpeg-button').onclick = async() => {
+    //     doDonwload('map-screenshot.jpg');
+    // };
+
+    document.getElementById('export-png-button').onclick = async() => {
+        mapScreenshotParam.format = "png";
+        doDonwload('map-screenshot.png');
+    };
+
+    // document.getElementById('export-pdf-button').onclick = async() => {
+    //     mapScreenshotParam.format = "jpeg";
+    //     const response = await doScreenshot();
+    //     createPDFDocument(response);
+    // };
+
+    function createPDFDocument(data) {
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        pdf.setFont("times");
+        pdf.setFontSize(16);
+        pdf.setFontStyle("bold");
+        const title = "ol-map-screenshop example!";
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        pdf.text((pageWidth / 2) - (title.length), 20, title);
+        pdf.text(pageWidth, 20, title);
+        pdf.setFontSize(10);
+        pdf.setFontStyle("italic");
+        pdf.text(10, 28, "Location: Córdoba, Andalucia, España");
+        pdf.addImage(data.img, 'JPEG', 10, 30, data.w, data.h);
+        pdf.save('map-screenshot.pdf');
+    }
+
+    async function doDonwload(fileName) {
+        const response = await doScreenshot();
+        const element = document.createElement('a');
+        element.setAttribute('href', response.img);
+        element.setAttribute('download', fileName);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+    async function doScreenshot(map) {
+        try {
+            return await olMapScreenshot.getScreenshot(map, mapScreenshotParam);
+        } catch (ex) {
+            showloader(false);
+            alert(ex.message);
+        }
+    }
+
+    self.onSaveScreenShot = function() {
+        doScreenshot(self.map)
+    }
+
+  // self.onSaveScreenShot = function(){
+  //
+  //         map.once('rendercomplete', function () {
+  //             const mapCanvas = document.createElement('canvas');
+  //             const size = self.map.getSize();
+  //             mapCanvas.width = size[0];
+  //             mapCanvas.height = size[1];
+  //             const mapContext = mapCanvas.getContext('2d');
+  //             Array.prototype.forEach.call(
+  //                 document.querySelectorAll('.ol-layer canvas'),
+  //                 function (canvas) {
+  //                     if (canvas.width > 0) {
+  //                         const opacity = canvas.parentNode.style.opacity;
+  //                         mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+  //                         const transform = canvas.style.transform;
+  //                         // Get the transform parameters from the style's transform matrix
+  //                         const matrix = transform
+  //                             .match(/^matrix\(([^\(]*)\)$/)[1]
+  //                             .split(',')
+  //                             .map(Number);
+  //                         // Apply the transform to the export map context
+  //                         CanvasRenderingContext2D.prototype.setTransform.apply(
+  //                             mapContext,
+  //                             matrix
+  //                         );
+  //                         mapContext.drawImage(canvas, 0, 0);
+  //                     }
+  //                 }
+  //             );
+  //             if (navigator.msSaveBlob) {
+  //                 // link download attribute does not work on MS browsers
+  //                 navigator.msSaveBlob(mapCanvas.msToBlob(), 'neon_map.png');
+  //             } else {
+  //
+  //                 const link = document.getElementById('image-download');
+  //                 link.download = 'neon_map' + '.png';
+  //                 link.href = mapCanvas.toDataURL();
+  //                 link.click();
+  //             }
+  //         });
+  //         self.map.renderSync();
+  //
+  // };
+
   return self;
 };
