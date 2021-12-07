@@ -3,7 +3,7 @@
 //Updates svg element with new linear gradient based upon text name cmaptype
 function updatePaletteView(cmaptype) {
     var svgns = 'http://www.w3.org/2000/svg';
-    console.log("In palette View svg edit" + cmaptype);
+    //console.log("In palette View svg edit" + cmaptype);
 
     // Create <svg>, <defs>, <linearGradient> and <rect> elements using createElementNS to apply the SVG namespace.
     // (https://developer.mozilla.org/en-US/docs/Web/API/Document/createElementNS)
@@ -15,7 +15,7 @@ function updatePaletteView(cmaptype) {
 
     // Store an array of stop information for the <linearGradient>
     if (cmaptype == 'NDVI_Beach') {  //NDVI_Beach
-        console.log("In palette View svg edit: NDVI_Beach");
+        //console.log("In palette View svg edit: NDVI_Beach");
         var stops = [
             {
                 "color": "#8bc4f9",
@@ -39,7 +39,7 @@ function updatePaletteView(cmaptype) {
         ];
     }
     else if (cmaptype == 'NDVI_Bright') {
-        console.log("In palette View svg edit   NDVI_Bright");
+        //console.log("In palette View svg edit   NDVI_Bright");
         var stops = [   //NDVI_Bright
             {
                 "color": "#640000",

@@ -50,7 +50,7 @@ function VisusOL(params)
           self.palette_max = d.max;
         }
 
-        console.log("field", self.field,"using min max ", self.palette_min, self.palette_max)
+        //console.log("field", self.field,"using min max ", self.palette_min, self.palette_max)
       }
     }
   }
