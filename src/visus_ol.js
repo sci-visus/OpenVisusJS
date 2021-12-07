@@ -412,10 +412,15 @@ function VisusOL(params)
   }
 
   var proj4def = proj4list[self.dataset.crs_name][1];
+  if (getUrlParameter('dataproduct') == "DP3.30010.001") {
+    // special case for DP3.30010.001, which doesn't use 1 pixel per meter resolution
+    proj4def = proj4def.replace('+units=m', '+to_meter=0.1');
+  }
+
   proj4.defs(self.dataset.crs_name, proj4def);
+
   ol.proj.proj4.register(proj4);
   var proj = new ol.proj.get(self.dataset.crs_name);
-  var ext = proj.getExtent();
 
   var tileGrid = new ol.tilegrid.TileGrid({
     resolutions: res,
