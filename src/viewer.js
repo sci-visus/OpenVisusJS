@@ -248,7 +248,7 @@ function updateInfo(dataset) {
       <li>Fields: "+dataset.fields.length+"</li> \
     </ul> \
     <p style=\"padding-left:5px\">ViSUS URL: <a href=\""+dataset_url+"\">"+dataset_url+"</a></p> \
-    <a href=\"https://visus.org\"><img src=\"images/site_logo.gif\" width=\"80px\"/></a>";
+    <a href=\"https://visus.org\">ViSUS LLC  </a>";
 }
 
 function addSelectionOSD(){
@@ -668,6 +668,11 @@ function onViewResolution(){
   data_url = visus1.refresh(sel_level)
 
   fetch_and_draw(data_url,0)
+}
+
+
+function onGetInfo(){
+    $("#infoModal").modal("show");
 }
 
 function download(box=null){
