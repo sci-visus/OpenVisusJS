@@ -250,7 +250,7 @@ function updateInfo(dataset) {
       <li>Timesteps: "+num_timesteps+"</li> \
       <li>Fields: "+dataset.fields.length+"</li> \
     </ul> \
-    <p style=\"padding-left:5px\">ViSUS URL: <a id=\'link_dataset_text\' href=\""+dataset_url+"\">"+dataset_url+"</a></p> \
+    <p style=\"padding-left:5px\">ViSUS URL: <span id=\'link_dataset_text\'\">"+dataset_url+"</span></p> \
     <a target=\"_blank\" rel=\"noopener\" href=\"https://visus.org\">ViSUS LLC  </a>";
 }
 
