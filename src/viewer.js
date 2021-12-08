@@ -539,6 +539,10 @@ function onFieldChange(value){
   refreshAll();
 }
 
+function onOpacityChange(value){
+  visus1.setOpacity(value);
+}
+
 function onTimeChange(value){
   visus1.setTime(value); 
   document.getElementById('edit_time').value=value;
