@@ -238,17 +238,20 @@ function updateInfo(dataset) {
   if (dataset.dim > 2) dims_str += " x "+dataset.dims[2];
 
   var dataset_url=getServer()+"dataset="+dataset.name;
+  var namestr = visus1.getDatasetName()
+  if (namestr ===undefined)
+    namstr= "test"
 
   document.getElementById('info').innerHTML="\
-    <span style=\"font-size:20px; padding-left:5px\" onclick=\"openNav()\">"+dataset.name+"</span> \
-    <ul> \
+    <span style=\"font-size:20px; padding-left:0px\" onclick=\"openNav()\">"+namestr+"</span>\
+     <ul style=\"font-size:14px; margin-left:15px\"> \
       <li>Size: "+size_str+"</li> \
       <li>Dims: "+dims_str+"</li> \
       <li>Timesteps: "+num_timesteps+"</li> \
       <li>Fields: "+dataset.fields.length+"</li> \
     </ul> \
-    <p style=\"padding-left:5px\">ViSUS URL: <a href=\""+dataset_url+"\">"+dataset_url+"</a></p> \
-    <a href=\"https://visus.org\">ViSUS LLC  </a>";
+    <p style=\"padding-left:5px\">ViSUS URL: <a id=\'link_dataset_text\' href=\""+dataset_url+"\">"+dataset_url+"</a></p> \
+    <a target=\"_blank\" rel=\"noopener\" href=\"https://visus.org\">ViSUS LLC  </a>";
 }
 
 function addSelectionOSD(){

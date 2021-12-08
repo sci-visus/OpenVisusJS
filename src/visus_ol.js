@@ -350,6 +350,16 @@ function VisusOL(params)
   }
 	  
   
+  self.getDatasetName=function() {
+      dataproduct = getUrlParameter('dataproduct');
+      site = getUrlParameter('site');
+      month = getUrlParameter('month');
+      if (dataproduct && site && month)
+         return( dataproduct + " " + site + " " + month  );
+      else
+          return ('')
+    }
+
   self.updateBaseMap = function(){
 
       baseMapLayer = jQuery.grep(self.map.getLayers().getArray(), function(layer) {
