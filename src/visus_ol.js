@@ -350,22 +350,6 @@ function VisusOL(params)
   }
 	  
   
-  self.setTitle=function() {
-      var title = getUrlParameter('title');
-
-      if (title)
-          $("#titlelbl").html("<b>" + decodeURI(title) + "</b>");
-      else {
-        dataproduct = getUrlParameter('dataproduct');
-        site = getUrlParameter('site');
-        month = getUrlParameter('month');
-        if (dataproduct && site && month)
-          $("#titlelbl").html("<b>" + dataproduct + " " + site + " " + month + "</b>");
-        else
-          $("#titlelbl").html("<b>" + 'Data Title' + "</b>");
-      }
-  };
-
   self.updateBaseMap = function(){
 
       baseMapLayer = jQuery.grep(self.map.getLayers().getArray(), function(layer) {
