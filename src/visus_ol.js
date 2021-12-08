@@ -255,7 +255,8 @@ function VisusOL(params)
         self.setDType(f.dtype)
         break;
       }
-    console.log("dtype = "+self.dtype)
+
+    sessionStorage.setItem("ui-field", value);
   };
   
   //getTime
@@ -275,7 +276,8 @@ function VisusOL(params)
 
   //setBaseMap
   self.setBaseMap=function(value) {
-     self.baseMap=value;
+    self.baseMap=value;
+    sessionStorage.setItem("ui-baseMap", value);
   };
 
   //getPalette
@@ -286,6 +288,7 @@ function VisusOL(params)
   //setPalette
   self.setPalette=function(value) {
     self.palette=value;
+    sessionStorage.setItem("ui-palette", value);
   };
 
   //getPaletteMin
@@ -296,6 +299,7 @@ function VisusOL(params)
    //setPaletteMin
   self.setPaletteMin=function(value) {
     self.palette_min=value;
+    sessionStorage.setItem("ui-paletteMin", value);
   } ;
   
    //getPaletteMax
@@ -306,6 +310,7 @@ function VisusOL(params)
   //setPaletteMax
   self.setPaletteMax=function(value) {
     self.palette_max=value;
+    sessionStorage.setItem("ui-paletteMax", value);
   }  ;
   
   //getPaletteInterp
@@ -316,7 +321,7 @@ function VisusOL(params)
   //setPaletteInterp
   self.setPaletteInterp=function(value) {
     self.palette_interp=value;
-  }; 
+  };
 
   self.getBounds=function() {
     // TODO implement getBounds
@@ -333,6 +338,18 @@ function VisusOL(params)
     self.osd.viewport.fitBounds(self.pre_bounds,true);
   }
 
+  self.setOpacity=function(value) {
+    test = self.map.getLayers().getArray();
+    allDataLayers = (test[1]).getLayers().getArray();
+    idxDataLayer = jQuery.grep(allDataLayers, function(layer) {
+            return layer.get('title') == 'IDX';
+    })[0];
+
+    idxDataLayer.setOpacity(value);
+    sessionStorage.setItem("ui-opacity", value);
+  }
+	  
+  
   self.setTitle=function() {
       var title = getUrlParameter('title');
 
@@ -362,7 +379,7 @@ function VisusOL(params)
 
   };
 
-
+/*
   datamap_slider = document.getElementById("datamapOpacitySlider");
   datamap_output = document.getElementById("datamapOpacityValue");
   datamap_output.innerHTML = (parseFloat(datamap_slider.value)/100).toString();
@@ -376,17 +393,13 @@ function VisusOL(params)
 
       idxDataLayer.setOpacity(parseFloat(this.value)/100)
   };
-
+*/
+  
   self.setAxis(2);
   self.setSlice(0);
-  self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
-  self.setPalette("NDVI_Beach");
-  self.setPaletteMin(0);
-  self.setPaletteMax(1);
   self.setPaletteInterp("Default");
-  self.setTitle('Viewer');
-
+  
   permutation=[[1,2,0],[0,2,1],[0,1,2]];
   X = permutation[self.axis][0];
   Y = permutation[self.axis][1];
@@ -469,16 +482,23 @@ function VisusOL(params)
 
   dataproduct = getUrlParameter('dataproduct');
   site = getUrlParameter('site');
+  reloadingDataset = false;
   if (dataproduct == sessionStorage.getItem("dataproduct") &&
       site == sessionStorage.getItem("site")) {
+    reloadingDataset = true;
+    
     center = JSON.parse(sessionStorage.getItem("view-center"));
-    resolution = JSON.parse(sessionStorage.getItem("view-resolution"));
-    rotation = JSON.parse(sessionStorage.getItem("view-rotation"));
-    if (center === null || resolution === null || rotation === null) {
-    }
-    else {
+    if (center) {
       view.setCenter(center);
+    }
+
+    resolution = JSON.parse(sessionStorage.getItem("view-resolution"));
+    if (resolution) {
       view.setResolution(resolution);
+    }
+
+    rotation = JSON.parse(sessionStorage.getItem("view-rotation"));
+    if (rotation) {
       view.setRotation(rotation);
     }
   }
@@ -768,6 +788,26 @@ function VisusOL(params)
   //         self.map.renderSync();
   //
   // };
+
+  field = self.dataset.fields[0].name;
+  palette = "NDVI_Beach";
+  paletteMin = 0;
+  paletteMax = 1;
+  opacity = 0.5;
+  baseMap = null;
+  
+  if (reloadingDataset) {
+    field = sessionStorage.getItem("ui-field");
+    baseMap = sessionStorage.getItem("ui-baseMap");
+    palette = sessionStorage.getItem("ui-palette");
+    paletteMin = sessionStorage.getItem("ui-paletteMin");
+    paletteMax = sessionStorage.getItem("ui-paletteMax");
+    opacity = sessionStorage.getItem("ui-opacity");
+  }
+
+  // call this later, after the visus object is done setting up
+  setTimeout(updateUI, 0, field, baseMap, palette, paletteMin, paletteMax, opacity);
+
 
   return self;
 };
