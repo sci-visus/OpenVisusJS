@@ -329,13 +329,9 @@ function VisusOL(params)
   }
 
   self.setBounds=function(new_bounds) {
-    // TODO implement set view to the input bounds
-    self.pre_bounds = new_bounds;
-    //self.refresh()
   }
 
   self.selfpresetbounds=function(){
-    self.osd.viewport.fitBounds(self.pre_bounds,true);
   }
 
   self.setOpacity=function(value) {
@@ -404,13 +400,6 @@ function VisusOL(params)
   //console.log(dimX, dimY)
 
  
-  if(self.pre_bounds != null){
-    self.setBounds(self.pre_bounds)
-    setTimeout(self.selfpresetbounds, 2000)
-  }
-
-
-
   self.datasetCorner = self.dataset.crs_offset; // min projected coordinates
 
   res = []
