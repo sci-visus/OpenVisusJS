@@ -503,6 +503,9 @@ function VisusOL(params)
   });
   sessionStorage.setItem("dataproduct", dataproduct);
   sessionStorage.setItem("site", site);
+  sessionStorage.setItem("view-center", JSON.stringify(view.getCenter()));
+  sessionStorage.setItem("view-resolution", JSON.stringify(view.getResolution()));
+  sessionStorage.setItem("view-rotation", JSON.stringify(view.getRotation()));
   
   
   const overlay = new ol.Overlay({
