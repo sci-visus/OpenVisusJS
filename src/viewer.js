@@ -237,8 +237,21 @@ function updateInfo(dataset) {
   dims_str=dataset.dims[0]+" x "+dataset.dims[1];
   if (dataset.dim > 2) dims_str += " x "+dataset.dims[2];
 
-  var dataset_url=getServer()+"dataset="+dataset.name;
-  var namestr = visus1.getDatasetName()
+  var server_url = getServer()
+  var dataset_url= server_url+"dataset="+dataset.name;
+
+  // var base_url=window.location.href.split('?')[0]
+  //
+  // var shre_dataset_url = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
+  //       +"&field="+encodeURIComponent(visus1.field)
+  //
+  //   pmin=isNaN(visus1.palette_min) ? "0" : visus1.palette_min
+  //   pmax=isNaN(visus1.palette_max) ? "1" : visus1.palette_max
+  //
+  //   shre_dataset_url=shre_dataset_url+"&time="+visus1.time+"&baseMap="+visus1.baseMap+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
+
+
+    var namestr = visus1.getDatasetName()
   if (namestr ===undefined)
     namstr= "test"
 
