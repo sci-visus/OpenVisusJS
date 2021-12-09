@@ -462,43 +462,48 @@ function VisusOL(params)
 	    self.datasetCorner[0] + self.dataset.dims[X],
 	    self.datasetCorner[1] + self.dataset.dims[Y]]);
 
-  view.on('change', function(){
-    /*
-    console.log("center:" + JSON.stringify(view.getCenter()));
-    console.log("resolution:" + JSON.stringify(view.getResolution()));
-    console.log("rotation:" + JSON.stringify(view.getRotation()));
-    */
+  dataproduct = getUrlParameter('dataproduct');
+  site = getUrlParameter('site');
+  reloadingDataset = false;
+
+  lastDataproduct = sessionStorage.getItem("dataproduct");
+  lastSite = sessionStorage.getItem("site");
+  lastCenter = JSON.parse(sessionStorage.getItem("view-center"));
+  lastResolution = JSON.parse(sessionStorage.getItem("view-resolution"));
+  lastRotation = JSON.parse(sessionStorage.getItem("view-rotation"));
+  lastField = sessionStorage.getItem("ui-field");
+  lastBaseMap = sessionStorage.getItem("ui-baseMap");
+  lastPalette = sessionStorage.getItem("ui-palette");
+  lastPaletteMin = sessionStorage.getItem("ui-paletteMin");
+  lastPaletteMax = sessionStorage.getItem("ui-paletteMax");
+  lastOpacity = sessionStorage.getItem("ui-opacity");
+  sessionStorage.clear();
+  
+  if (dataproduct == lastDataproduct &&
+      site == lastSite) {
+    reloadingDataset = true;
     
+    if (lastCenter) {
+      view.setCenter(lastCenter);
+    }
+
+    if (lastResolution) {
+      view.setResolution(lastResolution);
+    }
+
+    if (lastRotation) {
+      view.setRotation(lastRotation);
+    }
+  }
+
+  view.on('change', function(){
     sessionStorage.setItem("view-center", JSON.stringify(view.getCenter()));
     sessionStorage.setItem("view-resolution", JSON.stringify(view.getResolution()));
     sessionStorage.setItem("view-rotation", JSON.stringify(view.getRotation()));
   });
-
-  dataproduct = getUrlParameter('dataproduct');
-  site = getUrlParameter('site');
-  reloadingDataset = false;
-  if (dataproduct == sessionStorage.getItem("dataproduct") &&
-      site == sessionStorage.getItem("site")) {
-    reloadingDataset = true;
-    
-    center = JSON.parse(sessionStorage.getItem("view-center"));
-    if (center) {
-      view.setCenter(center);
-    }
-
-    resolution = JSON.parse(sessionStorage.getItem("view-resolution"));
-    if (resolution) {
-      view.setResolution(resolution);
-    }
-
-    rotation = JSON.parse(sessionStorage.getItem("view-rotation"));
-    if (rotation) {
-      view.setRotation(rotation);
-    }
-  }
-
   sessionStorage.setItem("dataproduct", dataproduct);
   sessionStorage.setItem("site", site);
+  
   
   const overlay = new ol.Overlay({
     element: container,
@@ -789,14 +794,15 @@ function VisusOL(params)
   paletteMax = 1;
   opacity = 0.5;
   baseMap = null;
+
   
   if (reloadingDataset) {
-    field = sessionStorage.getItem("ui-field");
-    baseMap = sessionStorage.getItem("ui-baseMap");
-    palette = sessionStorage.getItem("ui-palette");
-    paletteMin = sessionStorage.getItem("ui-paletteMin");
-    paletteMax = sessionStorage.getItem("ui-paletteMax");
-    opacity = sessionStorage.getItem("ui-opacity");
+    field = lastField;
+    baseMap = lastBaseMap;
+    palette = lastPalette;
+    paletteMin = lastPaletteMin;
+    paletteMax = lastPaletteMax;
+    opacity = lastOpacity;
   }
 
   // call this later, after the visus object is done setting up
