@@ -687,7 +687,7 @@ function VisusOL(params)
 
     document.getElementById('export-png-button').onclick = async() => {
         mapScreenshotParam.format = "png";
-        doDonwload('map-screenshot.png');
+        //doDonwload('map-screenshot.png'); //AAG took out.. errors..
     };
 
     // document.getElementById('export-pdf-button').onclick = async() => {
