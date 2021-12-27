@@ -685,10 +685,10 @@ function VisusOL(params)
     //     doDonwload('map-screenshot.jpg');
     // };
 
-    document.getElementById('export-png-button').onclick = async() => {
-        mapScreenshotParam.format = "png";
+    //document.getElementById('export-png-button').onclick = async() => {
+     //   mapScreenshotParam.format = "png";
         //doDonwload('map-screenshot.png'); //AAG took out.. errors..
-    };
+    //};
 
     // document.getElementById('export-pdf-button').onclick = async() => {
     //     mapScreenshotParam.format = "jpeg";
