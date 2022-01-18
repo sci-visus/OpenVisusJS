@@ -284,6 +284,11 @@ function VisusLeaflet(params)
 
   }
 
+  self.getDatasetName=function() {
+      //NYI
+      return ('')
+  };
+
   self.setDType=function(value) {
     self.dtype=value;
   }

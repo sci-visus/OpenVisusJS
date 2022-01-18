@@ -607,6 +607,11 @@ function VisusOSD(params)
 
   }
 
+  self.getDatasetName=function() {
+      //NYI
+      return ('')
+  };
+
   self.setDType=function(value) {
     self.dtype=value;
   }
@@ -1001,6 +1006,11 @@ function VisusVR(params)
     return (mag*sample_size)/1024.0/1024.0
 
   }
+
+  self.getDatasetName=function() {
+    //NYI
+    return ('')
+  };
 
   // //setField
   self.setField=function(value) {
