@@ -511,6 +511,7 @@ function VisusOL(params)
     return false;
   };
 
+
   if (0)
   self.map = new ol.Map({
     target: self.id,
@@ -534,7 +535,6 @@ function VisusOL(params)
             new ol.layer.Group({
                 title: 'Base map',
                 layers: [
-
                     new ol.layer.Tile({
                         title: 'World Topo Map (ArcGIS)',
                         source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"}),
@@ -624,6 +624,21 @@ function VisusOL(params)
         ],
     });
 
+
+  vectorUrl = self.dataset.protocol + "//" + self.dataset.host + "/raw_data/" + self.dataset.name + "/vector.geojson";
+  fetch(vectorUrl)
+    .then(response => response.json())
+    .then(json => {
+      vector_source = new ol.source.Vector({
+	features: new ol.format.GeoJSON().readFeatures(json),
+      });
+      vector_layer = new ol.layer.Vector({
+	source: vector_source,
+      });
+      self.map.addLayer(vector_layer);
+    });
+  
+  
   self.map.addControl(new ol.control.LayerSwitcher());
   
 
