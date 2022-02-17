@@ -117,6 +117,7 @@ mkFragSrc(renderingMode)
 #define METHOD ${(renderingMode === 'surface') ? 'SURFACE' : 'VOLUME'}
 
 precision mediump float;
+precision mediump sampler3D;
 
 uniform mediump sampler3D volume_sampler;
 uniform mediump sampler2D transfer_function_sampler;
