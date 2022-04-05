@@ -669,7 +669,10 @@ function VisusOL(params)
   };
 
   //self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/raw_data/" + self.dataset.name + "/vector.geojson", "Vectors");
-  self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/" + getUrlParameter('site') + ".geojson", "Site Boundary");
+  self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/terrestrialSamplingBoundairies/" + getUrlParameter('site') + ".geojson", "Terrestrial Sampling");
+  self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotCentroids/" + getUrlParameter('site') + ".geojson", "Plot Centroids");
+  self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotPoints/" + getUrlParameter('site') + ".geojson", "Plot Points");
+  self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotPolygons/" + getUrlParameter('site') + ".geojson", "Plot Polygons");
   
   
   self.map.addControl(new ol.control.LayerSwitcher());
