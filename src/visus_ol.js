@@ -625,18 +625,51 @@ function VisusOL(params)
     });
 
 
-  vectorUrl = self.dataset.protocol + "//" + self.dataset.host + "/raw_data/" + self.dataset.name + "/vector.geojson";
-  fetch(vectorUrl)
-    .then(response => response.json())
-    .then(json => {
-      vector_source = new ol.source.Vector({
-	features: new ol.format.GeoJSON().readFeatures(json),
-      });
-      vector_layer = new ol.layer.Vector({
-	source: vector_source,
-      });
-      self.map.addLayer(vector_layer);
+  
+
+  self.addGeoJsonLayer = function(url, title){
+    var vector_source = new ol.source.Vector({
+      projection : 'EPSG:4326',
+      url: url,
+      format: new ol.format.GeoJSON()
     });
+    vector_layer = new ol.layer.Vector({
+      title: title,
+      source: vector_source,
+    });
+    self.map.addLayer(vector_layer);
+    
+    /*
+    fetch(url)
+      .then(response => response.json())
+      .then(json => {
+	f = new ol.format.GeoJSON().readFeatures(json, {dataProjection: 'EPSG:4326', featureProjection: 'ESPG:4326'});
+
+	vector_source = new ol.source.Vector({
+	  features: new ol.format.GeoJSON().readFeatures(json, {dataProjection: 'EPSG:4326', featureProjection: 'ESPG:4326'}),
+	});
+	vector_layer = new ol.layer.Vector({
+	  title: title,
+	  source: vector_source,
+	});
+	self.map.addLayer(vector_layer);
+
+	aoeu = vector_source.getState();
+	aoeu = vector_source.features;
+	
+	vector_source.once('change',function(e) {
+	  if(vector_source.getState() === 'ready') {
+            var extent = vector_source.getExtent();
+            console.log(extent);
+            map.getView().fit(extent, map.getSize());
+	  }
+	});
+      });
+*/
+  };
+
+  //self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/raw_data/" + self.dataset.name + "/vector.geojson", "Vectors");
+  self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/" + getUrlParameter('site') + ".geojson", "Site Boundary");
   
   
   self.map.addControl(new ol.control.LayerSwitcher());
