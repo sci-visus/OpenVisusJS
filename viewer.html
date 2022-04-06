@@ -63,6 +63,7 @@
 <style type="text/css">
 body{
   background: black;
+  height: 100%;
 }
 
 .slidecontainer {
@@ -395,18 +396,20 @@ body{
 
 </nav>
 
-  <div id="viewer">
-    <div class="container-fluid">
-      <div class="row row-centered pos">
-	<script>
-	  document.write('<div id="2dCanvas" style="width: 100%; height: ' + $(window).height()*.75+ 'px; z-index:0"></div> ');
-	  </script>
-          <script>
-            document.write('<canvas id="3dCanvas" style="background: black" width="' + $(window).width()*.9 + '"  height="' + $(window).height()*.9+ '"/>');
-          </script>
-      </div>
+<div id="viewer">
+  <div class="container" stype="margin-top:50px">
+    <div class="row row-centered pos">
+      <script>
+	document.write('<div id="2dCanvas" class="map" style="width: 100%; height: ' + $(window).height() + 'px; z-index:0"></div> ');
+      </script>
+
+      <script>
+	document.write('<canvas id="3dCanvas" style="background: black" width="' + $(window).width()*.9 + '"  height="' + $(window).height()*.9+ '"/>');
+      </script>
     </div>
   </div>
+</div>
+
 
   <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
   <script src="src/colormaps.js"></script>
