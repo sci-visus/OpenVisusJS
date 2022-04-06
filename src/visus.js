@@ -375,8 +375,25 @@ function visusAsyncLoadDataset(url)
         
         continue;
       }
+
+      //crs name
+      if (lines[i]=="(crs_name)") 
+      {
+        ret.crs_name=lines[++i];
+        continue;  
+      }
+
+      //crs offset
+      if (lines[i]=="(crs_offset)")
+      {
+        var val=lines[++i].split(' ');
+	ret.crs_offset=[0,0];
+        for(b=0;b<2;b++)
+          ret.crs_offset[b]=parseFloat(val[b]);
+        continue;
+      }
     }
-    
+      
     correct_bitmask=ret.bitmask;
     
     ret.nbits=[0,0,0];
@@ -779,6 +796,508 @@ function VisusOSD(params)
   
   return self;
 };
+
+//////////////////////////////////////////////////////////////////////
+function VisusOL(params) 
+{
+  var self=this;
+  
+  self.id             = params['id'];
+  self.url            = params['url'];
+  self.dataset        = params['dataset'];
+  self.compression    = params['compression']    || 'png';
+  self.showNavigator  = params['showNavigator']  || true;
+  self.debugMode      = params['debugMode']      || false;
+  self.baseMap        = params['basemap']        || "http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}";
+  self.palette        = params['palette']        || "";
+  self.palette_min    = params['palette_min']    || '0';
+  self.palette_max    = params['palette_max']    || '0';
+  self.palette_interp = params['palette_interp'] || 'Default';
+  self.dtype          = params['dtype']          || 'uint8';
+  
+  if (self.dataset.dim==2)
+  {
+    self.tile_size=[1,1,1];
+    for (I=0;I<self.dataset.bitsperblock;I++) 
+      self.tile_size[self.dataset.bitmask[self.dataset.maxh-I]]*=2;     
+  }
+  else
+  {
+    self.tile_size=self.dataset.dims;     
+  }
+
+  self.guessRange=function(){
+    for(i=0; i< self.dataset.fields.length; i++){
+      d=self.dataset.fields[i]
+      if(d.name == self.field){
+        if(d.min != d.max){
+          self.palette_min = d.min; 
+          self.palette_max = d.max;
+        }
+
+        console.log("field", self.field,"using min max ", self.palette_min, self.palette_max)
+      }
+    }
+  }
+
+self.refresh=function() 
+  { 
+    guessRange();
+    self.VisusLayer.getSource().refresh();
+  };
+    
+  //getTileUrl
+  self.getTileUrl=function(coords) {
+    base_url=self.dataset.base_url
+  	  +'&dataset='+self.dataset.name
+  	  +'&compression='+self.compression          	  
+  	  +'&maxh='+ self.dataset.maxh
+    	+'&time='+self.time
+    	+'&field='+self.field
+      +'&palette='+self.palette
+      +'&palette_min='+self.palette_min
+      +'&palette_max='+self.palette_max
+      +'&palette_interp='+self.palette_interp;
+
+      level = coords[0];
+      x = coords[1];
+      y = coords[2];
+      
+    if (self.dataset.dim==2) 
+    {
+      if (self.dataset.crs_name) {
+	toh = self.dataset.maxh - 2 * (self.maxLevel - level);
+	vs = Math.pow(2, self.maxLevel-level);
+	
+	w = self.tile_size[0] * vs;
+	x1 = x * w - self.datasetCorner[0];
+	x2 = x1 + w - 1;
+
+	h = self.tile_size[1] * vs;
+	y1 = y * h + (self.datasetCorner[1] + self.dataset.dims[Y]);
+	y2 = y1 + h - 1;
+      }
+      else {
+	toh = Math.min(self.dataset.maxh, self.minLevel*2 + level*2);
+	vs = Math.pow(2, this.options.maxZoom-level);
+
+	w = self.tile_size[0] * vs;
+	x1 = x * w;
+	x2 = x1 + w - 1;
+
+	h = self.tile_size[1] * vs;
+	y1 = y * h;
+	y2 = y1 + h - 1;
+      }
+
+      
+      //mirror y
+      {
+        yt = y1; 
+        y1 = self.dataset.dims[1] - y2; 
+        y2 = self.dataset.dims[1] - yt;
+      }
+
+// NOTE: removed clamp because Leflet always needs tiles of the same size
+      // +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
+      // +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)
+
+      if (x2 < 0 || x1 >= self.dataset.dims[0] ||
+	  y2 < 0 || y1 >= self.dataset.dims[1]) {
+	return null;
+      }
+      
+      ret = base_url
+        +'&action=boxquery'
+        +'&pad=1'
+        +'&box='
+          +x1+'%20'+x2+'%20'
+          +y1+'%20'+y2
+        +'&toh='+toh;
+    }
+    
+    //console.log(ret);
+    return ret;
+  }; 
+  
+  //download_query
+  self.download_query=function(req_lev=self.level, box=null, is_rgb=true)  { 
+    base_url=self.dataset.base_url
+      +'&dataset='+self.dataset.name
+      +'&compression='+self.compression             
+      +'&maxh='+ self.dataset.maxh
+      +'&time='+self.time
+      +'&field='+self.field
+
+      //if(is_rgb)
+        base_url+='&palette='+self.palette
+        +'&palette_min='+self.palette_min
+        +'&palette_max='+self.palette_max
+        +'&palette_interp='+self.palette_interp;
+    
+      toh=clamp(req_lev,0,self.maxLevel*2);
+      
+      if(box==null)
+        ret = base_url +'&action=boxquery&box=0%20'+self.dataset.dims[0]+'%200%20'+((self.dataset.dims[1])-1)+'&toh='+toh;
+      else
+        ret = base_url +'&action=boxquery&box='+box[0]+'%20'+box[1]+'%20'+box[2]+'%20'+box[3]+'&toh='+toh;
+      //console.log("download query"+ret);
+
+      self.query_str = ret;
+
+      return ret;
+  };
+  
+  if (self.dataset.dim==2)
+  {
+    //each open sea dragon level is a "01" in visus
+    //euristic, for each OSD level I have two Visus levels, so I have to double the tile_size 
+    //in order to get the same number of samples
+    self.minLevel=Math.floor(self.dataset.bitsperblock/2);
+    self.maxLevel=Math.floor(self.dataset.maxh/2);  
+  }
+  else
+  {
+    self.minLevel=0;
+    self.maxLevel=5;
+  }
+  
+  self.getDataSize=function(level){
+    var sample_size = 1;
+    
+    sd=[1,1,1];
+    for (I=0;I<level;I++) 
+      sd[self.dataset.bitmask[self.dataset.maxh-I]]*=2;
+
+    for(d=0;d<3;d++)
+      if(sd[d]>dataset.dims[d])
+        sd[d]=dataset.dims[d]
+
+    sd[axis] = 1
+
+    mag=sd[0]*sd[1]*sd[2]
+    //console.log("level "+level+" nsamples "+mag+"="+sd)
+
+    return (mag*sample_size)/1024.0/1024.0
+
+  }
+
+  self.setDType=function(value) {
+    self.dtype=value;
+  }
+
+  //getAxis
+  self.getAxis=function() {
+    return self.axis; 
+  };
+  
+  //setAxis
+  self.setAxis=function(value) {
+    self.axis=value;
+    self.slice=clamp(self.slice,0,self.dataset.pow2dims[axis]-1);
+  };
+  
+  //getSlice
+  self.getSlice=function() {
+    return self.slice;
+  };
+  
+  //setSlice
+  self.setSlice=function(value) {
+    self.slice=clamp(value,0,self.dataset.pow2dims[axis]-1);
+  } ; 
+  
+  //getField
+  self.getField=function() {
+    return self.field;
+  };
+  
+  //setField
+  self.setField=function(value) {
+    self.field=value;
+    for(f of self.dataset.fields)
+      if(f.name==value){
+        self.setDType(f.dtype)
+        break;
+      }
+    console.log("dtype = "+self.dtype)
+  };
+  
+  //getTime
+  self.getTime=function() {
+    return self.time; 
+  };
+  
+  //setTime
+  self.setTime=function(value) {
+    self.time=value;
+  };
+
+  //getBaseMap
+    self.getBaseMap=function() {
+	return self.baseMap;
+    };
+
+    //setBaseMap
+    self.setBaseMap=function(value) {
+	self.baseMap=value;
+	sessionStorage.setItem("ui-baseMap", value);
+    };
+    
+  //getPalette
+  self.getPalette=function() {
+    return self.palette;
+  };
+  
+  //setPalette
+  self.setPalette=function(value) {
+    self.palette=value;
+  };
+  
+  //getPaletteMin
+  self.getPaletteMin=function() {
+    return self.palette_min;
+  };
+  
+   //setPaletteMin
+  self.setPaletteMin=function(value) {
+    self.palette_min=value;
+  } ;
+  
+   //getPaletteMax
+  self.getPaletteMax=function() {
+    return self.palette_max;
+  };
+  
+  //setPaletteMax
+  self.setPaletteMax=function(value) {
+    self.palette_max=value;
+  }  ;
+  
+  //getPaletteInterp
+  self.getPaletteInterp=function() {
+    return self.palette_interp;
+  };
+  
+  //setPaletteInterp
+  self.setPaletteInterp=function(value) {
+    self.palette_interp=value;
+  }; 
+
+  self.getBounds=function() {
+      // TODO return self.osd.viewport.getBounds();
+      return null;
+  }
+
+  self.setBounds=function(new_bounds) {
+      //self.osd.viewport.fitBounds(new_bounds,true);
+    //self.pre_bounds = new_bounds;
+      //self.refresh()
+      // TODO
+  }
+
+  self.selfpresetbounds=function(){
+    self.osd.viewport.fitBounds(self.pre_bounds,true);
+  }
+
+    self.setOpacity=function(value) {
+	test = self.map.getLayers().getArray();
+	allDataLayers = (test[1]).getLayers().getArray();
+	idxDataLayer = jQuery.grep(allDataLayers, function(layer) {
+	    return layer.get('title') == 'IDX';
+	})[0];
+
+	idxDataLayer.setOpacity(value);
+	sessionStorage.setItem("ui-opacity", value);
+    }
+
+    // TODO: update basemap
+
+  self.setAxis(2);
+  self.setSlice(0);
+  self.setField(self.dataset.fields[0].name);
+  self.setTime(self.dataset.timesteps[0]);
+  self.setPalette("");
+  self.setPaletteMin(0);
+  self.setPaletteMax(0);
+  self.setPaletteInterp("Default");   
+  
+  permutation=[[1,2,0],[0,2,1],[0,1,2]];
+  X = permutation[self.axis][0];
+  Y = permutation[self.axis][1];
+  Z = permutation[self.axis][2];  
+  
+    dimX = Math.pow(2, Math.ceil(Math.log(self.dataset.dims[X])/Math.log(2)));
+    dimY = Math.pow(2, Math.ceil(Math.log(self.dataset.dims[Y])/Math.log(2)));
+    self.datasetCorner = self.dataset.crs_offset;
+    
+    res = []
+    for (i=0; i<=self.maxLevel; i++) {
+	res.push(Math.pow(2, self.maxLevel-i));
+    }
+
+    var proj4def = proj4list[self.dataset.crs_name][1];
+    proj4.defs(self.dataset.crs_name, proj4def);
+    ol.proj.proj4.register(proj4);
+    var proj = new ol.proj.get(self.dataset.crs_name);
+
+    var tileGrid = new ol.tilegrid.TileGrid({
+	resolutions: res,
+	tileSize: [256,256],
+	extent: [self.datasetCorner[0],
+		 self.datasetCorner[1],
+		 self.datasetCorner[0] + self.dataset.dims[X],
+		 self.datasetCorner[1] + self.dataset.dims[Y]],
+	origin: [0,0]
+    });
+
+    var tileSource = new ol.source.TileImage({
+	tileUrlFunction: self.getTileUrl,
+	tileGrid: tileGrid,
+	projection: proj
+    });
+
+    var tileLayer = new ol.layer.Tile({
+	source: tileSource,
+	projection: proj,
+	opacity: 0.5,
+	title: 'IDX'
+    });
+    self.VisusLayer = tileLayer;
+
+    var view = new ol.View({
+	projection: proj,
+    });
+    view.fit([self.datasetCorner[0],
+	      self.datasetCorner[1],
+	      self.datasetCorner[0] + self.dataset.dims[X],
+	      self.datasetCorner[1] + self.dataset.dims[Y]]);
+    
+/*    const overlay = new ol.Overlay({
+	element: container,
+	autoPan: true,
+	autoPanAnimation: {
+	    duration: 250,
+	},
+    });
+
+    closer.onclick = function() {
+	overlay.setPosition(undefined);
+	closer.blur();
+	return false;
+    };
+    */
+    
+  //here I'm tring to preserve the viewort
+/*
+    var bRecycleOSD=false;
+  if (self.osd && self.osd.world.getItemAt(0))
+  {
+    var source=self.osd.world.getItemAt(0).source;
+    bRecycleOSD=
+      source.width==self.dataset.dims[X]   &&
+      source.height==self.dataset.dims[Y]  && 
+      source.tileWidth==self.tile_size[X]  &&
+      source.tileHeight==self.tile_size[Y] && 
+      source.minLevel==self.minLevel       &&
+      source.maxLevel==self.maxLevel       &&
+      source.getTileUrl==self.getTileUrl;
+  }
+  
+  if (bRecycleOSD)
+  {
+    console.log("Using existing OpenSeadragon instance");
+  }
+  else
+  {
+    console.log("Creating OpenSeadragon instance");
+    var osd_id=self.id+"_osd";
+    document.getElementById(self.id).innerHTML="<div id='"+osd_id+"' style='width: 100%;height: 100vh;'></div>";     
+    
+    self.osd=OpenSeadragon({
+      id : osd_id,
+      prefixUrl : 'https://raw.githubusercontent.com/sci-visus/OpenVisusJS/master/images/', //'https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/',
+      tileSources: self.tileSource
+    }); 
+  }
+  
+  self.osd.showNavigator=self.showNavigator;
+  self.osd.preserveViewport= true;
+  self.osd.debugMode=self.debugMode;
+  self.pre_bounds = null;
+    
+  //see https://github.com/openseadragon/openseadragon/issues/866
+  self.refresh=function() 
+  { 
+    guessRange();
+
+    var oldImage=self.osd.world.getItemAt(0);
+
+    self.osd.addTiledImage({
+      tileSource : self.tileSource,
+      success : function() {
+        if (oldImage){
+          self.osd.world.removeItem(oldImage);
+          // we are keeping only one item to avoid rendering of mixed tiles
+          while(visus1.osd.world.getItemCount() > 1)
+            visus1.osd.world.removeItem(self.osd.world.getItemAt(1))
+        }
+      }    
+    });  
+
+    if(self.pre_bounds != null){
+      self.setBounds(self.pre_bounds)
+      setTimeout(self.selfpresetbounds, 2000)
+    }
+  };
+
+  if (bRecycleOSD) {
+    self.refresh();
+  }
+*/
+    if (1) {
+	self.map = new ol.Map({
+	    target: self.id,
+	    layers: [
+		new ol.layer.Tile({ title: 'baseMap', source: new ol.source.XYZ({ url: self.baseMap})}),
+		tileLayer,
+		
+	    ],
+	    view: view,
+	    //overlays: [overlay],
+	    controls: [new ol.control.Rotate({ autoHide: false })],
+	});
+    }
+
+    else {
+    
+    self.map = new ol.Map({
+	view: view,
+	//overlays: [overlay],
+	controls: [new ol.control.Rotate({ autoHide: false })],
+        target: self.id,
+        layers: [new ol.layer.Group({
+                title: 'Base map',
+                layers: [
+                    new ol.layer.Tile({
+                        title: 'Road Map (Google)',
+                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=m&hl=pl&&x={x}&y={y}&z={z}"}),
+                        type: 'base'
+                    }),
+		]
+	}),
+		 new ol.layer.Group({
+		     title: 'Data',
+		     layers: [
+			 tileLayer,
+		     ]
+		 })
+		],
+    });
+    }
+  return self;
+};
+
 
 //////////////////////////////////////////////////////////////////////
 function VisusVR(params) 

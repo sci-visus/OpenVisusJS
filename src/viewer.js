@@ -217,6 +217,7 @@ function updateInfo(dataset) {
     <p style=\"padding-left:5px\">ViSUS URL: <a href=\""+dataset_url+"\">"+dataset_url+"</a></p>";
 }
 
+/*
 function addSelectionOSD(){
   selection = visus1.osd.selection({
       onSelection:  function(rect) { 
@@ -257,7 +258,7 @@ function addSelectionOSD(){
       return this.outerTracker.setTracking(!1),this.outerTracker.setTracking(!0),this.viewer.raiseEvent("selection_cancel",!1),this.undraw()
     };
 }
-
+*/
 ///////////////////////////////////////////////////////
 function setDataset(value, presets=false) 
 {
@@ -331,15 +332,16 @@ function setDataset(value, presets=false)
       }
 
       console.log("USE 2D canvas")
-      visus1=VisusOSD({
+      visus1=VisusOL({
         id : '2dCanvas',
+	url: getServer(),
         dataset : dataset,
         compression : 'png',
         showNavigator : false,
         debugMode : false
       }); 
 
-      addSelectionOSD();
+      //addSelectionOSD();
 
       document.getElementById('resolution').step=2;
 
