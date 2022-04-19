@@ -6,8 +6,6 @@ const closer = document.getElementById('popup-closer');
 
 
 
-
-
 //////////////////////////////////////////////////////////////////////
 function VisusOL(params) 
 {
@@ -636,39 +634,35 @@ function VisusOL(params)
     vector_layer = new ol.layer.Vector({
       title: title,
       source: vector_source,
+      visible: false,
     });
     self.map.addLayer(vector_layer);
-    
-    /*
-    fetch(url)
-      .then(response => response.json())
-      .then(json => {
-	f = new ol.format.GeoJSON().readFeatures(json, {dataProjection: 'EPSG:4326', featureProjection: 'ESPG:4326'});
-
-	vector_source = new ol.source.Vector({
-	  features: new ol.format.GeoJSON().readFeatures(json, {dataProjection: 'EPSG:4326', featureProjection: 'ESPG:4326'}),
-	});
-	vector_layer = new ol.layer.Vector({
-	  title: title,
-	  source: vector_source,
-	});
-	self.map.addLayer(vector_layer);
-
-	aoeu = vector_source.getState();
-	aoeu = vector_source.features;
-	
-	vector_source.once('change',function(e) {
-	  if(vector_source.getState() === 'ready') {
-            var extent = vector_source.getExtent();
-            console.log(extent);
-            map.getView().fit(extent, map.getSize());
-	  }
-	});
-      });
-*/
   };
 
+  self.addKMLLayer = function(url, title){
+    var vector_source = new ol.source.Vector({
+      projection : 'EPSG:4326',
+      url: url,
+      format: new ol.format.KML()
+    });
+    vector_layer = new ol.layer.Vector({
+      title: title,
+      source: vector_source,
+      visible: false,
+    });
+    self.map.addLayer(vector_layer);
+  };
+  
   //self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/raw_data/" + self.dataset.name + "/vector.geojson", "Vectors");
+
+  vectorUrl = self.dataset.protocol + "//" + self.dataset.host + "/raw_data/" + self.dataset.name + "/vector/";
+  vectorIndexUrl = vectorUrl + "index.json";
+  $.getJSON(vectorIndexUrl,
+	    data => {
+	      data.forEach(el => self.addKMLLayer(vectorUrl + el, el));
+	    });
+  
+  
   self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/terrestrialSamplingBoundairies/" + getUrlParameter('site') + ".geojson", "Terrestrial Sampling");
   self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotCentroids/" + getUrlParameter('site') + ".geojson", "Plot Centroids");
   self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotPoints/" + getUrlParameter('site') + ".geojson", "Plot Points");
