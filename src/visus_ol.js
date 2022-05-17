@@ -618,12 +618,33 @@ function VisusOL(params)
                     //     })
                     // })
                 ]
+            }),
+            new ol.layer.Group({
+                title: 'Flight Boundaries',
+                layers: []
+            }),
+            new ol.layer.Group({
+                title: 'Sampling Boundaries',
+                layers: []
             })
         ],
     });
 
 
-  
+
+  self.addLayerToGroup = function(newlayer, groupTitle) {
+    self.map.getLayers().forEach(function(layer) {
+      if (layer instanceof ol.layer.Group &&
+	  layer.get("title") === groupTitle &&
+	  layer.getLayers) {
+	innerLayers = layer.getLayers();
+	innerLayers.push(newlayer);
+	if (innerLayers instanceof ol.Collection) {
+	  layer.setLayers(innerLayers);
+	}
+      }
+    });
+  };
 
   self.addGeoJsonLayer = function(url, title){
     var vector_source = new ol.source.Vector({
@@ -636,7 +657,7 @@ function VisusOL(params)
       source: vector_source,
       visible: false,
     });
-    self.map.addLayer(vector_layer);
+    self.addLayerToGroup(vector_layer, 'Sampling Boundaries');
   };
 
   self.addKMLLayer = function(url, title){
@@ -648,13 +669,11 @@ function VisusOL(params)
     vector_layer = new ol.layer.Vector({
       title: title,
       source: vector_source,
-      visible: false,
+      visible: false
     });
-    self.map.addLayer(vector_layer);
+    self.addLayerToGroup(vector_layer, 'Flight Boundaries');
   };
   
-  //self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/raw_data/" + self.dataset.name + "/vector.geojson", "Vectors");
-
   vectorUrl = self.dataset.protocol + "//" + self.dataset.host + "/raw_data/" + self.dataset.name + "/vector/";
   vectorIndexUrl = vectorUrl + "index.json";
   $.getJSON(vectorIndexUrl,
