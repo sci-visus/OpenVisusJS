@@ -35,7 +35,8 @@ toArray(buffer, dataType)
         case 'float32':
                 return new Float32Array(buffer)
         case 'float64':
-                return new Float32Array(buffer)
+                const view = new Float64Array(buffer)
+                return new Float32Array(view.length).map((_, i) => view[i])
         default:
            console.err("Data type not supported")
     }
