@@ -367,6 +367,40 @@ function VisusOL(params)
 
   };
 
+  self.getNeonRCode = function() {
+
+    view = self.map.getView();
+    center = view.getCenter();
+    extent = view.calculateExtent(self.map.getSize());
+    size = Math.min(extent[2]-extent[0],
+		    extent[3]-extent[1]);
+
+    xmin = Math.floor(Math.max(extent[0], self.datasetCorner[0])/1000) * 1000;
+    xmax = Math.floor(Math.min(extent[2], self.datasetCorner[0]+self.dataset.dims[X])/1000) * 1000;
+    ymin = Math.floor(Math.max(extent[1], self.datasetCorner[1])/1000) * 1000;
+    ymax = Math.floor(Math.min(extent[3], self.datasetCorner[1]+self.dataset.dims[Y])/1000) * 1000;
+    
+    dataproduct = getUrlParameter('dataproduct');
+    site = getUrlParameter('site');
+    month = getUrlParameter('month');
+    code =  (
+      'library(neonUtilities)\n' +
+        'for (i in seq('+xmin+', '+xmax+', 1000)) {\n' +
+	'  for (j in seq('+ymin+', '+ymax+', 1000)) {\n' +
+	'    byTileAOP(dpID="' + dataproduct + '",\n' +
+	'              site="' + site + '",\n' +
+	'              year="' + month + '",\n' +
+	'              buffer=0,\n' +
+	'              easting=i,\n' +
+	'              northing=j,\n' +
+	'              check.size=FALSE)\n' +
+	'  }\n' +
+	'}\n'
+    );
+    
+    return code;
+  };
+
 /*
   datamap_slider = document.getElementById("datamapOpacitySlider");
   datamap_output = document.getElementById("datamapOpacityValue");
@@ -733,9 +767,14 @@ function VisusOL(params)
       if (this.status == 200) {
 	dv = new DataView(this.response);
 	f = dv.getFloat32(0, true);
-	content.innerHTML = '<p>Coordinate: <code>' + lonLat[1] + ' ' + lonLat[0] + '</code></p><p>'+self.field+' Value: <code>'+f+'</code></p>';
+	content.innerHTML =
+	  '<p>' +
+	  'Coordinate: <code>' + lonLat[1] + ' ' + lonLat[0] + '</code></p><p>'+self.field+
+	  ' Value: <code>'+f+'</code>' +
+	  '</p>';
 	overlay.setPosition(coordinate);
-	
+
+	console.log(self.getNeonRCode());
       }
     };
     xhr.send();
@@ -863,7 +902,6 @@ function VisusOL(params)
 
   // call this later, after the visus object is done setting up
   setTimeout(updateUI, 0, field, baseMap, palette, paletteMin, paletteMax, opacity);
-
 
   return self;
 };
