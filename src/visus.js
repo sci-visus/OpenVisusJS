@@ -835,6 +835,8 @@ function VisusOL(params)
           self.palette_max = d.max;
         }
 
+	  if (isNaN(self.palette_min)) self.palette_min = 0;
+	  if (isNaN(self.palette_max)) self.palette_max = 1;
         console.log("field", self.field,"using min max ", self.palette_min, self.palette_max)
       }
     }
@@ -902,17 +904,16 @@ self.refresh=function()
       // +clamp(x1, 0, self.dataset.dims[0])+'%20'+(clamp(x2, 0, self.dataset.dims[0])-1)+'%20'
       // +clamp(y1, 0, self.dataset.dims[1])+'%20'+(clamp(y2, 0, self.dataset.dims[1])-1)
 
-      if (x2 < 0 || x1 >= self.dataset.dims[0] ||
-	  y2 < 0 || y1 >= self.dataset.dims[1]) {
-	return null;
-      }
-      
+	if (x2 < 0 || x1 >= self.dataset.dims[0] ||
+	    y2 < 0 || y1 >= self.dataset.dims[1]) {
+	    return null;
+	}
+
       ret = base_url
         +'&action=boxquery'
-        +'&pad=1'
         +'&box='
-          +x1+'%20'+x2+'%20'
-          +y1+'%20'+y2
+            +x1+'%20'+x2+'%20'
+            +y1+'%20'+y2
         +'&toh='+toh;
     }
     
@@ -952,9 +953,12 @@ self.refresh=function()
   {
     //each open sea dragon level is a "01" in visus
     //euristic, for each OSD level I have two Visus levels, so I have to double the tile_size 
-    //in order to get the same number of samples
-    self.minLevel=Math.floor(self.dataset.bitsperblock/2);
-    self.maxLevel=Math.floor(self.dataset.maxh/2);  
+      //in order to get the same number of samples
+      // SPC Modified
+      //self.minLevel=Math.floor(self.dataset.bitsperblock/2);
+      //self.maxLevel=Math.floor(self.dataset.maxh/2);
+      self.minLevel=0;
+      self.maxlevel=8;
   }
   else
   {
@@ -1091,13 +1095,12 @@ self.refresh=function()
 
   self.setBounds=function(new_bounds) {
       //self.osd.viewport.fitBounds(new_bounds,true);
-    //self.pre_bounds = new_bounds;
-      //self.refresh()
-      // TODO
+      //self.pre_bounds = new_bounds;
+      //self.refresh();
   }
 
   self.selfpresetbounds=function(){
-    self.osd.viewport.fitBounds(self.pre_bounds,true);
+      //self.osd.viewport.fitBounds(self.pre_bounds,true);
   }
 
     self.setOpacity=function(value) {
@@ -1111,15 +1114,25 @@ self.refresh=function()
 	sessionStorage.setItem("ui-opacity", value);
     }
 
-    // TODO: update basemap
+    self.updateBaseMap = function(){
 
+      baseMapLayer = jQuery.grep(self.map.getLayers().getArray(), function(layer) {
+          return layer.get('title') == 'baseMap';
+      })[0];
+      baseMapLayer.setSource(new ol.source.XYZ({ url: self.baseMap}) );
+      baseMapLayer.setOpacity(0.5);
+
+      self.map.changed();
+      self.map.getLayers().forEach(layer => layer.getSource().refresh());
+
+  };
   self.setAxis(2);
   self.setSlice(0);
   self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
-  self.setPalette("");
+  self.setPalette("rich");
   self.setPaletteMin(0);
-  self.setPaletteMax(0);
+  self.setPaletteMax(1);
   self.setPaletteInterp("Default");   
   
   permutation=[[1,2,0],[0,2,1],[0,1,2]];
@@ -1186,7 +1199,7 @@ self.refresh=function()
 	closer.blur();
 	return false;
     };
-    */
+*/
     
   //here I'm tring to preserve the viewort
 /*
@@ -1255,7 +1268,7 @@ self.refresh=function()
     self.refresh();
   }
 */
-    if (1) {
+    if (0) {
 	self.map = new ol.Map({
 	    target: self.id,
 	    layers: [
@@ -1264,7 +1277,7 @@ self.refresh=function()
 		
 	    ],
 	    view: view,
-	    //overlays: [overlay],
+	    overlays: [overlay],
 	    controls: [new ol.control.Rotate({ autoHide: false })],
 	});
     }
@@ -1311,9 +1324,9 @@ function VisusVR(params)
   self.compression    = params['compression']    || 'raw';
   self.showNavigator  = params['showNavigator']  || true;
   self.debugMode      = params['debugMode']      || false;
-  self.palette        = params['palette']        || "";
-  self.palette_min    = params['palette_min']    || NaN;
-  self.palette_max    = params['palette_max']    || NaN;
+  self.palette        = params['palette']        || "rich";
+  self.palette_min    = params['palette_min']    || 0;
+  self.palette_max    = params['palette_max']    || 1;
   self.palette_interp = params['palette_interp'] || 'Default';
   
   if (self.dataset.dim==2)
