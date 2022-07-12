@@ -383,6 +383,13 @@ function visusAsyncLoadDataset(url)
         continue;  
       }
 
+      //crs scale
+      if (lines[i]=="(crs_scale)") 
+      {
+        ret.crs_scale=lines[++i];
+        continue;  
+      }
+
       //crs offset
       if (lines[i]=="(crs_offset)")
       {
@@ -909,12 +916,19 @@ self.refresh=function()
 	    return null;
 	}
 
+	// | 0, lovely javascript to convert double to int
+	x1 = x1 | 0;
+	x2 = x2 | 0;
+	y1 = y1 | 0;
+	y2 = y2 | 0;
+	
       ret = base_url
-        +'&action=boxquery'
-        +'&box='
+            +'&action=boxquery'
+            +'&pad=1'
+            +'&box='
             +x1+'%20'+x2+'%20'
             +y1+'%20'+y2
-        +'&toh='+toh;
+            +'&toh='+toh;
     }
     
     //console.log(ret);
@@ -940,8 +954,14 @@ self.refresh=function()
       
       if(box==null)
         ret = base_url +'&action=boxquery&box=0%20'+self.dataset.dims[0]+'%200%20'+((self.dataset.dims[1])-1)+'&toh='+toh;
-      else
-        ret = base_url +'&action=boxquery&box='+box[0]+'%20'+box[1]+'%20'+box[2]+'%20'+box[3]+'&toh='+toh;
+      else {
+	  // | 0, lovely javascript to convert double to int
+	  box[0] = box[0] | 0;
+	  box[1] = box[1] | 0;
+	  box[2] = box[2] | 0;
+	  box[3] = box[3] | 0;
+          ret = base_url +'&action=boxquery&box='+box[0]+'%20'+box[1]+'%20'+box[2]+'%20'+box[3]+'&toh='+toh;
+      }
       //console.log("download query"+ret);
 
       self.query_str = ret;
@@ -958,7 +978,7 @@ self.refresh=function()
       //self.minLevel=Math.floor(self.dataset.bitsperblock/2);
       //self.maxLevel=Math.floor(self.dataset.maxh/2);
       self.minLevel=0;
-      self.maxlevel=8;
+      self.maxLevel=8;
   }
   else
   {
@@ -1150,6 +1170,7 @@ self.refresh=function()
     }
 
     var proj4def = proj4list[self.dataset.crs_name][1];
+    proj4def = proj4def.replace('+units=m', '+to_meter='+self.dataset.crs_scale);
     proj4.defs(self.dataset.crs_name, proj4def);
     ol.proj.proj4.register(proj4);
     var proj = new ol.proj.get(self.dataset.crs_name);
@@ -1289,7 +1310,9 @@ self.refresh=function()
 	//overlays: [overlay],
 	controls: [new ol.control.Rotate({ autoHide: false })],
         target: self.id,
-        layers: [new ol.layer.Group({
+        layers: [
+
+	    new ol.layer.Group({
                 title: 'Base map',
                 layers: [
                     new ol.layer.Tile({
@@ -1298,7 +1321,8 @@ self.refresh=function()
                         type: 'base'
                     }),
 		]
-	}),
+	    }),
+
 		 new ol.layer.Group({
 		     title: 'Data',
 		     layers: [
