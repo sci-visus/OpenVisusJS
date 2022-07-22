@@ -401,6 +401,74 @@ function VisusOL(params)
     return code;
   };
 
+
+  self.getVisusPythonCode = function() {
+
+      view = self.map.getView();
+      res = view.getResolution();
+      level = self.tileGrid.getZForResolution(res);
+      toh = self.dataset.maxh - 2 * (self.maxLevel - level)
+      center = view.getCenter();
+      extent = view.calculateExtent(self.map.getSize());
+      size = Math.min(extent[2]-extent[0],
+		      extent[3]-extent[1]);
+
+      xmin = extent[0] - self.datasetCorner[0];
+      xmax = extent[2] - self.datasetCorner[0];
+      ymin = extent[1] - self.datasetCorner[1];
+      ymax = extent[3] - self.datasetCorner[1];
+
+      xmin = xmin | 0;
+      xmax = xmax | 0;
+      ymin = ymin | 0;
+      ymax = ymax | 0;
+      
+      server_url = getServer();
+      dataset_url= server_url+"dataset="+self.dataset.name;
+      
+      code =  (
+'from OpenVisus import *\n' + 
+'from PIL import Image\n' + 
+'import numpy\n' + 
+'\n' + 
+'\n' + 
+'\n' + 
+'def BattelleNEONQuery(data_url,\n' + 
+'                      field,\n' + 
+'                      easting,\n' + 
+'                      northing,\n' + 
+'                      resolution):\n' + 
+'\n' + 
+'    dataset=LoadDataset(data_url)\n' + 
+'    access=dataset.createAccess()\n' + 
+'    query=dataset.createBoxQuery(BoxNi(PointNi(easting[0], northing[0]),\n' + 
+'                                       PointNi(easting[1], northing[1])),\n' + 
+'                                 dataset.getField(field),\n' + 
+'                                 0)\n' + 
+'    query.setResolutionRange(0, resolution)\n' + 
+'    dataset.beginBoxQuery(query)\n' + 
+'    dataset.executeBoxQuery(access,query)\n' + 
+'    data=Array.toNumPy(query.buffer,bSqueeze=True,bShareMem=False)\n' + 
+'    data = numpy.flip(data, 0)\n' + 
+'    return data\n' + 
+'\n' + 
+'\n' + 
+'DbModule.attach()\n' + 
+'\n' + 
+'data = BattelleNEONQuery(\"' + dataset_url + '\",\n' + 
+'                         \"'+self.field+'\",\n' + 
+'                         ('+xmin+','+xmax+'),\n' + 
+'                         ('+ymin+','+ymax+'),\n' + 
+'                        '+toh+')\n' + 
+'\n' + 
+'Image.fromarray(data).save("out.tif")\n' + 
+'\n' + 
+'DbModule.detach()\n' +
+'\n');
+    
+    return code;
+  };
+    
 /*
   datamap_slider = document.getElementById("datamapOpacitySlider");
   datamap_output = document.getElementById("datamapOpacityValue");
@@ -419,7 +487,11 @@ function VisusOL(params)
   
   self.setAxis(2);
   self.setSlice(0);
+  self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
+  self.setPalette("rich");
+  self.setPaletteMin(0);
+  self.setPaletteMax(1);
   self.setPaletteInterp("Default");
   
   permutation=[[1,2,0],[0,2,1],[0,1,2]];
@@ -450,7 +522,7 @@ function VisusOL(params)
   ol.proj.proj4.register(proj4);
   var proj = new ol.proj.get(self.dataset.crs_name);
 
-  var tileGrid = new ol.tilegrid.TileGrid({
+  self.tileGrid = new ol.tilegrid.TileGrid({
     resolutions: res,
     tileSize: [256,256],
     extent: [self.datasetCorner[0],
@@ -775,6 +847,7 @@ function VisusOL(params)
 	overlay.setPosition(coordinate);
 
 	console.log(self.getNeonRCode());
+	console.log(self.getVisusPythonCode());
       }
     };
     xhr.send();
