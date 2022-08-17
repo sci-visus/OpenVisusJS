@@ -1,7 +1,9 @@
 
 
 const container = document.getElementById('popup');
-const content = document.getElementById('popup-content');
+const contentCoords = document.getElementById('popup-coords');
+const contentR = document.getElementById('popup-r-script');
+const contentPython = document.getElementById('popup-python-script');
 const closer = document.getElementById('popup-closer');
 
 
@@ -839,13 +841,14 @@ function VisusOL(params)
       if (this.status == 200) {
 	dv = new DataView(this.response);
 	f = dv.getFloat32(0, true);
-	content.innerHTML =
+	  contentCoords.innerHTML =
 	  '<p>' +
 	  'Coordinate: <code>' + lonLat[1] + ' ' + lonLat[0] + '</code></p><p>'+self.field+
 	  ' Value: <code>'+f+'</code>' +
-	  '</p>';
+	      '</p>';
+	  contentR.innerHTML = '<p><code font-size:0.65rem>' + self.getNeonRCode() + '</code></p>';
+	  contentPython.innerHTML = '<p><code font-size:0.65rem>' + self.getVisusPythonCode() + '</code></p>';
 	overlay.setPosition(coordinate);
-
 	console.log(self.getNeonRCode());
 	console.log(self.getVisusPythonCode());
       }
@@ -898,7 +901,7 @@ function VisusOL(params)
         element.click();
         document.body.removeChild(element);
     }
-
+    
     async function doScreenshot(map) {
         try {
             return await olMapScreenshot.getScreenshot(map, mapScreenshotParam);
