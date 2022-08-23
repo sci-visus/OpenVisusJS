@@ -1162,7 +1162,8 @@ self.refresh=function()
   
     dimX = Math.pow(2, Math.ceil(Math.log(self.dataset.dims[X])/Math.log(2)));
     dimY = Math.pow(2, Math.ceil(Math.log(self.dataset.dims[Y])/Math.log(2)));
-    self.datasetCorner = self.dataset.crs_offset;
+    self.datasetCorner = [self.dataset.crs_offset[0] * self.dataset.crs_scale,
+			  self.dataset.crs_offset[1] * self.dataset.crs_scale];
     
     res = []
     for (i=0; i<=self.maxLevel; i++) {
@@ -1170,10 +1171,10 @@ self.refresh=function()
     }
 
     var proj4def = proj4list[self.dataset.crs_name][1];
-    proj4def = proj4def.replace('+units=m', '+to_meter='+self.dataset.crs_scale);
-    proj4.defs(self.dataset.crs_name, proj4def);
+    proj4def = proj4def.replace('+units=m', '+to_meter='+(1/self.dataset.crs_scale));
+    proj4.defs("visuscrs", proj4def);
     ol.proj.proj4.register(proj4);
-    var proj = new ol.proj.get(self.dataset.crs_name);
+    var proj = new ol.proj.get("visuscrs");
 
     var tileGrid = new ol.tilegrid.TileGrid({
 	resolutions: res,
