@@ -517,10 +517,9 @@ function VisusOL(params)
     proj4def = proj4def.replace('+units=m', '+to_meter=0.1');
   }
 
-  proj4.defs(self.dataset.crs_name, proj4def);
-
+  proj4.defs("visuscrs", proj4def);
   ol.proj.proj4.register(proj4);
-  var proj = new ol.proj.get(self.dataset.crs_name);
+  var proj = new ol.proj.get("visuscrs");
 
   self.tileGrid = new ol.tilegrid.TileGrid({
     resolutions: res,
