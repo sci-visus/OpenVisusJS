@@ -3,6 +3,15 @@ var visus1;
 let renderer;
 let curr_render_type;
 
+//TODO rename osdCanvas to osdCanvas
+let canvas2d_name="osdCanvas";
+
+if(document.getElementById("leafletCanvas"))
+  canvas2d_name="leafletCanvas";
+else if (document.getElementById("olCanvas"))
+  canvas2d_name="olCanvas";
+
+
 function
 toArray(buffer, dataType)
 {
@@ -26,7 +35,8 @@ toArray(buffer, dataType)
         case 'float32':
                 return new Float32Array(buffer)
         case 'float64':
-                return new Float32Array(buffer)
+                const view = new Float64Array(buffer)
+                return new Float32Array(view.length).map((_, i) => view[i])
         default:
            console.err("Data type not supported")
     }
@@ -34,7 +44,7 @@ toArray(buffer, dataType)
 
 function notifyStatus(new_text)
 {
-  if(document.getElementById('2dCanvas').hidden==true){
+  if(document.getElementById(canvas2d_name).hidden==true){
     document.getElementById('status_bar').hidden=false
     document.getElementById('status').innerHTML="  "+new_text
   }
@@ -124,7 +134,7 @@ function fetch_and_draw(query_str, reset_view=1)
           renderer.present();
         // else if(visus1.usePresets==false)
         //   onSliceChange(50);
-        
+
         hideStatus();
       }
 
@@ -142,7 +152,7 @@ async function refreshAll(reset_view=1)
 {
 
   if(dataset.dim==2)
-    query_str = visus1.refresh();
+    query_str = visus1.refresh(document.getElementById('auto_refresh').checked); //if auto refresh make hard osd refresh
   else
     query_str = visus1.refresh(level);
 
@@ -204,17 +214,34 @@ function updateInfo(dataset) {
   dims_str=dataset.dims[0]+" x "+dataset.dims[1];
   if (dataset.dim > 2) dims_str += " x "+dataset.dims[2];
 
-  var dataset_url=getServer()+"dataset="+dataset.name;
+  var server_url = getServer()
+  var dataset_url= server_url+"dataset="+dataset.name;
+
+  // var base_url=window.location.href.split('?')[0]
+  //
+  // var shre_dataset_url = base_url+"?server="+encodeURIComponent(getServer())+"&dataset="+encodeURIComponent(document.getElementById('dataset').value)
+  //       +"&field="+encodeURIComponent(visus1.field)
+  //
+  //   pmin=isNaN(visus1.palette_min) ? "0" : visus1.palette_min
+  //   pmax=isNaN(visus1.palette_max) ? "1" : visus1.palette_max
+  //
+  //   shre_dataset_url=shre_dataset_url+"&time="+visus1.time+"&baseMap="+visus1.baseMap+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
+
+
+    var namestr = visus1.getDatasetName()
+  if (namestr ===undefined)
+    namstr= "test"
 
   document.getElementById('info').innerHTML="\
-    <span style=\"font-size:20px; padding-left:5px\" onclick=\"openNav()\">"+dataset.name+"</span> \
-    <ul> \
+    <span style=\"font-size:20px; padding-left:0px\" onclick=\"openNav()\">"+namestr+"</span>\
+     <ul style=\"font-size:14px; margin-left:15px\"> \
       <li>Size: "+size_str+"</li> \
       <li>Dims: "+dims_str+"</li> \
       <li>Timesteps: "+num_timesteps+"</li> \
       <li>Fields: "+dataset.fields.length+"</li> \
     </ul> \
-    <p style=\"padding-left:5px\">ViSUS URL: <a href=\""+dataset_url+"\">"+dataset_url+"</a></p>";
+    <p style=\"padding-left:5px\">ViSUS URL: <span id=\'link_dataset_text\'\">"+dataset_url+"</span></p> \
+    <a target=\"_blank\" rel=\"noopener\" href=\"https://visus.org\">ViSUS LLC  </a>";
 }
 
 function addSelectionOSD(){
@@ -263,18 +290,11 @@ function setDataset(value, presets=false)
 {
   document.getElementById('dataset').value=value;
 
-  // reset palette
-  // document.getElementById('palette_min').value="";
-  // document.getElementById('palette_max').value="";
+  // old MIDX handling, selecting the first dataset
+  // now we just request the default field from the MIDX
+  // Note: if no default field in MIDX the viewer might not work
 
-  //document.getElementById('render_type').checked=true
-  //document.getElementById('axis').disabled=true
-  //document.getElementById('axis').value='2'
-  //document.getElementById('slice').disabled=true
-  //document.getElementById('edit_slice').disabled=true
-
-  // if MIDX
-  if(value.includes("*")){
+  /*if(value.includes("*")){
     console.log("MIDX not supported\n")
     value=value.replace("*","")
     dataset_url=getServer()+'action=read_dataset&dataset='+value
@@ -284,7 +304,7 @@ function setDataset(value, presets=false)
     });
 
     return;
-  }
+  }*/
 
   dataset_url=getServer()+'action=read_dataset&dataset='+value
 
@@ -320,7 +340,7 @@ function setDataset(value, presets=false)
     }   
 
     if(dataset.dim==2){
-      document.getElementById('2dCanvas').hidden=false
+      document.getElementById(canvas2d_name).hidden=false
       document.getElementById('3dCanvas').hidden=true
       document.getElementById('view_btn').hidden=true;
       document.getElementById('range_panel').hidden=true;
@@ -331,16 +351,41 @@ function setDataset(value, presets=false)
       }
 
       console.log("USE 2D canvas")
-      visus1=VisusOSD({
-        id : '2dCanvas',
-        dataset : dataset,
-        compression : 'png',
-        showNavigator : false,
-        debugMode : false
-      }); 
 
-      addSelectionOSD();
+      if(document.getElementById("osdCanvas")){
+        visus1=VisusOSD({
+          id : 'osdCanvas',
+          dataset : dataset,
+          compression : 'png',
+          showNavigator : false,
+          debugMode : false
+        }); 
 
+        addSelectionOSD();
+      }
+      
+      if(document.getElementById("leafletCanvas")) {
+        visus1=VisusLeaflet({
+          id : 'leafletCanvas',
+          url: getServer(),
+          dataset : dataset,
+          compression : 'png',
+          showNavigator : false,
+          debugMode : false
+        }); 
+      }
+
+	if (document.getElementById("olCanvas")) {
+	    visus1=VisusOL({
+		id : 'olCanvas',
+		url: getServer(),
+		dataset : dataset,
+		compression: 'png',
+		showNavigator : false,
+		debugMode : false
+	    });
+	}
+	
       document.getElementById('resolution').step=2;
 
       if(dataset.pow2dims[0] < dataset.pow2dims[1])
@@ -352,7 +397,7 @@ function setDataset(value, presets=false)
 
     }else {
       console.log("USE 3D canvas")
-      document.getElementById('2dCanvas').hidden=true;
+      document.getElementById(canvas2d_name).hidden=true;
       document.getElementById('3dCanvas').hidden=false;
       document.getElementById('view_btn').hidden=false;
       document.getElementById('range_panel').hidden=false;
@@ -487,6 +532,10 @@ function onFieldChange(value){
   refreshAll();
 }
 
+function onOpacityChange(value){
+  visus1.setOpacity(value);
+}
+
 function onTimeChange(value){
   visus1.setTime(value); 
   document.getElementById('edit_time').value=value;
@@ -544,14 +593,44 @@ function onVRChange(ren_type){
 
 }
 
-function onPaletteChange(){
 
+function onBaseMapChange(){
+    console.log('onBaseMapChange()');
+    visus1.setBaseMap(document.getElementById('baseMap').value);
+    visus1.updateBaseMap();
+    refreshAll(0);
+}
+
+
+function onTakeSnapshot(){
+    leafletImage(visus1.map, function(err, canvas) {
+        // now you have canvas
+        // example thing to do with that canvas:
+        var img = document.createElement('img');
+        var dimensions = map.getSize();
+        img.width = dimensions.x;
+        img.height = dimensions.y;
+
+        var imgElement = document.getElementById('snapshot');
+
+
+        img.setAttribute('download', 'VisusNeonDownload.png');
+        //img.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+        img.setAttribute('href', canvas.toDataURL("image/png"));
+        imgElement.innerHTML = '';
+        imgElement.appendChild(img);
+        img.click();
+    });
+}
+
+
+function onPaletteChange(){
   var colormap = get_palette_data(document.getElementById('palette').value)
   let pal_min= parseFloat(document.getElementById('palette_min').value)
   let pal_max= parseFloat(document.getElementById('palette_max').value)
 
   if(isNaN(pal_min)) pal_min = 0;
-  if(isNaN(pal_max)) pal_max = 0;
+  if(isNaN(pal_max)) pal_max = 1;
 
   visus1.setPalette(document.getElementById('palette').value); 
   visus1.setPaletteMin(pal_min); 
@@ -561,9 +640,18 @@ function onPaletteChange(){
 
   if(renderer)
     renderer.updateColorMap(colormap,pal_min, pal_max);
+  
+  // Steve: this function only exists when used for the "Ag" viewer, otherwise it breaks the viewer @Amy
+  // I added a check to see if it exists, but I don't think it is the best solution
+  if (typeof updatePaletteView === "function")
+    updatePaletteView(document.getElementById('palette').value)
 
-  //if(document.getElementById('2dCanvas').hidden==false)
-    refreshAll(0);
+  //if(document.getElementById('osdCanvas').hidden==false)
+  refreshAll(0);
+}
+
+function onSaveScreenShot(){
+  visus1.onSaveScreenShot()
 }
 
 function onViewResolution(){
@@ -577,6 +665,11 @@ function onViewResolution(){
   data_url = visus1.refresh(sel_level)
 
   fetch_and_draw(data_url,0)
+}
+
+
+function onGetInfo(){
+    $("#infoModal").modal("show");
 }
 
 function download(box=null){
@@ -699,10 +792,10 @@ function shareLink(){
     link=link+"&bH="+bounds.height+"&bW="+bounds.width+"&bX="+bounds.x+"&bY="+bounds.y+"&bD="+bounds.degrees;
   }
 
-  pmin=isNaN(visus1.palette_min) ? "NaN" : visus1.palette_min
-  pmax=isNaN(visus1.palette_max) ? "NaN" : visus1.palette_max
+  pmin=isNaN(visus1.palette_min) ? "0" : visus1.palette_min
+  pmax=isNaN(visus1.palette_max) ? "1" : visus1.palette_max
 
-  link=link+"&time="+visus1.time+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
+  link=link+"&time="+visus1.time+"&baseMap="+visus1.baseMap+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
 
   document.getElementById('link_text').value = link;
 
@@ -813,8 +906,8 @@ function loadPresets(){
   }
 
   if(document.getElementById('palette_max').value == document.getElementById('palette_min').value){
-    document.getElementById('palette_max').value=NaN;
-    document.getElementById('palette_min').value=NaN;
+    document.getElementById('palette_max').value=1;
+    document.getElementById('palette_min').value=0;
   }
 
   if(pre_vpoint!=null && isRendererDefined()){
@@ -846,18 +939,20 @@ function loadPresets(){
 
 }
 
-document.getElementById('3dCanvas').addEventListener('webglcontextlost', function(event) { event.preventDefault()}, false)
-document.getElementById('3dCanvas').addEventListener('webglcontextrestored', function(event) {
-  console.log("Restored WebGl context")
+if(document.getElementById('3dCanvas')){
+  document.getElementById('3dCanvas').addEventListener('webglcontextlost', function(event) { event.preventDefault()}, false)
+  document.getElementById('3dCanvas').addEventListener('webglcontextrestored', function(event) {
+    console.log("Restored WebGl context")
 
-  parent=document.getElementById('3dCanvas').parentNode
-  savedhtml=parent.innerHTML
-  parent.removeChild(document.getElementById('3dCanvas'))
-  parent.innerHTML=savedhtml
+    parent=document.getElementById('3dCanvas').parentNode
+    savedhtml=parent.innerHTML
+    parent.removeChild(document.getElementById('3dCanvas'))
+    parent.innerHTML=savedhtml
 
-  //console.log("restored correctly", document.getElementById('3dCanvas'))
-  //delete renderer
-  renderer=null
-  refreshAll();
-}, false)
 
+    //console.log("restored correctly", document.getElementById('3dCanvas'))
+    //delete renderer
+    renderer=null
+    refreshAll();
+  }, false)
+}

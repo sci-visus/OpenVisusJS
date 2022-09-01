@@ -60,6 +60,13 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
+   integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+   crossorigin=""/>
+ <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"
+   integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og=="
+   crossorigin=""></script>
+
 <style type="text/css">
 body{
   background: black;
@@ -135,6 +142,8 @@ body{
   color:rgba(64,64,64,1.0);
 }
 
+.leaflet-tile { border: none; }
+
 </style>
 
 </head>
@@ -149,7 +158,7 @@ body{
 <body>
   <div id='status_bar' style="float:top; display: none"><img src="images/spinner.gif" height="10px" ><label id='status' style="color: blue"></label></div>
 
-  <nav hidden id="info" class="panel" role="navigation">
+ <!--  <nav id="info" class="panel" role="navigation">
       <ul>
           <li><a href="#">Home</a></li>
           <li><a href="#">Dataset Info</a></li>
@@ -157,10 +166,7 @@ body{
           <li><a href="#">Ondemand</a></li>
           <li><a href="#">Contact Us</a></li>
       </ul>
-<!--=======-->
-<!--  <nav id="info" class="panel" role="navigation">-->
-      <a href="https://visus.org"><img src="images/site_logo.gif" width="80px"/></a>
-  </nav>
+  </nav> -->
 
   <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
           <div class="modal-dialog">
@@ -235,8 +241,8 @@ body{
               </div>
               <div class="input-group-append input-group-sm">
                 <select id='palette' onchange='onPaletteChange();' class='custom-select'>
-                  <option value='' selected="selected"></option>
-                  <option value='rich'>rich</option>
+                  <option value=''></option>
+                  <option value='rich' selected="selected">rich</option>
                   <option value='hsl'>hsl</option>
                   <option value='banded'>banded</option>
                   <option value='bry'>bry</option>
@@ -311,28 +317,55 @@ body{
     </div>
   </div> 
 
+  <div id="serverModal" class="modal fade myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div id="server-modal-dialog" class="modal-dialog my-modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="row">
+              <div class="col">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Server</span>
+                </div>
+                <input id='server' type="text" size=32 onchange='setServer(this.value);' class='form-control'/>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">AutoRefresh</span>
+                </div>
+                <div class="input-group-append">
+                  <div class="input-group-text">
+                    <input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);'></input>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> 
 
-  <nav hidden class="navbar navbar-expand-sm navbar-dark bg-dark rounded fixed-top">
+  <nav class="navbar navbar-expand-sm navbar-dark bg-dark rounded">
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
-<!--<<<<<<< HEAD-->
-<!--	<li class="nav-item">-->
-<!--=======-->
-        <li class="nav-item">
-          <a href="https://visus.org"><img src="images/visus-smallbar.png" width="80px"/></a>
-        </li>
         <li class="nav-item">
           <button id="serverbtn" type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal"><span class="fa fa-server"></span></button>
         </li>
         <li class="nav-item">
-<!-->>>>>>> 5976e4aadd6bacdb17a7476b6729b758b7e4c4fb-->
           <div class="input-group input-group-sm">
-	    <input id='server' type="text" size=32 class='form-control' readonly/>
-            <input id='dataset' type="text" size=32 class='form-control' readonly/>
+            <select id='dataset' onchange='setDataset(this.value);' class='custom-select' style="max-width: 200px"></select>
             <div class="input-group-append input-group-sm">
               <select id='field' onchange='onFieldChange(this.value);' class='custom-select' style="max-width: 100px" ></select> 
             </div>
@@ -408,23 +441,423 @@ body{
 
 </nav>
 
+  <!-- remove this if not used -->
+  <script src="../src/VisusGetTileSources.js" ></script>
+
+  <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
+  <script src="../src/selection/openseadragonselection.js"></script>
+  <script src="../src/colormaps.js"></script>
+  <script src="../src/dvr.js"></script>
+  <script src="../src/visus.js"></script>
+  <script src="../config.js"></script>
+  <script src="rastercoords.js"></script>
+  <!-- <script src="../src/viewer.js"></script> -->
+
+  <style>
+    .openseadragon
+{
+    width:      800px;
+    height:     600px;
+    border:     1px solid black;
+    color:      #333; /* text color for messages */
+    background-color: black;
+}
+.openseadragon.front-page {
+    height: 586px;
+}
+.openseadragon-small
+{
+    width:      100px;
+    height:     80px;
+    border:     1px solid black;
+    color:      #333; /* text color for messages */
+    background-color: black;
+}
+.demoheading {
+    color: #437AB2; 
+    padding: 0 0 0.2em 1em;
+}
+.toolbar
+{
+    width:      800px;
+    height:     33px;
+    border:     none;
+    color:      #333;
+    padding:    4px;
+    background-color: transparent;
+}
+.toolbar.fullpage{
+    width:      100%;
+    border:     none;
+    position:   fixed;
+    z-index:    999999;
+    left:       0;
+    top:        0;
+    background-color: #ccc;
+}
+
+table.for-examples {
+    margin-left: 20px;
+    border-collapse: collapse;
+}
+
+table.for-examples td {
+    border: 1px dotted #999;
+    padding: 10px;
+}
+
+ol.for-examples {
+    margin-left: 20px;
+}
+
+ol.for-examples li {
+    margin: 0.5em 0;
+}
+
+.openseadragon-container {
+    margin:     0 auto;
+    width:      800px;
+    height:     600px;
+    padding:    1.0em;
+    background-color: #EEE; 
+
+}
+</style>
   <div id="viewer">
-    <div class="container-fluid">
+    <div class="container">
       <div class="row row-centered pos">
-        <div class="col-lg h-100" id='osdCanvas' style='background: black;'></div>
-          <script>
-            document.write('<canvas id="3dCanvas" style="background: black" width="' + $(window).width()*.9 + '"  height="' + $(window).height()*.9+ '"/>');
-          </script>
+        <div id="mapid" style="width: 600px; height: 400px; z-index:0"></div>
+        <div class="col-lg" id='2dCanvas' style='float:top; position:relative; margin-top:250px; background: transparent;widht:600px;height:400px' class="openseadragon"></div>
+        <script>
+
+          // var bXRoad=false;
+          //   viewer2=OpenSeadragon({
+          //     id: "2dCanvas",
+          //     prefixUrl: "https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/",
+          //     showNavigator: true,
+          //     debugMode: false,
+          //     tileSources: getTileSources("https://molniya.sci.utah.edu", "neon_moab", 120000, 190000, 35, 512, bXRoad)
+          // });
+
+          S = 2.495320233665337e-8
+          D = 57.29577951308232
+          R = 6378137
+          function world_unproject(x, y, z){
+            const scale = 256 * Math.pow(2, z);
+            const p = {
+              x: (x / scale - 0.5) / S,
+              y: (y / scale - 0.5) / -S,
+            };
+            return {
+              lat: (2 * Math.atan(Math.exp(p.y / R)) - (Math.PI / 2)) * D,
+              lng: p.x * D / R,
+            };
+          }
+
+          var minZoom = 0
+          var maxZoom = 10
+          var img = [
+            120000,
+            190000
+          ]
+
+          // create the map
+          // var mymap = L.map(mapid, {
+          //   //added from storymap
+          //   //center: [0, 0],
+          //   //zoom: 5,
+          //   //scrollWheelZoom: false,
+          //   //
+          //   minZoom: minZoom,
+          //   maxZoom: maxZoom
+          // })
+
+          var mymap = L.map(mapid)
+
+          // assign map and image dimensions
+          var rc = new L.RasterCoords(mymap, img)
+          console.log("zoom level",rc.zoomLevel())
+          world_max_zoom=30
+
+          mymap.setMaxZoom(world_max_zoom)//rc.zoomLevel())
+          // all coordinates need to be unprojected using the `unproject` method
+          // set the view in the lower right edge of the image
+          //mymap.setView(rc.unproject([img[0], img[1]]), 0)
+          mymap.setView([38.297937422435105, -109.4561444142454], 13);
+          //mymap.setView(rc.unproject([4900, 3015]), 3)
+
+
+          //var mymap = L.map('mapid').setView([38.297937422435105, -109.4561444142454], 13);
+
+          // var mymap = L.map('mapid', {
+          //      crs: L.CRS.Simple,
+          //      //minZoom: -5,
+          // });
+
+          // var bounds = [[-60000,-95000], [60000,95000]];
+          // mymap.fitBounds(bounds)
+
+          
+          var mapLayer = new L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+              maxZoom: world_max_zoom,
+              attribution: '',
+              id: 'mapbox.streets',
+            })
+          mapLayer.addTo(mymap);
+
+          map_tile_size=mapLayer.getTileSize().x;
+
+          console.log("world bound", mymap.getPixelWorldBounds(world_max_zoom))
+
+          worldBounds=mymap.getPixelWorldBounds(world_max_zoom).max
+
+          worldBounds_min=mymap.layerPointToLatLng(mymap.getPixelWorldBounds(world_max_zoom).min, world_max_zoom);
+          worldBounds_max=mymap.layerPointToLatLng(mymap.getPixelWorldBounds(world_max_zoom).max, world_max_zoom);
+
+          full_size=map_tile_size*Math.pow(2,world_max_zoom);
+          console.log("map layer tile size", mapLayer.getTileSize(), "full size", full_size);
+          console.log("worldBounds", worldBounds_min, worldBounds_max)
+
+          world_ratio=(worldBounds_max.lat-worldBounds_min.lat)/full_size
+          map_ratio=(38.30679548724762-38.297937422435105)/190000
+
+          console.log("ratios ", world_ratio, map_ratio, world_ratio/map_ratio)
+          // tile_unit=180.0/Math.pow(2,18)
+
+          // x_tile=38.297937422435105/tile_unit
+          // y_tile=-109.44451991552009/tile_unit
+
+          // console.log("tiles start", x_tile, y_tile)
+            //L.marker([0.18402499582621254, 0.6684251047442432]).addTo(mymap);
+            //L.marker([0.18422788160286332, 0.6685797071405766]).addTo(mymap);
+
+            // var myMarker = L.marker([38.297937422435105,-109.4561444142454], {title: "MyPoint", alt: "sw", draggable: true}).addTo(mymap)
+
+            rectangle = L.polygon([
+              [ 38.297937422435105 ,  -109.44451991552009 ],
+              [ 38.297937422435105 ,  -109.4561444142454 ],
+              [ 38.30679548724762 ,  -109.4561444142454 ],
+              [ 38.30679548724762 ,  -109.44451991552009 ],
+            ])
+            rectangle.addTo(mymap);
+
+            var southWest = [38.297937422435105,-109.4561444142454] //map.unproject([ 0, mapHeight], getMaxZoom());
+            var northEast = [38.30679548724762, -109.44451991552009]//map.unproject([ mapWidth, 0 ], getMaxZoom());
+            var mapBounds = new L.LatLngBounds(rectangle.getBounds().getSouthWest(), rectangle.getBounds().getNorthEast());
+
+            console.log("map bounds", mapBounds)
+
+            L.marker(mapBounds.getSouthWest()).addTo(mymap);
+            L.marker(mapBounds.getNorthEast()).addTo(mymap);
+
+          // mymap.on('click', function(e){
+          //   var coord = e.latlng;
+          //   var lat = coord.lat;
+          //   var lng = coord.lng;
+          //   console.log("lat: " + lat + " lon: " + lng);
+          //   });
+
+            L.TileLayer.Visus = L.TileLayer.extend({
+                  options: {
+                      width: 120000,
+                      height: 190000,
+                      imageFormat: 'jpg',
+                      tileSize: 64,
+                      minZoom: 0,
+                      maxZoom: world_max_zoom,//rc.zoomLevel(),
+                      detectRetina: true
+                    },
+                    bounds: mapBounds,
+                  getTileUrl: function(coords) {
+                      server="https://molniya.sci.utah.edu"
+                      dataset="neon_moab"
+                      w=120000
+                      h=190000
+                      max_levels=35
+                      tile_size=64
+
+                      factor_offset = 20
+                      level=coords.z - factor_offset
+                      x=coords.x//parseInt(coords.x / Math.pow(2,factor_offset))
+                      y=coords.y//parseInt(coords.y / Math.pow(2,factor_offset))
+                      num_levels = rc.zoomLevel();//parseInt(Math.pow(2,18)/tile_size, 10);//parseInt(Math.log2(h/tile_size))//parseInt(max_levels / 2, 10);
+                      //console.log("num levels", num_levels)
+
+                      //console.log(mymap.project(coords))
+                      var tilePos = this._getTilePos(coords);
+
+                      var key = this._tileCoordsToKey(coords);
+
+                      // if(key[0] == 2 && key[1] == 3)
+                      //   console.log("key", key, "coords",coords)
+                      //console.log("tilepos", tilePos, "key", key)
+                      //console.log("coords",coords)
+                      
+                      // var latLng = mymap.layerPointToLatLng([0,0,0]);
+                      // console.log("latlng coords", latLng, "level",level)
+                      // var latLng = mymap.layerPointToLatLng([64,64,0]);
+                      // console.log("latlng coords", latLng, "level",level)
+                      
+                      //console.log("coords ", coords, tilePos)
+                      var curr_xyz = [coords.x*tile_size,coords.y*tile_size,coords.z]
+                      var latLng = mymap.unproject([coords.x*tile_size,coords.y*tile_size],coords.z) //mymap.layerPointToLatLng(coords); 
+
+                      if(! mapBounds.contains(latLng)) return NaN;
+                      
+                      L.marker(latLng).addTo(mymap);
+
+                      orig_xyz=mymap.project(mapBounds.getSouthWest(),coords.z)
+                      //curr_xyz=mymap.project(latLng,coords.z)
+                      //mymap.latLngToLayerPoint([ 38.297937422435105 ,  -109.44451991552009 ])
+                      factor=tile_size*Math.pow(2,level)
+                      offset=[parseInt((curr_xyz.x-orig_xyz.x)/factor),parseInt((curr_xyz.y-orig_xyz.y)/factor)]
+                      console.log("orig,curr",orig_xyz, curr_xyz)
+                      console.log("offset", offset)
+                      console.log("xy", x, y)
+                      x=parseInt(x-offset[0])
+                      y=parseInt(y-offset[1])
+
+                      console.log("check contains", mapBounds, latLng)
+                      
+                      //console.log("proj coords", rc.unproject([x,y]))
+                      //console.log("requesting tile ", coords.z, coords.x, coords.y, tilePos, key);
+                      //return "";
+                      var scale = Math.pow(2, num_levels - level);
+                      var level_tile_size = tile_size * scale;
+                      //console.log("tile size level:", level_tile_size)
+                      var x1 = level_tile_size * x; var x2 = Math.min(level_tile_size * (x + 1) - 1, w)
+                      var y2 = h - level_tile_size * y; var y1 = h - Math.min(level_tile_size * (y + 1) - 1, h);
+
+                      var url = server + "/mod_visus?";
+
+                      url += "&action=boxquery";
+                      url += "&compression=jpg";
+                      url += "&box=" + x1 + "%20" + x2 + "%20" + y1 + "%20" + y2;
+                      url += "&dataset=" + encodeURIComponent(dataset);
+                      url += "&maxh=" + max_levels;
+                      url += "&toh=" + 7;//Math.max(20, Math.min(max_levels,parseInt((level+1)* Math.ceil(max_levels/num_levels))));
+
+                      return url;
+                  },
+                  /*_isValidTile: function (coords) {
+                      w=120000
+                      h=190000
+                      max_levels=35
+                      tile_size=64
+                      level=coords.z // - 8
+                      x=coords.x
+                      y=coords.y
+                      num_levels = rc.zoomLevel();
+                      //console.log(mymap.project(coords))
+                      var tilePos = this._getTilePos(coords);
+                      var key = this._tileCoordsToKey(coords);
+                      
+                      var scale = Math.pow(2, num_levels - level);
+                      var level_tile_size = tile_size * scale;
+                      //console.log("tile size level:", level_tile_size)
+                      var x1 = level_tile_size * x; var x2 = Math.min(level_tile_size * (x + 1) - 1, w)
+                      var y2 = h - level_tile_size * y; var y1 = h - Math.min(level_tile_size * (y + 1) - 1, h);
+                      
+                      //console.log("proj coords", rc.unproject([coords.x,coords.y]))
+                      if(x1 >= 0 && x2 <= w && y1 >= 0 && y2 <= h)
+                        return true;
+                      else 
+                        return false
+
+                  }*/
+
+                  // _getGridSize: function (imageSize) {
+                  //   var tileSize = this.options.tileSize;
+                  //   return L.point(Math.ceil(imageSize.x / tileSize), Math.ceil(imageSize.y / tileSize));
+                  // },
+/*
+                  initialize: function () {
+                    var options = L.setOptions(this, this.options);
+                    var imageSize = L.point(options.width, options.height),
+                    tileSize = options.tileSize;
+
+                    this._imageSize = [imageSize];
+                    this._gridSize = [this._getGridSize(imageSize)];
+
+                    while (imageSize.x > 0 || imageSize.y > 0) {
+                      imageSize = imageSize.divideBy(2).floor();
+                      this._imageSize.push(imageSize);
+                      this._gridSize.push(this._getGridSize(imageSize));
+                    }
+
+                    this._imageSize.reverse();
+                    this._gridSize.reverse();
+
+                    options.maxNativeZoom = this._gridSize.length - 1;
+                    console.log("max zoom "+options.maxNativeZoom)
+                    // var maxZoomGrid = this._gridSize[options.maxNativeZoom];
+                    // var southWest = mymap.unproject([0, options.height], options.maxNativeZoom);
+                    // var northEast = mymap.unproject([options.width, 0], options.maxNativeZoom);
+                    // console.log(southWest, northEast)
+                    // options.bounds = new L.LatLngBounds(southWest, northEast);
+
+                    var bounds = [[0,0], [options.width,options.height]];
+                    //mymap.fitBounds(bounds)
+
+                  },*/
+            })
+
+            L.tileLayer.visus = function() {
+                return new L.TileLayer.Visus();
+            }
+            
+            L.tileLayer.visus().addTo(mymap);
+    
+
+/*
+          var viewer1Leading = false;
+          var viewer2Leading = false;
+
+          viewer1.addHandler('zoom', function() {
+              if (viewer2Leading) {
+                  return;
+              }
+
+              viewer1Leading = true;
+              viewer2.viewport.zoomTo(viewer1.viewport.getZoom());
+              
+              viewer1Leading = false;
+          });
+
+          viewer1.addHandler('pan', function() {
+              if (viewer2Leading) {
+                  return;
+              }
+
+              viewer1Leading = true;
+              viewer2.viewport.panTo(viewer1.viewport.getCenter(true));
+              viewer1Leading = false;
+          });
+
+          viewer2.addHandler('zoom', function() {
+              if (viewer1Leading) {
+                  return;
+              }
+
+              viewer2Leading = true;
+              viewer1.viewport.zoomTo(viewer1.viewport.getZoom());
+              viewer2Leading = false;
+          });
+
+          viewer2.addHandler('pan', function() {
+              if (viewer1Leading) {
+                  return;
+              }
+
+              viewer2Leading = true;
+              viewer1.viewport.panTo(viewer1.viewport.getCenter(true));
+              viewer2Leading = false;
+          });
+*/
+      </script>
       </div>
     </div>
   </div>
-
-  <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
-  <script src="src/colormaps.js"></script>
-  <script src="src/dvr.js"></script>
-  <script src="src/visus.js"></script>
-  <script src="config.js"></script>
-  <script src="src/viewer.js"></script>
 
   <script>
 
@@ -553,13 +986,54 @@ body{
   $('#downloadModal').onLoad = function (){
     updateDownloadResolution($('#edit_resolution').val);
   };
-
+/*
   setTimeout(function () {
       if(visus1){
         if(visus1.dataset.dim==3)
           $("#rendercontainer").show();
         else
           $("#rendercontainer").hide();
+
+        if(visus1.osd){
+          selection = visus1.osd.selection({
+            onSelection:  function(rect) { 
+              //console.log(selection.rect); 
+              rectToSelection(selection.rect);
+
+              $('#downloadModal').modal();
+
+            },
+            keyboardShortcut:        's',
+            prefixUrl:               null, 
+            allowRotation:           false,
+            showConfirmDenyButtons:  false,
+            navImages:               { // overwrites OpenSeadragon's options
+              selection: {
+                  REST:   '../images/selection_rest.png',
+                  GROUP:  '../images/selection_grouphover.png',
+                  HOVER:  '../images/selection_hover.png',
+                  DOWN:   '../images/selection_pressed.png'
+              },
+              selectionConfirm: {
+                  REST:   '../images/selection_confirm_rest.png',
+                  GROUP:  '../images/selection_confirm_grouphover.png',
+                  HOVER:  '../images/selection_confirm_hover.png',
+                  DOWN:   '../images/selection_confirm_pressed.png'
+              },
+              selectionCancel: {
+                  REST:   '../images/selection_cancel_rest.png',
+                  GROUP:  '../images/selection_cancel_grouphover.png',
+                  HOVER:  '../images/selection_cancel_hover.png',
+                  DOWN:   '../images/selection_cancel_pressed.png',
+              },
+            }
+          });
+
+          selection.cancel = function(){ 
+            selection.toggleState(); console.log("CANCEL"); 
+            return this.outerTracker.setTracking(!1),this.outerTracker.setTracking(!0),this.viewer.raiseEvent("selection_cancel",!1),this.undraw()
+          };
+        }
       }
 
       // visualize slider if time varying dataset
@@ -577,18 +1051,17 @@ body{
     }, 1000);
 
   $('#render_type').selectpicker();
-
+*/
   </script>
-
+<!--
 <script src="src/bigSlide.js"></script>
 <script>
 
-    <!-- dataset info panel -->
-    $(document).ready(function() {
+       $(document).ready(function() {
         $('.info-link').bigSlide({side:'right', menu:'#info'});
     });
 
 </script>
-
+-->
 </body>
 </html>

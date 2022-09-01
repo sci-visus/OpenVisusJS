@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<script>
+/*
+ * Copyright (c) 2019 University of Utah 
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. Neither the name of the copyright holder nor the names of its
+ *    contributors may be used to endorse or promote products derived from
+ *    this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+</script>
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <title>ViSUS WebViewer</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css" />
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script> 
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+<style type="text/css">
+body{
+  background: #343a40;
+  color: white;
+}
+
+.slidecontainer {
+  width: 100%; /* Width of the outside container */
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 15px;
+  border-radius: 5px;   
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: #4CAF50;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: #4CAF50;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.nav-item{
+  padding-right: 5px;
+  padding-left: 5px;
+  z-index:50;
+}
+
+.myoptnav{
+  display:none; 
+}
+
+.myModal {
+  position: relative;
+}
+
+.my-modal-dialog {
+  position: fixed;
+  margin: 0;
+  padding: 50px;
+}
+
+.my-modal-dialog>.modal-content{
+  background-color: rgba(255,255,255,.3) !important;
+}
+
+.card{
+  background-color: #495057;
+  text-align: center;
+}
+
+.card-img-top {
+    width: 100%;
+    height: 15vw;
+    object-fit: cover;
+}
+
+
+
+</style>
+
+</head>
+
+<script>
+  var selection_box= new Array();
+  // Selection widget
+  var selection;
+
+</script>
+
+<body>
+
+   
+  <center>
+    <!-- <h3>Interactive exploration of large scale scientific data</h3> -->
+    <img src="aaas_logo.png" width="15%" /><span width="20%">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+    <img src='uu-logo.png' width="20%"/>
+    <img src='visus.org-logo.png' width="10%"/>
+  </center>
+
+<br/>
+
+  <div class="card-deck">
+  <div class="card">
+    <img class="card-img-top" src="thumb_nature.png" height="200px">
+    <div class="card-body">
+      <h5 class="card-title">Climate Change</h5>
+      <p class="card-text">The Intergovernment Panel on Climate Change and Al Gore won the Nobel Peace Prize in 2007 for their efforts to build up and disseminate greater knowledge about man-made climate change. The simulation data presented is part of this study on climate change and provided by the Earth System Grid Federation Service</p>
+
+      <a type="button" class="btn btn-primary" data-dismiss="modal" href="viewer.html?server=https%3A%2F%2Faims2.llnl.gov%2Fvisus%2Fmod_visus%3F&dataset=nature_2007_aer1_hourly&field=SUANGSTR&time=0&palette=AsymmetricBlueGreenDivergent&palette_min=0.0&palette_max=3.0">View</a>
+    </div>
+  </div>
+  <div class="card">
+    <img class="card-img-top" src="thumb_histo.png" height="200px">
+    <div class="card-body">
+      <h5 class="card-title">Histopatology</h5>
+      <p class="card-text">Histopathology is a microscopic examination of a tissue in order to study the manifestations of disease. With this exam doctors are able to classify tumours cells and lymphoid tissues. Histopathological examination of tissues starts with surgery, biopsy, or autopsy. The tissue is removed from the body and then prepared for viewing under a microscope using either chemical fixation or frozen section</p>
+
+      <a type="button" class="btn btn-primary" data-dismiss="modal" href="viewer.html?server=http%3A%2F%2Fatlantis.sci.utah.edu%2Fmod_visus%3F&dataset=tx_sub&field=pixels&time=0&palette=&palette_min=0&palette_max=0">View</a>
+    </div>
+  </div>
+  <div class="card">
+    <img class="card-img-top" src="thumb_rabbit.png" height="200px">
+    <div class="card-body">
+      <h5 class="card-title">Retina of a Rabbit</h5>
+      <p class="card-text">High-resolution electron microscopy imaging techniques enable neuroscientists to image tissue at a fine enough detail to reconstruct neuron connections in the retina. Gaining a deeper understanding of these connections can lead to new treatments for vision disorders</p>
+
+      <a type="button" class="btn btn-primary" data-dismiss="modal" href="viewer.html?server=http%3A%2F%2Fatlantis.sci.utah.edu%2Fmod_visus%3F&dataset=rabbit&field=EM&time=1&palette=rich&palette_min=0&palette_max=255">View</a>
+      
+    </div>
+  </div>
+  <div class="card">
+    <img class="card-img-top" src="thumb_david.png" height="200px">
+    <div class="card-body">
+      <h5 class="card-title">The Digital Michelangelo Project</h5>
+      <p class="card-text">A group from Stanford University built a digital model of the the "David" (by Michelangelo) by scanning the original statue in Florence using a laser scanner and assembling the resulting range images. The scan was so accurate that we can see even the finer details. Curious fact: when the original statue was still placed outside in the square, someone carved his own initials somewhere on the statue, can you find those initials?</p>
+      
+      <a type="button" class="btn btn-primary" data-dismiss="modal" href="viewer.html?server=http%3A%2F%2Fatlantis.sci.utah.edu%2Fmod_visus%3F&dataset=david_subsampled&field=data&time=0&palette=&palette_min=0&palette_max=0">View</a>
+
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>

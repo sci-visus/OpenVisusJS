@@ -60,9 +60,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
-
 <style type="text/css">
 body{
   background: black;
@@ -138,6 +135,15 @@ body{
   color:rgba(64,64,64,1.0);
 }
 
+.input-group-text{
+      background-color: #495057;
+      border: 0;
+}
+
+.container{
+  min-width: 100%;
+}
+
 </style>
 
 </head>
@@ -152,7 +158,7 @@ body{
 <body>
   <div id='status_bar' style="float:top; display: none"><img src="images/spinner.gif" height="10px" ><label id='status' style="color: blue"></label></div>
 
-  <nav id="info" class="panel" role="navigation">
+<!--   <nav id="info" class="panel" role="navigation">
       <ul>
           <li><a href="#">Home</a></li>
           <li><a href="#">Dataset Info</a></li>
@@ -160,7 +166,7 @@ body{
           <li><a href="#">Ondemand</a></li>
           <li><a href="#">Contact Us</a></li>
       </ul>
-  </nav>
+  </nav> -->
 
   <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
           <div class="modal-dialog">
@@ -235,8 +241,8 @@ body{
               </div>
               <div class="input-group-append input-group-sm">
                 <select id='palette' onchange='onPaletteChange();' class='custom-select'>
-                  <option value=''></option>
-                  <option value='rich' selected="selected">rich</option>
+                  <option value='' selected="selected"></option>
+                  <option value='rich'>rich</option>
                   <option value='hsl'>hsl</option>
                   <option value='banded'>banded</option>
                   <option value='bry'>bry</option>
@@ -329,12 +335,12 @@ body{
             <div class="col">
               <div class="input-group input-group-sm">
                 <div class="input-group-prepend">
-                  <span class="input-group-text">AutoRefresh</span>
-                </div>
-                <div class="input-group-append">
                   <div class="input-group-text">
                     <input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);'></input>
                   </div>
+                </div>
+                <div class="input-group-append">
+                  <span class="input-group-text">AutoRefresh</span>
                 </div>
               </div>
             </div>
@@ -342,22 +348,40 @@ body{
               <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
             </div>
           </div>
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">
+                        <input id='auto_spin' type='checkbox' size=32 onchange='onSpinChange(this.value);'></input>
+                      </div>
+                    </div>
+                    <div class="input-group-append">
+                      <span class="input-group-text">AutoSpin</span>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
         </div>
       </div>
     </div>
   </div> 
 
-  <nav class="navbar navbar-expand-sm navbar-dark bg-dark rounded">
+  <nav class="navbar navbar-expand-sm navbar-dark bg-dark rounded fixed-top">
+
+    <img class="order-md-last" src='uu-logo.png' width="100"/>
+    <a class="navbar-brand order-md-last" href="https://www.visus.org" target="blank"><h6><small>powered by OpenVisus<img src='visus.org-logo.png 'width="50"/></small></h6></a>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
+        <li class="nav-item" hidden>
           <button id="serverbtn" type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal"><span class="fa fa-server"></span></button>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" hidden>
           <div class="input-group input-group-sm">
             <select id='dataset' onchange='setDataset(this.value);' class='custom-select' style="max-width: 200px"></select>
             <div class="input-group-append input-group-sm">
@@ -365,7 +389,7 @@ body{
             </div>
           </div>
         </li>
-        <li class="nav-item" id="rendercontainer" style="min-width: 55px">
+        <li class="nav-item" id="rendercontainer" style="min-width: 55px" hidden>
               <select id='render_type' onchange='changeVis(this.value)' class='form-control border form-control-sm'  data-show-content="true">
                 <option value="0" data-content="<i class='fa fa-pizza-slice'></i> Slice"></option>
                 <option value="1" data-content="<i class='fa fa-cube'></i> Volume"></option>
@@ -373,7 +397,7 @@ body{
               </select>
         </li>
 
-        <li class="nav-item" id="slicenav">
+        <li class="nav-item" id="slicenav" hidden>
           <div class="input-group input-group-sm">
           <div class="input-group-prepend">
             <span class="input-group-text form-control-sm" id='render_slider_lbl'>Axis</span>
@@ -396,15 +420,20 @@ body{
         </div>
         </li>
         
-        <li class="nav-item">
+        <li class="nav-item" hidden>
             <button id="palettebtn" class="btn btn-warning btn-sm navbar-btn"><span class="fa fa-palette"></span></button>
         </li>
+        
+        <li class="nav-item">
+          <a id="homebtn" class="btn btn-success btn-sm navbar-btn" href="index.html"><span class="fa fa-home"></span></a>
+        </li>
+
         <li class="nav-item">
           <div class="input-group input-group-sm">
-            <div class="input-group-prepend">
+            <div class="input-group-prepend" hidden>
               <span class="input-group-text form-control-sm ">Time</span>
             </div>
-            <div class="input-group-append">
+            <div class="input-group-append" hidden>
               <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn'/>
             </div>
             <div class="input-group-append">
@@ -412,12 +441,32 @@ body{
                 <input class="custom-range" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/>  
               </div>
             </div>
+            <div class="input-group-append">
+              <div class="input-group-text form-control-sm">
+                <button type="button" id="backtime" class="btn btn-primary btn-sm navbar-btn" ><span class="fa fa-backward"></span></button>
+              </div>
+            </div>
+            <div class="input-group-append">
+              <div class="input-group-text form-control-sm">
+                <button type="button" id="playtime" class="btn btn-primary btn-sm navbar-btn" ><span class="fa fa-play"></span></button>
+              </div>
+            </div>
+            <div class="input-group-append">
+              <div class="input-group-text form-control-sm">
+                <button type="button" id="stoptime" class="btn btn-primary btn-sm navbar-btn" ><span class="fa fa-stop"></span></button>
+              </div>
+            </div>
+            <div class="input-group-append">
+              <div class="input-group-text form-control-sm">
+                <button type="button" id="fwdtime" class="btn btn-primary btn-sm navbar-btn" ><span class="fa fa-forward"></span></button>
+              </div>
+            </div>
           </div>
         </li>
       </ul>
 
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
+        <li class="nav-item" hidden>
           <div class="input-group">
             <button type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()"><span class="fa fa-download"></span></button>
             <div class="input-group-append">
@@ -425,7 +474,7 @@ body{
             </div>
           </div>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" hidden>
           <button id="infobtn" type="button" class="btn btn-primary btn-sm navbar-btn info-link" data-toggle="modal" ><span class="fa fa-info"></span></button>
         </li>
       </ul>
@@ -435,338 +484,50 @@ body{
 
 </nav>
 
-  <!-- remove this if not used -->
-  <script src="../src/VisusGetTileSources.js" ></script>
-
-  <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
-  <script src="../src/selection/openseadragonselection.js"></script>
-  <script src="../src/colormaps.js"></script>
-  <script src="../src/dvr.js"></script>
-  <script src="../src/visus.js"></script>
-  <script src="../config.js"></script>
-  <script src="rastercoords.js"></script>
-  <!-- <script src="../src/viewer.js"></script> -->
-
-  <style>
-    .openseadragon
-{
-    width:      800px;
-    height:     600px;
-    border:     1px solid black;
-    color:      #333; /* text color for messages */
-    background-color: black;
-}
-.openseadragon.front-page {
-    height: 586px;
-}
-.openseadragon-small
-{
-    width:      100px;
-    height:     80px;
-    border:     1px solid black;
-    color:      #333; /* text color for messages */
-    background-color: black;
-}
-.demoheading {
-    color: #437AB2; 
-    padding: 0 0 0.2em 1em;
-}
-.toolbar
-{
-    width:      800px;
-    height:     33px;
-    border:     none;
-    color:      #333;
-    padding:    4px;
-    background-color: transparent;
-}
-.toolbar.fullpage{
-    width:      100%;
-    border:     none;
-    position:   fixed;
-    z-index:    999999;
-    left:       0;
-    top:        0;
-    background-color: #ccc;
-}
-
-table.for-examples {
-    margin-left: 20px;
-    border-collapse: collapse;
-}
-
-table.for-examples td {
-    border: 1px dotted #999;
-    padding: 10px;
-}
-
-ol.for-examples {
-    margin-left: 20px;
-}
-
-ol.for-examples li {
-    margin: 0.5em 0;
-}
-
-.openseadragon-container {
-    margin:     0 auto;
-    width:      800px;
-    height:     600px;
-    padding:    1.0em;
-    background-color: #EEE; 
-
-}
-</style>
   <div id="viewer">
     <div class="container">
       <div class="row row-centered pos">
-        <div id="mapid" style="width: 600px; height: 400px; z-index:0"></div>
-        <div class="col-lg" id='2dCanvas' style='float:top; position:relative; margin-top:250px; background: transparent;widht:600px;height:400px' class="openseadragon"></div>
-        <script>
-
-          // var bXRoad=false;
-          //   viewer2=OpenSeadragon({
-          //     id: "2dCanvas",
-          //     prefixUrl: "https://raw.githubusercontent.com/openseadragon/openseadragon/master/images/",
-          //     showNavigator: true,
-          //     debugMode: false,
-          //     tileSources: getTileSources("https://molniya.sci.utah.edu", "neon_moab", 120000, 190000, 35, 512, bXRoad)
-          // });
-
-          var minZoom = 0
-          var maxZoom = 10
-          var img = [
-            120000,
-            190000
-          ]
-
-          // create the map
-          // var mymap = L.map(mapid, {
-          //   //added from storymap
-          //   //center: [0, 0],
-          //   //zoom: 5,
-          //   //scrollWheelZoom: false,
-          //   //
-          //   minZoom: minZoom,
-          //   maxZoom: maxZoom
-          // })
-
-          var mymap = L.map(mapid)
-
-          // assign map and image dimensions
-          var rc = new L.RasterCoords(mymap, img)
-          console.log("zoom level",rc.zoomLevel())
-
-          mymap.setMaxZoom(rc.zoomLevel())
-          // all coordinates need to be unprojected using the `unproject` method
-          // set the view in the lower right edge of the image
-          mymap.setView(rc.unproject([img[0], img[1]]), 0)
-
-          //mymap.setView(rc.unproject([4900, 3015]), 3)
-
-
-          //var mymap = L.map('mapid').setView([38.297937422435105, -109.4561444142454], 13);
-
-          // var mymap = L.map('mapid', {
-          //      crs: L.CRS.Simple,
-          //      //minZoom: -5,
-          // });
-
-          // var bounds = [[-60000,-95000], [60000,95000]];
-          // mymap.fitBounds(bounds)
-/*
-          var mapLayer = new L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-              maxZoom: 18,
-              attribution: '',
-              id: 'mapbox.streets'
-            })
-          mapLayer.addTo(mymap);
-
-          map_tile_size=mapLayer.getTileSize().x;
-
-          //console.log("world bound", mymap.getPixelWorldBounds(18))
-
-          full_size=map_tile_size*Math.pow(2,18);
-          console.log("map layer tile size", mapLayer.getTileSize(), "full size", full_size);
-*/
-          // tile_unit=180.0/Math.pow(2,18)
-
-          // x_tile=38.297937422435105/tile_unit
-          // y_tile=-109.44451991552009/tile_unit
-
-          // console.log("tiles start", x_tile, y_tile)
-            //L.marker([0.18402499582621254, 0.6684251047442432]).addTo(mymap);
-            //L.marker([0.18422788160286332, 0.6685797071405766]).addTo(mymap);
-
-          //   L.polygon([
-          //     [ 38.297937422435105 ,  -109.44451991552009 ],
-          // [ 38.297937422435105 ,  -109.4561444142454 ],
-          //     [ 38.30679548724762 ,  -109.4561444142454 ],
-          // [ 38.30679548724762 ,  -109.44451991552009 ],
-
-          //   ]).addTo(mymap);
-
-          // mymap.on('click', function(e){
-          //   var coord = e.latlng;
-          //   var lat = coord.lat;
-          //   var lng = coord.lng;
-          //   console.log("lat: " + lat + " lon: " + lng);
-          //   });
-
-            L.TileLayer.Visus = L.TileLayer.extend({
-                  options: {
-                      width: 120000,
-                      height: 190000,
-                      imageFormat: 'jpg',
-                      tileSize: 256,
-                      minZoom: 1,
-                      maxZoom: 10
-                    },
-                  getTileUrl: function(coords) {
-                      server="https://molniya.sci.utah.edu"
-                      dataset="neon_moab"
-                      w=120000
-                      h=190000
-                      max_levels=35
-                      tile_size=256
-                      level=coords.z // - 8
-                      x=coords.x
-                      y=coords.y
-                      num_levels = rc.zoomLevel();//parseInt(Math.pow(2,18)/tile_size, 10);//parseInt(Math.log2(h/tile_size))//parseInt(max_levels / 2, 10);
-                      //console.log("num levels", num_levels)
-
-                      //console.log(mymap.project(coords))
-                      var tilePos = this._getTilePos(coords);
-                      var key = this._tileCoordsToKey(coords);
-                      //console.log("tilepos", tilePos, "key", key)
-                      //console.log("coords",coords)
-                      /*
-                      var latLng = mymap.layerPointToLatLng(coords);
-                      console.log("latlng coords", latLng)
-
-                      orig_xyz=mymap.project([ 38.297937422435105 ,  -109.44451991552009 ],coords.z)
-                      curr_xyz=mymap.project(latLng,coords.z)
-                      //mymap.latLngToLayerPoint([ 38.297937422435105 ,  -109.44451991552009 ])
-                      offset=[(curr_xyz.x-orig_xyz.x)/tile_size,(curr_xyz.y-orig_xyz.y)/tile_size]
-                      console.log("offset", offset)
-                      x=parseInt(x-offset[0])
-                      y=parseInt(y-offset[1])
-                      */
-                      //console.log("proj coords", rc.unproject([x,y]))
-                      console.log("requesting tile ", coords.z, coords.x, coords.y, tilePos, key);
-                      //return "";
-                      var scale = Math.pow(2, num_levels - level);
-                      var level_tile_size = tile_size * scale;
-                      //console.log("tile size level:", level_tile_size)
-                      var x1 = level_tile_size * x; var x2 = Math.min(level_tile_size * (x + 1) - 1, w)
-                      var y2 = h - level_tile_size * y; var y1 = h - Math.min(level_tile_size * (y + 1) - 1, h);
-
-                      var url = server + "/mod_visus?";
-
-                      url += "&action=boxquery";
-                      url += "&compression=jpg";
-                      url += "&box=" + x1 + "%20" + x2 + "%20" + y1 + "%20" + y2;
-                      url += "&dataset=" + encodeURIComponent(dataset);
-                      url += "&maxh=" + max_levels;
-                      url += "&toh=" + Math.max(20, Math.min(max_levels,parseInt((level+1)* Math.ceil(max_levels/num_levels))));
-
-                      return url;
-                  },
-
-                  // _getGridSize: function (imageSize) {
-                  //   var tileSize = this.options.tileSize;
-                  //   return L.point(Math.ceil(imageSize.x / tileSize), Math.ceil(imageSize.y / tileSize));
-                  // },
-/*
-                  initialize: function () {
-                    var options = L.setOptions(this, this.options);
-                    var imageSize = L.point(options.width, options.height),
-                    tileSize = options.tileSize;
-
-                    this._imageSize = [imageSize];
-                    this._gridSize = [this._getGridSize(imageSize)];
-
-                    while (imageSize.x > 0 || imageSize.y > 0) {
-                      imageSize = imageSize.divideBy(2).floor();
-                      this._imageSize.push(imageSize);
-                      this._gridSize.push(this._getGridSize(imageSize));
-                    }
-
-                    this._imageSize.reverse();
-                    this._gridSize.reverse();
-
-                    options.maxNativeZoom = this._gridSize.length - 1;
-                    console.log("max zoom "+options.maxNativeZoom)
-                    // var maxZoomGrid = this._gridSize[options.maxNativeZoom];
-                    // var southWest = mymap.unproject([0, options.height], options.maxNativeZoom);
-                    // var northEast = mymap.unproject([options.width, 0], options.maxNativeZoom);
-                    // console.log(southWest, northEast)
-                    // options.bounds = new L.LatLngBounds(southWest, northEast);
-
-                    var bounds = [[0,0], [options.width,options.height]];
-                    //mymap.fitBounds(bounds)
-
-                  },*/
-            })
-
-            L.tileLayer.visus = function() {
-                return new L.TileLayer.Visus();
-            }
-            
-            L.tileLayer.visus().addTo(mymap);
-    
-
-/*
-          var viewer1Leading = false;
-          var viewer2Leading = false;
-
-          viewer1.addHandler('zoom', function() {
-              if (viewer2Leading) {
-                  return;
-              }
-
-              viewer1Leading = true;
-              viewer2.viewport.zoomTo(viewer1.viewport.getZoom());
-              
-              viewer1Leading = false;
-          });
-
-          viewer1.addHandler('pan', function() {
-              if (viewer2Leading) {
-                  return;
-              }
-
-              viewer1Leading = true;
-              viewer2.viewport.panTo(viewer1.viewport.getCenter(true));
-              viewer1Leading = false;
-          });
-
-          viewer2.addHandler('zoom', function() {
-              if (viewer1Leading) {
-                  return;
-              }
-
-              viewer2Leading = true;
-              viewer1.viewport.zoomTo(viewer1.viewport.getZoom());
-              viewer2Leading = false;
-          });
-
-          viewer2.addHandler('pan', function() {
-              if (viewer1Leading) {
-                  return;
-              }
-
-              viewer2Leading = true;
-              viewer1.viewport.panTo(viewer1.viewport.getCenter(true));
-              viewer2Leading = false;
-          });
-*/
-      </script>
+        <div class="col-lg h-100" id='2dCanvas' style='background: black;'></div>
+          <script>
+            document.write('<canvas id="3dCanvas" style="background: black" width="' + $(window).width()*.9 + '"  height="' + $(window).height()*.9+ '"/>');
+          </script>
       </div>
     </div>
   </div>
 
+  
+  <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
+  <script src="../../src/selection/openseadragonselection.js"></script>
+  <script src="../../src/colormaps.js"></script>
+  <script src="../../src/dvr.js"></script>
+  <script src="../../src/visus.js"></script>
+  <script src="../../config.js"></script>
+  <script src="../../src/viewer.js"></script>
+
   <script>
+
+    function loadScenePreset(preset_name){
+      config_str=''
+
+      if(preset_name=="david")
+        config_str='server=http%3A%2F%2Fatlantis.sci.utah.edu%2Fmod_visus%3F&dataset=david_subsampled&field=data&time=0&palette=&palette_min=0&palette_max=0'
+      else if(preset_name=="rabbit")
+        config_str='server=http%3A%2F%2Fatlantis.sci.utah.edu%2Fmod_visus%3F&dataset=rabbit&field=EM&time=1&palette=rich&palette_min=0&palette_max=255'
+      else if(preset_name=="nature")
+        config_str='server=https%3A%2F%2Faims2.llnl.gov%2Fvisus%2Fmod_visus%3F&dataset=nature_2007_aer1_hourly&field=SUANGSTR&time=0&palette=ExtendedCoolWarm&palette_min=0&palette_max=2'
+      else if(preset_name=="aperio")
+        config_str='server=http%3A%2F%2Fatlantis.sci.utah.edu%2Fmod_visus%3F&dataset=aperio_cmu_1_JP2K_33005_sub&field=pixels&bH=0.7150652173913045&bW=1.290605514316013&bX=-0.14530275715800645&bY=-5.551115123125783e-17&bD=0&time=0&palette=&palette_min=0&palette_max=0'
+
+      HOST_URL="viewer.html"
+      gotourl = HOST_URL+"?"+config_str //+"&demoid="+preset_name
+      window.location=gotourl
+    }
+
+    demo_id = getParameterByName('demoid')
+    dataset_param = getParameterByName('dataset')
+
+    if(demo_id==null && dataset_param==null)
+      loadScenePreset("david")
 
     $('#infobtn').click(function() {
       console.log("infobtn.onclick");
@@ -808,6 +569,32 @@ ol.for-examples li {
       $('#server-modal-dialog').draggable({
         handle: ".modal-body"
       });
+    });
+
+    $('#backtime').click(function() {
+      t=parseInt($('#time')[0].value)
+
+      $('#time')[0].value = t-1;
+      $('#time').change()
+    });
+
+    $('#fwdtime').click(function() {
+      t=parseInt($('#time')[0].value)
+
+      $('#time')[0].value = t+1;
+      $('#time').change()
+    });
+
+    var playingtime = false;
+
+    $('#playtime').click(function() {
+      playingtime = true
+
+      setInterval(function(){ if(playingtime==true) $('#fwdtime').click(); }, 2000);
+    });
+
+    $('#stoptime').click(function() {
+      playingtime = false
     });
 
     function changeVis(value){
@@ -893,54 +680,13 @@ ol.for-examples li {
   $('#downloadModal').onLoad = function (){
     updateDownloadResolution($('#edit_resolution').val);
   };
-/*
+
   setTimeout(function () {
       if(visus1){
         if(visus1.dataset.dim==3)
           $("#rendercontainer").show();
         else
           $("#rendercontainer").hide();
-
-        if(visus1.osd){
-          selection = visus1.osd.selection({
-            onSelection:  function(rect) { 
-              //console.log(selection.rect); 
-              rectToSelection(selection.rect);
-
-              $('#downloadModal').modal();
-
-            },
-            keyboardShortcut:        's',
-            prefixUrl:               null, 
-            allowRotation:           false,
-            showConfirmDenyButtons:  false,
-            navImages:               { // overwrites OpenSeadragon's options
-              selection: {
-                  REST:   '../images/selection_rest.png',
-                  GROUP:  '../images/selection_grouphover.png',
-                  HOVER:  '../images/selection_hover.png',
-                  DOWN:   '../images/selection_pressed.png'
-              },
-              selectionConfirm: {
-                  REST:   '../images/selection_confirm_rest.png',
-                  GROUP:  '../images/selection_confirm_grouphover.png',
-                  HOVER:  '../images/selection_confirm_hover.png',
-                  DOWN:   '../images/selection_confirm_pressed.png'
-              },
-              selectionCancel: {
-                  REST:   '../images/selection_cancel_rest.png',
-                  GROUP:  '../images/selection_cancel_grouphover.png',
-                  HOVER:  '../images/selection_cancel_hover.png',
-                  DOWN:   '../images/selection_cancel_pressed.png',
-              },
-            }
-          });
-
-          selection.cancel = function(){ 
-            selection.toggleState(); console.log("CANCEL"); 
-            return this.outerTracker.setTracking(!1),this.outerTracker.setTracking(!0),this.viewer.raiseEvent("selection_cancel",!1),this.undraw()
-          };
-        }
       }
 
       // visualize slider if time varying dataset
@@ -958,17 +704,9 @@ ol.for-examples li {
     }, 1000);
 
   $('#render_type').selectpicker();
-*/
+
   </script>
-<!--
-<script src="src/bigSlide.js"></script>
-<script>
 
-       $(document).ready(function() {
-        $('.info-link').bigSlide({side:'right', menu:'#info'});
-    });
 
-</script>
--->
 </body>
 </html>

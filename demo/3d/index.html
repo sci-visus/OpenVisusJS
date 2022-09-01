@@ -135,6 +135,15 @@ body{
   color:rgba(64,64,64,1.0);
 }
 
+.input-group-text{
+      background-color: #495057;
+      border: 0;
+}
+
+.container{
+  min-width: 100%;
+}
+
 </style>
 
 </head>
@@ -147,9 +156,9 @@ body{
 </script>
 
 <body>
-  <div id='status_bar' style="float:top; display: none"><img src="images/spinner.gif" height="10px" ><label id='status' style="color: blue"></label></div>
+  <div id='status_bar' style="float:top; display: none"><label id='status' style="color: blue"></label></div>
 
-  <nav hidden id="info" class="panel" role="navigation">
+<!--   <nav id="info" class="panel" role="navigation">
       <ul>
           <li><a href="#">Home</a></li>
           <li><a href="#">Dataset Info</a></li>
@@ -157,10 +166,7 @@ body{
           <li><a href="#">Ondemand</a></li>
           <li><a href="#">Contact Us</a></li>
       </ul>
-<!--=======-->
-<!--  <nav id="info" class="panel" role="navigation">-->
-      <a href="https://visus.org"><img src="images/site_logo.gif" width="80px"/></a>
-  </nav>
+  </nav> -->
 
   <div id="downloadModal" class="modal fade modal-fullscreen" role="dialog">
           <div class="modal-dialog">
@@ -311,34 +317,79 @@ body{
     </div>
   </div> 
 
+  <div id="serverModal" class="modal fade myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div id="server-modal-dialog" class="modal-dialog my-modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="row">
+              <div class="col">
+              <div class="input-group input-group-sm mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Server</span>
+                </div>
+                <input id='server' type="text" size=32 onchange='setServer(this.value);' class='form-control'/>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-sm">
+                <div class="input-group-prepend">
+                  <div class="input-group-text">
+                    <input id='auto_refresh' type='checkbox' size=32 onchange='onRefreshChange(this.value);'></input>
+                  </div>
+                </div>
+                <div class="input-group-append">
+                  <span class="input-group-text">AutoRefresh</span>
+                </div>
+              </div>
+            </div>
+            <div class="col">
+              <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col">
+              <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                      <div class="input-group-text">
+                        <input id='auto_spin' type='checkbox' size=32 onchange='onSpinChange(this.value);'></input>
+                      </div>
+                    </div>
+                    <div class="input-group-append">
+                      <span class="input-group-text">AutoSpin</span>
+                    </div>
+                    
+                  </div>
+                </div>
+              </div>
+        </div>
+      </div>
+    </div>
+  </div> 
 
-  <nav hidden class="navbar navbar-expand-sm navbar-dark bg-dark rounded fixed-top">
+  <nav class="navbar navbar-expand-sm navbar-dark bg-dark rounded fixed-top">
+
+    <img class="order-md-last" src='uu-logo.png' width="100"/>
+    <a class="navbar-brand order-md-last" href="https://www.visus.org" target="blank"><h6><small>powered by OpenVisus<img src='visus.org-logo.png 'width="50"/></small></h6></a>
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
-<!--<<<<<<< HEAD-->
-<!--	<li class="nav-item">-->
-<!--=======-->
-        <li class="nav-item">
-          <a href="https://visus.org"><img src="images/visus-smallbar.png" width="80px"/></a>
-        </li>
-        <li class="nav-item">
+        <li class="nav-item" hidden>
           <button id="serverbtn" type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal"><span class="fa fa-server"></span></button>
         </li>
-        <li class="nav-item">
-<!-->>>>>>> 5976e4aadd6bacdb17a7476b6729b758b7e4c4fb-->
+        <li class="nav-item" hidden>
           <div class="input-group input-group-sm">
-	    <input id='server' type="text" size=32 class='form-control' readonly/>
-            <input id='dataset' type="text" size=32 class='form-control' readonly/>
+            <select id='dataset' onchange='setDataset(this.value);' class='custom-select' style="max-width: 200px"></select>
             <div class="input-group-append input-group-sm">
               <select id='field' onchange='onFieldChange(this.value);' class='custom-select' style="max-width: 100px" ></select> 
             </div>
           </div>
         </li>
-        <li class="nav-item" id="rendercontainer" style="min-width: 55px">
+        <li class="nav-item" id="rendercontainer" style="min-width: 55px" hidden>
               <select id='render_type' onchange='changeVis(this.value)' class='form-control border form-control-sm'  data-show-content="true">
                 <option value="0" data-content="<i class='fa fa-pizza-slice'></i> Slice"></option>
                 <option value="1" data-content="<i class='fa fa-cube'></i> Volume"></option>
@@ -346,7 +397,7 @@ body{
               </select>
         </li>
 
-        <li class="nav-item" id="slicenav">
+        <li class="nav-item" id="slicenav" hidden>
           <div class="input-group input-group-sm">
           <div class="input-group-prepend">
             <span class="input-group-text form-control-sm" id='render_slider_lbl'>Axis</span>
@@ -369,15 +420,20 @@ body{
         </div>
         </li>
         
-        <li class="nav-item">
+        <li class="nav-item" hidden>
             <button id="palettebtn" class="btn btn-warning btn-sm navbar-btn"><span class="fa fa-palette"></span></button>
         </li>
+        
+        <li class="nav-item" hidden>
+          <a id="homebtn" class="btn btn-success btn-sm navbar-btn" href="index.html"><span class="fa fa-home"></span></a>
+        </li>
+
         <li class="nav-item">
           <div class="input-group input-group-sm">
-            <div class="input-group-prepend">
-              <span class="input-group-text form-control-sm ">Time</span>
+            <div class="input-group-text form-control-sm input-group-prepend">
+              <label style="color: white">Time</label>
             </div>
-            <div class="input-group-append">
+            <div class="input-group-append" hidden>
               <input id='edit_time' size=4 onchange='onTimeChange(this.value);' class='form-control form-control-sm navbar-btn'/>
             </div>
             <div class="input-group-append">
@@ -385,12 +441,32 @@ body{
                 <input class="custom-range" id='time' type='range' step='1' oninput="onTimeChange(this.value);" onchange="onTimeChange(this.value);"/>  
               </div>
             </div>
+            <div class="input-group-append" hidden>
+              <div class="input-group-text form-control-sm">
+                <button type="button" id="backtime" class="btn btn-primary btn-sm navbar-btn" ><span class="fa fa-backward"></span></button>
+              </div>
+            </div>
+            <div class="input-group-append" hidden>
+              <div class="input-group-text form-control-sm">
+                <button type="button" id="playtime" class="btn btn-primary btn-sm navbar-btn" ><span class="fa fa-play"></span></button>
+              </div>
+            </div>
+            <div class="input-group-append" hidden>
+              <div class="input-group-text form-control-sm">
+                <button type="button" id="stoptime" class="btn btn-primary btn-sm navbar-btn" ><span class="fa fa-stop"></span></button>
+              </div>
+            </div>
+            <div class="input-group-append" hidden>
+              <div class="input-group-text form-control-sm">
+                <button type="button" id="fwdtime" class="btn btn-primary btn-sm navbar-btn" ><span class="fa fa-forward"></span></button>
+              </div>
+            </div>
           </div>
         </li>
       </ul>
 
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item">
+        <li class="nav-item" hidden>
           <div class="input-group">
             <button type="button" class="btn btn-primary btn-sm navbar-btn" data-toggle="modal" data-target="#downloadModal" onclick="setDefaultResolution()"><span class="fa fa-download"></span></button>
             <div class="input-group-append">
@@ -398,7 +474,7 @@ body{
             </div>
           </div>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" hidden>
           <button id="infobtn" type="button" class="btn btn-primary btn-sm navbar-btn info-link" data-toggle="modal" ><span class="fa fa-info"></span></button>
         </li>
       </ul>
@@ -409,7 +485,7 @@ body{
 </nav>
 
   <div id="viewer">
-    <div class="container-fluid">
+    <div class="container">
       <div class="row row-centered pos">
         <div class="col-lg h-100" id='osdCanvas' style='background: black;'></div>
           <script>
@@ -419,14 +495,42 @@ body{
     </div>
   </div>
 
+  
   <script src='https://openseadragon.github.io/openseadragon/openseadragon.min.js'></script>
-  <script src="src/colormaps.js"></script>
-  <script src="src/dvr.js"></script>
-  <script src="src/visus.js"></script>
-  <script src="config.js"></script>
-  <script src="src/viewer.js"></script>
+  <script src="../../src/selection/openseadragonselection.js"></script>
+  <script src="../../src/colormaps.js"></script>
+  <script src="../../src/dvr.js"></script>
+  <script src="../../src/visus.js"></script>
+  <script src="../../config.js"></script>
+  <script src="../../src/viewer.js"></script>
 
   <script>
+
+    function loadScenePreset(preset_name){
+      config_str=''
+
+      if(preset_name=="foam")
+        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=foam&field=data&slice=50&axis=2&vr=1&res=24&vp=0.02136559057952947%2C-0.9954319250695699%2C-0.09305264150725381%2C0%2C0.9400075301825149%2C-0.011696203183760745%2C0.3409531375882201%2C0%2C-0.34048400070980644%2C-0.09475484886470843%2C0.9354636090609141%2C0%2C0%2C0%2C-1.5%2C1&vd=1.5&q=0.6973401244114455%2C0.15620354085485388%2C-0.08870540735461928%2C-0.6938649403279332&time=0&palette=&palette_min=10000&palette_max=NaN'
+      else if(preset_name=="neurons")
+        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=Fred0014&field=Ch1&slice=50&axis=2&vr=1&res=24&vp=-0.3941702551378242%2C-0.8071635659056691%2C0.4394505522115386%2C0%2C-0.03269931938160603%2C0.4901785338944734%2C0.8710084726459577%2C0%2C-0.9184555321171306%2C0.328955897930876%2C-0.2196074970030144%2C0%2C0%2C0%2C-0.7999999999999997%2C1&vd=0.7999999999999997&q=0.46808139830419276%2C0.2895076458276693%2C-0.7252510403362604%2C-0.4136375902406406&time=0&palette=lighthues&palette_min=200&palette_max=NaN'
+      else if(preset_name=="rabbit")
+        config_str='server=https%3A%2F%2Fmolniya.sci.utah.edu%2Fmod_visus%3F&dataset=rabbit3d_noscale&field=EM&slice=50&axis=2&vr=1&res=21&vp=0.6428523518344567%2C0.6286392877043048%2C-0.43766825301309253%2C0%2C-0.7300505984699379%2C0.3298636040056597%2C-0.5985115925578074%2C0%2C-0.2318770739305495%2C0.704274554919473%2C0.6709920818298714%2C0%2C0%2C0%2C-1.2999999999999998%2C1&vd=1.2999999999999998&q=0.8129741751233535%2C-0.40062347222764094%2C0.06328343057493742%2C0.41781458985707853&time=0&palette=gamma&palette_min=0&palette_max=0'
+      
+      HOST_URL="index.html"
+      gotourl = HOST_URL+"?"+config_str//+"&demoid="+preset_name
+      window.location=gotourl
+    }
+
+    demo_id = getParameterByName('demoid')
+    dataset_param = getParameterByName('dataset')
+
+    console.log(demo_id)
+    if(demo_id!=null){// && dataset_param!=null){
+      //
+    
+    // else {
+      loadScenePreset(demo_id)
+    }
 
     $('#infobtn').click(function() {
       console.log("infobtn.onclick");
@@ -468,6 +572,32 @@ body{
       $('#server-modal-dialog').draggable({
         handle: ".modal-body"
       });
+    });
+
+    $('#backtime').click(function() {
+      t=parseInt($('#time')[0].value)
+
+      $('#time')[0].value = t-1;
+      $('#time').change()
+    });
+
+    $('#fwdtime').click(function() {
+      t=parseInt($('#time')[0].value)
+
+      $('#time')[0].value = t+1;
+      $('#time').change()
+    });
+
+    var playingtime = false;
+
+    $('#playtime').click(function() {
+      playingtime = true
+
+      setInterval(function(){ if(playingtime==true) $('#fwdtime').click(); }, 2000);
+    });
+
+    $('#stoptime').click(function() {
+      playingtime = false
     });
 
     function changeVis(value){
@@ -580,15 +710,6 @@ body{
 
   </script>
 
-<script src="src/bigSlide.js"></script>
-<script>
-
-    <!-- dataset info panel -->
-    $(document).ready(function() {
-        $('.info-link').bigSlide({side:'right', menu:'#info'});
-    });
-
-</script>
 
 </body>
 </html>

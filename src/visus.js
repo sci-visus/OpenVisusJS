@@ -58,7 +58,7 @@ function visusAsyncGetListOfDatasets(url)
         push_midx=0
         if ('childs' in item && item.childs.length>0){
           if(push_midx==0){
-            ret.push(item.attributes.name+"*");
+            ret.push(item.attributes.name);//+"*");
             push_midx=1;
           }
           arr = item.childs.concat(arr);
@@ -216,6 +216,11 @@ function visusAsyncLoadDataset(url)
     // try parsing as xml first
     var parser = new DOMParser();
     var xmlDoc = parser.parseFromString(content, "text/xml");
+
+    // test if this is an midx
+    var fieldElement = xmlDoc.getElementsByTagName("field")
+    if(fieldElement.length==1 && fieldElement[0].parentNode.nodeName=="dataset")
+      console.log("found MIDX with field", fieldElement[0].getAttribute("name"))
 
     var boxElement = xmlDoc.getElementsByTagName("box")
     if (boxElement.length == 1) {
@@ -375,6 +380,23 @@ function visusAsyncLoadDataset(url)
         
         continue;
       }
+
+      //crs name
+      if (lines[i]=="(crs_name)") 
+      {
+        ret.crs_name=lines[++i];
+        continue;  
+      }
+
+      //crs offset
+      if (lines[i]=="(crs_offset)")
+      {
+        var val=lines[++i].split(' ');
+	ret.crs_offset=[0,0];
+        for(b=0;b<2;b++)
+          ret.crs_offset[b]=parseFloat(val[b]);
+        continue;
+      }
     }
     
     correct_bitmask=ret.bitmask;
@@ -459,7 +481,7 @@ function VisusOSD(params)
           self.palette_max = d.max;
         }
 
-        console.log("field", self.field,"using min max ", self.palette_min, self.palette_max)
+        //console.log("field", self.field,"using min max ", self.palette_min, self.palette_max)
       }
     }
   }
@@ -483,6 +505,9 @@ function VisusOSD(params)
       vs = Math.pow(2, self.maxLevel-level); 
       w=self.tile_size[0] * vs; x1=x * w; x2=x1 + w;
       h=self.tile_size[1] * vs; y1=y * h; y2=y1 + h;
+
+      if(self.dataset.maxh == (toh+1))
+        toh=self.dataset.maxh
       
       //mirror y
     	{
@@ -581,6 +606,11 @@ function VisusOSD(params)
     return (mag*sample_size)/1024.0/1024.0
 
   }
+
+  self.getDatasetName=function() {
+      //NYI
+      return ('')
+  };
 
   self.setDType=function(value) {
     self.dtype=value;
@@ -749,7 +779,8 @@ function VisusOSD(params)
   self.pre_bounds = null;
     
   //see https://github.com/openseadragon/openseadragon/issues/866
-  self.refresh=function() 
+
+  self.refresh=function(hard_refresh=0) 
   { 
     guessRange();
 
@@ -760,9 +791,15 @@ function VisusOSD(params)
       success : function() {
         if (oldImage){
           self.osd.world.removeItem(oldImage);
-          // we are keeping only one item to avoid rendering of mixed tiles
-          while(visus1.osd.world.getItemCount() > 1)
-            visus1.osd.world.removeItem(self.osd.world.getItemAt(1))
+
+          // NOTE: Time varying 2d, if you uncomment this you refresh every timestep (which should be the right thing to do)
+          // Instead (when commented) we are piling up tiles to make the transition in time more smooth ...
+          if(hard_refresh){
+            console.log("hard refresh")
+            // we are keeping only one item to avoid rendering of mixed tiles
+            while(visus1.osd.world.getItemCount() > 1)
+              visus1.osd.world.removeItem(self.osd.world.getItemAt(1))
+          }
         }
       }    
     });  
@@ -792,9 +829,9 @@ function VisusVR(params)
   self.compression    = params['compression']    || 'raw';
   self.showNavigator  = params['showNavigator']  || true;
   self.debugMode      = params['debugMode']      || false;
-  self.palette        = params['palette']        || "";
-  self.palette_min    = params['palette_min']    || NaN;
-  self.palette_max    = params['palette_max']    || NaN;
+  self.palette        = params['palette']        || "rich";
+  self.palette_min    = params['palette_min']    || 0;
+  self.palette_max    = params['palette_max']    || 1;
   self.palette_interp = params['palette_interp'] || 'Default';
   
   if (self.dataset.dim==2)
@@ -970,6 +1007,11 @@ function VisusVR(params)
 
   }
 
+  self.getDatasetName=function() {
+    //NYI
+    return ('')
+  };
+
   // //setField
   self.setField=function(value) {
     self.field=value;
@@ -1029,9 +1071,9 @@ function VisusVR(params)
   self.setSlice(50);
   self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
-  self.setPalette("");
-  self.setPaletteMin(NaN);
-  self.setPaletteMax(NaN);
+  self.setPalette("rich");
+  self.setPaletteMin(0);
+  self.setPaletteMax(1);
   self.setPaletteInterp("Default");
   self.setDType("uint8")
   
