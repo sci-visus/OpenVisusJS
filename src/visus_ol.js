@@ -838,8 +838,14 @@ function VisusOL(params)
     xhr.responseType = 'arraybuffer';
     xhr.onload = function(e) {
       if (this.status == 200) {
-	dv = new DataView(this.response);
-	f = dv.getFloat32(0, true);
+	  dv = new DataView(this.response);
+	  f = 0;
+	  if (dv.byteLength == 4) {
+	      f = dv.getFloat32(0, true);
+	  }
+	  else if (dv.byteLength == 8) {
+	      f = dv.getFloat64(0, true);
+	  }
 	  contentCoords.innerHTML =
 	  '<p>' +
 	  'Coordinate: <code>' + lonLat[1] + ' ' + lonLat[0] + '</code></p><p>'+self.field+
