@@ -848,9 +848,9 @@ function VisusOL(params)
 	  }
 	  contentCoords.innerHTML =
 	  '<p>' +
-	  'Coordinate: <code>' + lonLat[1] + ' ' + lonLat[0] + '</code></p><p>'+self.field+
-	  ' Value: <code>'+f+'</code>' +
-	      '</p>';
+	  'Coordinate: <code>' + Math.round(lonLat[1]*100)/100 + ' ' + Math.round(lonLat[0]*100)/100 + '</code></p><p>'+self.field+
+	  ' Value: <code>'+ Math.round(f*1000000)/1000000 +'</code>' +
+	  '</p>';
 	  contentR.innerHTML = '<p><code font-size:0.65rem>' + self.getNeonRCode() + '</code></p>';
 	  contentPython.innerHTML = '<p><code font-size:0.65rem>' + self.getVisusPythonCode() + '</code></p>';
 	overlay.setPosition(coordinate);
