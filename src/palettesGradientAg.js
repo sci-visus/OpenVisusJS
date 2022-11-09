@@ -11,12 +11,12 @@ function updatePaletteView(cmaptype) {
     var defs = document.getElementById('svg-palette-view-defs') ;
     var gradient = document.getElementById('svg-palette-lg') ;
     document.getElementById('svg-palette-lg').innerHTML= '';
-
+    var stops =[];
 
     // Store an array of stop information for the <linearGradient>
-    if (cmaptype == 'NDVI_Beach') {  //NDVI_Beach
+    if (cmaptype === 'NDVI_Beach') {  //NDVI_Beach
         //console.log("In palette View svg edit: NDVI_Beach");
-        var stops = [
+         stops = [
             {
                 "color": "#8bc4f9",
                 "offset": "5%"
@@ -38,9 +38,9 @@ function updatePaletteView(cmaptype) {
             }
         ];
     }
-    else if (cmaptype == 'NDVI_Bright') {
+    else if (cmaptype === 'NDVI_Bright') {
         //console.log("In palette View svg edit   NDVI_Bright");
-        var stops = [   //NDVI_Bright
+        stops = [   //NDVI_Bright
             {
                 "color": "#640000",
                 "offset": "5%"
@@ -62,9 +62,9 @@ function updatePaletteView(cmaptype) {
             }
         ];
     }
-    else if (cmaptype == 'NDVI_Forest') {
+    else if (cmaptype === 'NDVI_Forest') {
 
-        var  stops = [  // NDVI_Forest
+        stops = [  // NDVI_Forest
         {
             "color": "#6e462c",
             "offset": "5%"
@@ -85,8 +85,8 @@ function updatePaletteView(cmaptype) {
             "offset": "85%"
         }];
     }
-    else if (cmaptype == 'NDVI_VIRIDIS') {
-    var stops = [   //NDVI_VIRIDIS
+    else if (cmaptype === 'NDVI_VIRIDIS') {
+      stops = [   //NDVI_VIRIDIS
         {
             "color": "#40004f",
             "offset": "5%"
@@ -100,87 +100,56 @@ function updatePaletteView(cmaptype) {
         }
     ];
     }
-    else if (cmaptype == 'NDVI_BlueGreen') {
-    var  stops = [   //NDVI_Other
+    else if (cmaptype === 'NDVI_BlueRed') {
+       stops = [   //NDVI_BlueRed
         {
-            "color": "#091b54",
+            "color": "#d7191c",
             "offset": "5%"
-        }
-        , {
-            "color": "#fcfbf9",
+        },
+        {
+              "color": "#d7191c",
+              "offset": "10%"
+        },
+        {
+            "color": "#fdae61",
+            "offset": "25%"
+        },
+        {
+            "color": "#ffffbf",
             "offset": "50%"
         },
         {
-            "color": "#bda57b",
-            "offset": "60%"
-        }, {
-            "color": "#2a8900",
+            "color": "#abd9e9",
             "offset": "75%"
-        }
-        , {
-            "color": "#000000",
-            "offset": "90%"
-        }
-    ];
-    }
-    else if (cmaptype == 'NDVI_Rainbow') {
-    var  stops = [   //NDVI_BlueGreen
-        {
-            "color": "#ffffff",
-            "offset": "0%"
-        }
-        , {
-            "color": "#000000",
-            "offset": "50%"
         },
         {
-            "color": "#8e4a93",
-            "offset": "51%"
-        }, {
-            "color": "#bd200f",
-            "offset": "62%"
-        }
-        , {
-            "color": "#eb7d2e",
-            "offset": "73%"
-        }, {
-            "color": "#fffb00",
-            "offset": "84%"
-        }
-        , {
-            "color": "#199410",
-            "offset": "95%"
-        }, {
-            "color": "#134721",
-            "offset": "100%"
-        }
-
-
-
+            "color": "#2c7bb6",
+            "offset": "85%"
+        },
     ];
     }
-    else if (cmaptype == 'LinearGray4')
-        var stops = createStopsFromViSUSColorMaps(LinearGray4_colormap);
-    else if (cmaptype == 'LinearGray5')
-        var stops = createStopsFromViSUSColorMaps(LinearGray5_colormap);
-    else if (cmaptype == 'AsymmetricBlueGreenDivergent')
-        var stops = createStopsFromViSUSColorMaps(AsymmetricBlueGreenDivergent_colormap);
-    else if (cmaptype == 'AsymmetricBlueOrangeDivergent')
-        var stops = createStopsFromViSUSColorMaps(AsymmetricBlueOrangeDivergent_colormap);
-    else if (cmaptype == 'brg')
-        var stops = createStopsFromViSUSColorMaps(bry_colormap);
+    else if (cmaptype === 'LinearGray4')
+          stops = createStopsFromViSUSColorMaps(LinearGray4_colormap);
+    else if (cmaptype === 'LinearGray5')
+          stops = createStopsFromViSUSColorMaps(LinearGray5_colormap);
+    else if (cmaptype === 'AsymmetricBlueGreenDivergent')
+          stops = createStopsFromViSUSColorMaps(AsymmetricBlueGreenDivergent_colormap);
+    else if (cmaptype === 'AsymmetricBlueOrangeDivergent')
+          stops = createStopsFromViSUSColorMaps(AsymmetricBlueOrangeDivergent_colormap);
+    else if (cmaptype === 'brg')
+          stops = createStopsFromViSUSColorMaps(bry_colormap);
 
-    else if (cmaptype == 'red')
-        var stops = createStopsFromViSUSColorMaps(red_colormap);
+    else if (cmaptype === 'red')
+          stops = createStopsFromViSUSColorMaps(red_colormap);
 
-    else if (cmaptype == 'green')
-        var stops = createStopsFromViSUSColorMaps(green_colormap);
+    else if (cmaptype === 'green')
+          stops = createStopsFromViSUSColorMaps(green_colormap);
 
-    else if (cmaptype == 'blue')
-        var stops = createStopsFromViSUSColorMaps(blue_colormap);
+    else if (cmaptype === 'blue')
+          stops = createStopsFromViSUSColorMaps(blue_colormap);
 
     else {
-        var stops = [{
+          stops = [{
             "color": "#ffffff",
             "offset": "0%"
         }, {

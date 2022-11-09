@@ -818,7 +818,9 @@ function shareLink(){
   pmin=isNaN(visus1.palette_min) ? "0" : visus1.palette_min
   pmax=isNaN(visus1.palette_max) ? "1" : visus1.palette_max
 
-  link=link+"&time="+visus1.time+"&baseMap="+visus1.baseMap+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
+  link=link+"&time="+visus1.time+"&palette="+visus1.palette+"&palette_min="+pmin+"&palette_max="+pmax
+  if (visus1.baseMap)
+    link = link+"&baseMap="+visus1.baseMap
 
   document.getElementById('link_text').value = link;
 

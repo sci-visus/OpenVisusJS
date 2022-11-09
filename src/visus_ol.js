@@ -604,6 +604,133 @@ function VisusOL(params)
                         source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
+
+                    // new ol.layer.Tile({
+                    //     title: 'MODIS',
+                    //     source: new ol.source.XYZ({ url: "https://www.neonscience.org/field-sites/field-sites-map/ABBY"}),
+                    //     type: 'base'
+                    // }),
+
+                    // new ol.layer.WMS(
+                    //     "NASA Global Mosaic",
+                    //     "http://wms.jpl.nasa.gov/wms.cgi",
+                    //     {
+                    //     layers: "global_mosaic"
+                    //     }),
+                    //
+                    // new ol.layer.WMS(
+                    //     "NASA Modis",
+                    //     "http://wms.jpl.nasa.gov/wms.cgi",
+                    //     {
+                    //      layers: "modis"
+                    // }),
+                ]
+            }),
+            new ol.layer.Group({
+                title: 'WMS Layers',
+                layers: [
+                    new ol.layer.Tile({
+                        title: 'ahocevar ',
+                        //extent: [-13884991, 2870341, -7455066, 6338219],
+                        source: new ol.source.TileWMS({
+                            url: 'https://ahocevar.com/geoserver/wms',
+                            params: {'LAYERS': 'topp:states', 'TILED': true},
+                            serverType: 'geoserver',
+                            // Countries have transparency, so do not fade tiles:
+                            transition: 0,
+                        }),
+                    }),
+                    new ol.layer.Tile({
+                        title: 'mesonet weather ',
+                       // extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
+                        source: new ol.source.TileWMS({
+                            attributions: ['Iowa State University'],
+                            url: 'https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi',
+                            params: {'LAYERS': 'nexrad-n0r-wmst'},
+                        }),
+                    }),
+
+                    new ol.layer.Tile({
+                        title: 'NLCD ',
+                        //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
+                        source: new ol.source.TileWMS(
+                            'https://www.mrlc.gov/geoserver/mrlc_display/wms?service=WMS&',
+                        {
+                            layers: 'NLCD_2019_Impervious_descriptor_L48',
+                            //layers: '',
+                            opacity: 0.5,
+                        }),
+                    }),
+                    new ol.layer.Tile({
+                        title: 'One Earth ',
+                        //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
+                        source: new ol.source.TileWMS(
+                            'http://onearth.jpl.nasa.gov/wms.cgi?',
+                            {
+                                layers: 'global_mosaic',
+                                //layers: '',
+                                opacity: 0.5,
+                            }),
+                    }),
+
+
+
+                    // new ol.layer.Tile({
+                    //     title: 'Daymet ',
+                    //     //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
+                    //     source: new ol.source.TileWMS({
+                    //         attributions: ['Daymet'],
+                    //         url: 'https://daymet.ornl.gov/data/send/saveData?lat={lat}&lon={lon}&measuredParams=prcp,tmax,tmin&year={year}',
+                    //         transparent: true,
+                    //     }, {
+                    //         opacity: 0.5,
+                    //         singleTile: true
+                    //     }),
+                    // }),
+                    //# Daymet URL. It is important that the URL is structured correctly
+                    //daymeturl = "https://daymet.ornl.gov/data/send/saveData?lat={lat}&lon={lon}&measuredParams=prcp,tmax,tmin&year={year}"
+
+                    new ol.layer.Tile({
+                        title: 'NASA MODIS daily terra ',
+                        //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
+                        source: new ol.source.TileWMS({
+                            attributions: ['NASA Modis'],
+                            url: 'http://wms.jpl.nasa.gov/wms.cgi',
+                            layers: "daily_terra", // "modis,global_mosaic",
+                            transparent: true,
+                        }, {
+                            opacity: 0.5,
+                            singleTile: true
+                        }),
+                    }),
+                    new ol.layer.Tile({
+                        title: 'MODIS NEON   MOD17A3HGF ',
+                        //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
+                        source: new ol.source.TileWMS({
+                            attributions: ['NASA Modis'],
+                            url: 'https://modis.ornl.gov/cgi-bin/',
+                            layers: "modis,global_mosaic",
+                            transparent: true,
+                            params: {'network': 'NEON','network_siteid': 'ABBY','product': 'MOD17A3HGF', },
+                        }, {
+                            opacity: 0.5,
+                            singleTile: true
+                        }),
+                    }),
+                    new ol.layer.Tile({
+                        title: 'LifeMapper ',
+                        //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
+                        source: new ol.source.TileWMS({
+                            attributions: ['LifeMapper '],
+                            url: 'http://www.lifemapper.org/Services/WMS/',
+                            //layers: "modis,global_mosaic",
+                            transparent: true,
+                            params: {'ScientificName': 'Ursus%20americanus' },
+                        }, {
+                            opacity: 0.5,
+                            singleTile: true
+                        }),
+                    }),
                 ]
             }),
             new ol.layer.Group({
