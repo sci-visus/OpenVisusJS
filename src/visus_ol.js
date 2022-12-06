@@ -335,13 +335,7 @@ function VisusOL(params)
   }
 
   self.setOpacity=function(value) {
-    test = self.map.getLayers().getArray();
-    allDataLayers = (test[1]).getLayers().getArray();
-    idxDataLayer = jQuery.grep(allDataLayers, function(layer) {
-            return layer.get('title') == 'IDX';
-    })[0];
-
-    idxDataLayer.setOpacity(value);
+    self.VisusLayer.setOpacity(value);
     sessionStorage.setItem("ui-opacity", value);
   }
 	  
