@@ -711,7 +711,6 @@ function VisusOL(params)
                         source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
-
                     // new ol.layer.Tile({
                     //     title: 'MODIS',
                     //     source: new ol.source.XYZ({ url: "https://www.neonscience.org/field-sites/field-sites-map/ABBY"}),
@@ -736,6 +735,12 @@ function VisusOL(params)
             new ol.layer.Group({
                 title: 'WMS Layers',
                 layers: [
+                    new ol.layer.Tile({
+                      title: 'gibs.earthdata.nasa.gov',
+                      //source: new ol.source.XYZ({ url: "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/layer_name/default/date/resolution/${z}/${y}/${x}.png"}),
+                      source: new ol.source.XYZ({ url: "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2012-07-09/250m/${z}/${y}/${x}.jpg"}),
+                      type: 'base'
+                    }),
                     new ol.layer.Tile({
                         title: 'ahocevar ',
                         //extent: [-13884991, 2870341, -7455066, 6338219],
