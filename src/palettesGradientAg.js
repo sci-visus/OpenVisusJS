@@ -100,7 +100,7 @@ function updatePaletteView(cmaptype) {
         }
     ];
     }
-    else if (cmaptype === 'NDVI_BlueRed') {
+    else if (cmaptype === 'NDVI_BlueRed' || cmaptype === 'BlueRed' ) {
        stops = [   //NDVI_BlueRed
         {
             "color": "#d7191c",
