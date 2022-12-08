@@ -725,7 +725,6 @@ function VisusOL(params)
             }),
             new ol.layer.Group({
                 title: 'WMS Layers',
-		/*
                 layers: [
                     new ol.layer.Tile({
                       title: 'gibs.earthdata.nasa.gov',
@@ -836,7 +835,6 @@ function VisusOL(params)
                         }),
                     }),
                 ]
-*/
             }),
             new ol.layer.Group({
                 title: 'Data',
