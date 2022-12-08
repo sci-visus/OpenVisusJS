@@ -597,11 +597,8 @@ function VisusOL(params)
   
   
   const overlay = new ol.Overlay({
-    element: container,
-    autoPan: true,
-    autoPanAnimation: {
-      duration: 250,
-    },
+      element: container,
+      positioning: "bottom-left",
   });
 
   closer.onclick = function () {
@@ -729,6 +726,7 @@ function VisusOL(params)
             }),
             new ol.layer.Group({
                 title: 'WMS Layers',
+		/*
                 layers: [
                     new ol.layer.Tile({
                         title: 'ahocevar ',
@@ -833,6 +831,7 @@ function VisusOL(params)
                         }),
                     }),
                 ]
+*/
             }),
             new ol.layer.Group({
                 title: 'Data',
@@ -974,6 +973,7 @@ function VisusOL(params)
 	  '</p>';
 	  contentR.innerHTML = '<p><code font-size:0.65rem>' + self.getNeonRCode() + '</code></p>';
 	  contentPython.innerHTML = '<p><code font-size:0.65rem>' + self.getVisusPythonCode() + '</code></p>';
+
 	overlay.setPosition(coordinate);
 	console.log(self.getNeonRCode());
 	console.log(self.getVisusPythonCode());
