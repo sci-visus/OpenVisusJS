@@ -100,33 +100,29 @@ function updatePaletteView(cmaptype) {
         }
     ];
     }
-    else if (cmaptype === 'NDVI_BlueRed' || cmaptype === 'BlueRed' ) {
-       stops = [   //NDVI_BlueRed
-        {
-            "color": "#d7191c",
-            "offset": "5%"
-        },
-        {
-              "color": "#d7191c",
-              "offset": "10%"
-        },
-        {
-            "color": "#fdae61",
-            "offset": "25%"
-        },
-        {
-            "color": "#ffffbf",
-            "offset": "50%"
-        },
-        {
-            "color": "#abd9e9",
-            "offset": "75%"
-        },
-        {
-            "color": "#2c7bb6",
-            "offset": "85%"
-        },
-    ];
+    else  if (cmaptype === 'NDVI_BlueRed') {  //NDVI_BlueRed
+        //console.log("In palette View svg edit: NDVI_BlueRed");
+        stops = [
+            {
+                "color": "#d7191c",
+                "offset": "5%"
+            }, {
+                "color": "#fdae61",
+                "offset": "27.5%"
+            }
+            , {
+                "color": "#ffffbf",
+                "offset": "50%"
+            }
+            , {
+                "color": "#abd9e9",
+                "offset": "72.5%"
+            }
+            , {
+                "color": "#2c7bb6",
+                "offset": "95%"
+            }
+        ];
     }
     else if (cmaptype === 'LinearGray4')
           stops = createStopsFromViSUSColorMaps(LinearGray4_colormap);
