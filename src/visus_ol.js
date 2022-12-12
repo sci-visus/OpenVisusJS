@@ -380,7 +380,9 @@ function VisusOL(params)
     site = getUrlParameter('site');
     month = getUrlParameter('month');
     code =  (
-      'library(neonUtilities)\n' +
+	'# Download tiles within current view:\n' + 
+	'\n' + 
+	'library(neonUtilities)\n' +
         'for (i in seq('+xmin+', '+xmax+', 1000)) {\n' +
 	'  for (j in seq('+ymin+', '+ymax+', 1000)) {\n' +
 	'    byTileAOP(dpID="' + dataproduct + '",\n' +
@@ -420,9 +422,11 @@ function VisusOL(params)
       ymax = ymax | 0;
       
       server_url = getServer();
-      dataset_url= server_url+"dataset="+self.dataset.name;
+      dataset_url= server_url+"dataset=";
       
       code =  (
+'# Download current view:\n' + 
+'\n' + 
 'from OpenVisus import *\n' + 
 'from PIL import Image\n' + 
 'import numpy\n' + 
@@ -451,7 +455,8 @@ function VisusOL(params)
 '\n' + 
 'DbModule.attach()\n' + 
 '\n' + 
-'data = BattelleNEONQuery(\"' + dataset_url + '\",\n' + 
+'data = BattelleNEONQuery(\"' + dataset_url + '\"+\n' + 
+'                         \"'+self.dataset.name+'\",\n' + 
 '                         \"'+self.field+'\",\n' + 
 '                         ('+xmin+','+xmax+'),\n' + 
 '                         ('+ymin+','+ymax+'),\n' + 
@@ -974,8 +979,8 @@ function VisusOL(params)
 	  'Coordinate: <code>' + Math.round(lonLat[1]*100)/100 + ' ' + Math.round(lonLat[0]*100)/100 + '</code></p><p>'+self.field+
 	  ' Value: <code>'+ Math.round(f*1000000)/1000000 +'</code>' +
 	  '</p>';
-	  contentR.innerHTML = '<p><code font-size:0.65rem>' + self.getNeonRCode() + '</code></p>';
-	  contentPython.innerHTML = '<p><code font-size:0.65rem>' + self.getVisusPythonCode() + '</code></p>';
+	  contentR.innerHTML = '<p><pre><code white-space: pre; font-size:0.65rem>' + self.getNeonRCode() + '</code></pre></p>';
+	  contentPython.innerHTML = '<p><pre><code font-size:0.65rem>' + self.getVisusPythonCode() + '</code></pre></p>';
 
 	overlay.setPosition(coordinate);
 	console.log(self.getNeonRCode());
