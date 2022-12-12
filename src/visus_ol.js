@@ -982,9 +982,10 @@ function VisusOL(params)
 	  contentR.innerHTML = '<p><pre><code white-space: pre; font-size:0.65rem>' + self.getNeonRCode() + '</code></pre></p>';
 	  contentPython.innerHTML = '<p><pre><code font-size:0.65rem>' + self.getVisusPythonCode() + '</code></pre></p>';
 
-	overlay.setPosition(coordinate);
-	console.log(self.getNeonRCode());
-	console.log(self.getVisusPythonCode());
+	  overlay.setPosition(coordinate);
+	  container.style.display = "block";
+	  console.log(self.getNeonRCode());
+	  console.log(self.getVisusPythonCode());
       }
     };
     xhr.send();
