@@ -253,10 +253,12 @@ function VisusOL(params)
     for(f of self.dataset.fields)
       if(f.name==value){
         self.setDType(f.dtype)
-        break;
+	sessionStorage.setItem("ui-field", value);
+        return;
       }
 
-    sessionStorage.setItem("ui-field", value);
+      // if trying to set to a field that doesn't exist, set the field to the first one
+      setField(self.dataset.fields[0].name);
   };
   
   //getTime
@@ -488,12 +490,7 @@ function VisusOL(params)
   
   self.setAxis(2);
   self.setSlice(0);
-  self.setField(self.dataset.fields[0].name);
   self.setTime(self.dataset.timesteps[0]);
-  self.setPalette("rich");
-  self.setPaletteMin(0);
-  self.setPaletteMax(1);
-  self.setPaletteInterp("Default");
   
   permutation=[[1,2,0],[0,2,1],[0,1,2]];
   X = permutation[self.axis][0];
@@ -557,8 +554,8 @@ function VisusOL(params)
 
   dataproduct = getUrlParameter('dataproduct');
   site = getUrlParameter('site');
-  reloadingDataset = false;
 
+  reloadingDataset = false;
   lastDataproduct = sessionStorage.getItem("dataproduct");
   lastSite = sessionStorage.getItem("site");
   lastCenter = JSON.parse(sessionStorage.getItem("view-center"));
@@ -1113,6 +1110,6 @@ function VisusOL(params)
 
   // call this later, after the visus object is done setting up
   setTimeout(updateUI, 0, field, baseMap, palette, paletteMin, paletteMax, opacity);
-
+    
   return self;
 };
