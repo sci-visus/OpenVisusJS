@@ -19,7 +19,7 @@ function VisusOL(params)
   self.compression    = params['compression']    || 'png';
   self.showNavigator  = params['showNavigator']  || true;
   self.debugMode      = params['debugMode']      || false;
-  self.baseMap        = params['basemap']        || "http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}";
+  self.baseMap        = params['basemap']        || "https://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}";
   self.palette        = params['palette']        || "";
   self.palette_min    = params['palette_min']    || '0';
   self.palette_max    = params['palette_max']    || '0';
@@ -671,37 +671,37 @@ function VisusOL(params)
                     }),
                     new ol.layer.Tile({
                         title: 'Road Map (Google)',
-                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=m&hl=pl&&x={x}&y={y}&z={z}"}),
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=m&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
                     new ol.layer.Tile({
                         title: 'Road Names (Google)',
-                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=h&hl=pl&&x={x}&y={y}&z={z}"}),
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=h&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
                     new ol.layer.Tile({
                         title: 'Road without Building (Google)',
-                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=r&hl=pl&&x={x}&y={y}&z={z}"}),
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=r&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
                     new ol.layer.Tile({
                         title: 'Satellite & Roads (Google)',
-                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=y&hl=pl&&x={x}&y={y}&z={z}"}),
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=y&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
                     new ol.layer.Tile({
                         title: 'Terrain & Roads (Google) ',
-                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=p&hl=pl&&x={x}&y={y}&z={z}"}),
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=p&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
                     new ol.layer.Tile({
                         title: 'Terrain (Google)',
-                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=t&hl=pl&&x={x}&y={y}&z={z}"}),
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=t&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
                     new ol.layer.Tile({
                         title: 'Satellite (Google) ',
-                        source: new ol.source.XYZ({ url: "http://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}"}),
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}"}),
                         type: 'base'
                     }),
                     // new ol.layer.Tile({
@@ -712,14 +712,14 @@ function VisusOL(params)
 
                     // new ol.layer.WMS(
                     //     "NASA Global Mosaic",
-                    //     "http://wms.jpl.nasa.gov/wms.cgi",
+                    //     "https://wms.jpl.nasa.gov/wms.cgi",
                     //     {
                     //     layers: "global_mosaic"
                     //     }),
                     //
                     // new ol.layer.WMS(
                     //     "NASA Modis",
-                    //     "http://wms.jpl.nasa.gov/wms.cgi",
+                    //     "https://wms.jpl.nasa.gov/wms.cgi",
                     //     {
                     //      layers: "modis"
                     // }),
@@ -770,7 +770,7 @@ function VisusOL(params)
             //             title: 'One Earth ',
             //             //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
             //             source: new ol.source.TileWMS(
-            //                 'http://onearth.jpl.nasa.gov/wms.cgi?',
+            //                 'https://onearth.jpl.nasa.gov/wms.cgi?',
             //                 {
             //                     layers: 'global_mosaic',
             //                     //layers: '',
@@ -800,7 +800,7 @@ function VisusOL(params)
             //             //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
             //             source: new ol.source.TileWMS({
             //                 attributions: ['NASA Modis'],
-            //                 url: 'http://wms.jpl.nasa.gov/wms.cgi',
+            //                 url: 'https://wms.jpl.nasa.gov/wms.cgi',
             //                 layers: "daily_terra", // "modis,global_mosaic",
             //                 transparent: true,
             //             }, {
@@ -827,7 +827,7 @@ function VisusOL(params)
             //             //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
             //             source: new ol.source.TileWMS({
             //                 attributions: ['LifeMapper '],
-            //                 url: 'http://www.lifemapper.org/Services/WMS/',
+            //                 url: 'https://www.lifemapper.org/Services/WMS/',
             //                 //layers: "modis,global_mosaic",
             //                 transparent: true,
             //                 params: {'ScientificName': 'Ursus%20americanus' },
