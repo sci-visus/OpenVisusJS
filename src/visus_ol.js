@@ -540,7 +540,8 @@ function VisusOL(params)
     source: tileSource,
     projection: proj,
     opacity: 0.5,
-      title: 'IDX'
+      title: 'IDX',
+      zIndex: 10,
   });
   self.VisusLayer = tileLayer;
 
@@ -610,246 +611,19 @@ function VisusOL(params)
   };
 
 
-  if (0)
-  self.map = new ol.Map({
-    target: self.id,
-    layers: [
-      new ol.layer.Tile({ title: 'baseMap', source: new ol.source.XYZ({ url: self.baseMap})}),
-      tileLayer,
-
-    ],
-    view: view,
-    overlays: [overlay],
-    controls: [new ol.control.Rotate({ autoHide: false })],
-  });
-
+  if (0) {
+  }
   else
     self.map = new ol.Map({
         view: view,
         overlays: [overlay],
         controls: [new ol.control.Rotate({ autoHide: false })],
+	interactions: ol.interaction.defaults().extend([new ol.interaction.DragRotateAndZoom()]),
         target: self.id,
         layers: [
             new ol.layer.Group({
-                title: 'Base map',
-                layers: [
-                    new ol.layer.Tile({
-                        title: 'World Topo Map (ArcGIS)',
-                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'NatGeo (ArcGIS)',
-                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'USA Topo (ArcGIS)',
-                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/tile/{z}/{y}/{x}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Shaded Relief (ArcGIS)',
-                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Street (ArcGIS)',
-                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Terrain (ArcGIS)',
-                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}"}),
-                        type: 'base'
-                    }),
-
-                    new ol.layer.Tile({
-                        title: 'Open Street Map',
-                        source: new ol.source.XYZ({ url: "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Road Map (Google)',
-                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=m&hl=pl&&x={x}&y={y}&z={z}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Road Names (Google)',
-                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=h&hl=pl&&x={x}&y={y}&z={z}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Road without Building (Google)',
-                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=r&hl=pl&&x={x}&y={y}&z={z}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Satellite & Roads (Google)',
-                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=y&hl=pl&&x={x}&y={y}&z={z}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Terrain & Roads (Google) ',
-                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=p&hl=pl&&x={x}&y={y}&z={z}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Terrain (Google)',
-                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=t&hl=pl&&x={x}&y={y}&z={z}"}),
-                        type: 'base'
-                    }),
-                    new ol.layer.Tile({
-                        title: 'Satellite (Google) ',
-                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}"}),
-                        type: 'base'
-                    }),
-                    // new ol.layer.Tile({
-                    //     title: 'MODIS',
-                    //     source: new ol.source.XYZ({ url: "https://www.neonscience.org/field-sites/field-sites-map/ABBY"}),
-                    //     type: 'base'
-                    // }),
-
-                    // new ol.layer.WMS(
-                    //     "NASA Global Mosaic",
-                    //     "https://wms.jpl.nasa.gov/wms.cgi",
-                    //     {
-                    //     layers: "global_mosaic"
-                    //     }),
-                    //
-                    // new ol.layer.WMS(
-                    //     "NASA Modis",
-                    //     "https://wms.jpl.nasa.gov/wms.cgi",
-                    //     {
-                    //      layers: "modis"
-                    // }),
-                ]
-            }),
-            // new ol.layer.Group({
-            //     title: 'WMS Layers',
-            //     layers: [
-            //         new ol.layer.Tile({
-            //           title: 'gibs.earthdata.nasa.gov',
-            //           //source: new ol.source.XYZ({ url: "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/layer_name/default/date/resolution/${z}/${y}/${x}.png"}),
-            //           source: new ol.source.XYZ({ url: "https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/MODIS_Terra_CorrectedReflectance_TrueColor/default/2012-07-09/250m/${z}/${y}/${x}.jpg"}),
-            //           type: 'base'
-            //         }),
-            //         new ol.layer.Tile({
-            //             title: 'ahocevar ',
-            //             //extent: [-13884991, 2870341, -7455066, 6338219],
-            //             source: new ol.source.TileWMS({
-            //                 url: 'https://ahocevar.com/geoserver/wms',
-            //                 params: {'LAYERS': 'topp:states', 'TILED': true},
-            //                 serverType: 'geoserver',
-            //                 // Countries have transparency, so do not fade tiles:
-            //                 transition: 0,
-            //             }),
-            //         }),
-            //         new ol.layer.Tile({
-            //             title: 'mesonet weather ',
-            //            // extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
-            //             source: new ol.source.TileWMS({
-            //                 attributions: ['Iowa State University'],
-            //                 url: 'https://mesonet.agron.iastate.edu/cgi-bin/wms/nexrad/n0r-t.cgi',
-            //                 params: {'LAYERS': 'nexrad-n0r-wmst'},
-            //             }),
-            //         }),
-            //
-            //         new ol.layer.Tile({
-            //             title: 'NLCD ',
-            //             //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
-            //             source: new ol.source.TileWMS(
-            //                 'https://www.mrlc.gov/geoserver/mrlc_display/wms?service=WMS&',
-            //             {
-            //                 layers: 'NLCD_2019_Impervious_descriptor_L48',
-            //                 //layers: '',
-            //                 opacity: 0.5,
-            //             }),
-            //         }),
-            //         new ol.layer.Tile({
-            //             title: 'One Earth ',
-            //             //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
-            //             source: new ol.source.TileWMS(
-            //                 'https://onearth.jpl.nasa.gov/wms.cgi?',
-            //                 {
-            //                     layers: 'global_mosaic',
-            //                     //layers: '',
-            //                     opacity: 0.5,
-            //                 }),
-            //         }),
-            //
-            //
-            //
-            //         // new ol.layer.Tile({
-            //         //     title: 'Daymet ',
-            //         //     //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
-            //         //     source: new ol.source.TileWMS({
-            //         //         attributions: ['Daymet'],
-            //         //         url: 'https://daymet.ornl.gov/data/send/saveData?lat={lat}&lon={lon}&measuredParams=prcp,tmax,tmin&year={year}',
-            //         //         transparent: true,
-            //         //     }, {
-            //         //         opacity: 0.5,
-            //         //         singleTile: true
-            //         //     }),
-            //         // }),
-            //         //# Daymet URL. It is important that the URL is structured correctly
-            //         //daymeturl = "https://daymet.ornl.gov/data/send/saveData?lat={lat}&lon={lon}&measuredParams=prcp,tmax,tmin&year={year}"
-            //
-            //         new ol.layer.Tile({
-            //             title: 'NASA MODIS daily terra ',
-            //             //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
-            //             source: new ol.source.TileWMS({
-            //                 attributions: ['NASA Modis'],
-            //                 url: 'https://wms.jpl.nasa.gov/wms.cgi',
-            //                 layers: "daily_terra", // "modis,global_mosaic",
-            //                 transparent: true,
-            //             }, {
-            //                 opacity: 0.5,
-            //                 singleTile: true
-            //             }),
-            //         }),
-            //         new ol.layer.Tile({
-            //             title: 'MODIS NEON   MOD17A3HGF ',
-            //             //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
-            //             source: new ol.source.TileWMS({
-            //                 attributions: ['NASA Modis'],
-            //                 url: 'https://modis.ornl.gov/cgi-bin/',
-            //                 layers: "modis,global_mosaic",
-            //                 transparent: true,
-            //                 params: {'network': 'NEON','network_siteid': 'ABBY','product': 'MOD17A3HGF', },
-            //             }, {
-            //                 opacity: 0.5,
-            //                 singleTile: true
-            //             }),
-            //         }),
-            //         new ol.layer.Tile({
-            //             title: 'LifeMapper ',
-            //             //extent:  transformExtent([-126, 24, -66, 50], 'EPSG:4326', 'EPSG:3857'),
-            //             source: new ol.source.TileWMS({
-            //                 attributions: ['LifeMapper '],
-            //                 url: 'https://www.lifemapper.org/Services/WMS/',
-            //                 //layers: "modis,global_mosaic",
-            //                 transparent: true,
-            //                 params: {'ScientificName': 'Ursus%20americanus' },
-            //             }, {
-            //                 opacity: 0.5,
-            //                 singleTile: true
-            //             }),
-            //         }),
-            //     ]
-            // }),
-            new ol.layer.Group({
-                title: 'Data',
-                layers: [
-                    tileLayer,
-                    // new ol.layer.Vector({
-                    //     title: 'Natura biotopes',
-                    //     source: new ol.source.Vector({
-                    //         format: new ol.format.WFS(),
-                    //         url: naturaUrl
-                    //     })
-                    // })
-                ]
+                title: 'GIBS',
+		layers: []
             }),
             new ol.layer.Group({
                 title: 'Flight Boundaries',
@@ -858,7 +632,101 @@ function VisusOL(params)
             new ol.layer.Group({
                 title: 'Sampling Boundaries',
                 layers: []
-            })
+            }),
+            new ol.layer.Group({
+                title: 'Base map',
+                layers: [
+                    new ol.layer.Tile({
+                        title: 'World Topo Map (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'NatGeo (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'USA Topo (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer/tile/{z}/{y}/{x}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Shaded Relief (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Street (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Terrain (ArcGIS)',
+                        source: new ol.source.XYZ({ url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+
+                    new ol.layer.Tile({
+                        title: 'Open Street Map',
+                        source: new ol.source.XYZ({ url: "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Road Map (Google)',
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=m&hl=pl&&x={x}&y={y}&z={z}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Road Names (Google)',
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=h&hl=pl&&x={x}&y={y}&z={z}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Road without Building (Google)',
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=r&hl=pl&&x={x}&y={y}&z={z}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Satellite & Roads (Google)',
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=y&hl=pl&&x={x}&y={y}&z={z}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Terrain & Roads (Google) ',
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=p&hl=pl&&x={x}&y={y}&z={z}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Terrain (Google)',
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=t&hl=pl&&x={x}&y={y}&z={z}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Satellite (Google) ',
+                        source: new ol.source.XYZ({ url: "https://mt1.google.com/vt/lyrs=s&hl=pl&&x={x}&y={y}&z={z}"}),
+			zIndex: 0,
+                        type: 'base'
+                    }),
+                ]
+            }),
+            new ol.layer.Group({
+                title: 'Data',
+                layers: [ tileLayer ]
+            }),
         ],
     });
 
@@ -888,6 +756,7 @@ function VisusOL(params)
       title: title,
       source: vector_source,
       visible: false,
+	zIndex: 20,
     });
     self.addLayerToGroup(vector_layer, 'Sampling Boundaries');
   };
@@ -901,7 +770,8 @@ function VisusOL(params)
     vector_layer = new ol.layer.Vector({
       title: title,
       source: vector_source,
-      visible: false
+	visible: false,
+	zIndex: 20,
     });
     self.addLayerToGroup(vector_layer, 'Flight Boundaries');
   };
@@ -915,13 +785,47 @@ function VisusOL(params)
   
   
   self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/terrestrialSamplingBoundairies/" + getUrlParameter('site') + ".geojson", "Terrestrial Sampling");
-  self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotCentroids/" + getUrlParameter('site') + ".geojson", "Plot Centroids");
+  self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotCentroids/" + getUrlParameter('site') + ".geojson", "Plot Centroids"); 
   self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotPoints/" + getUrlParameter('site') + ".geojson", "Plot Points");
   self.addGeoJsonLayer(self.dataset.protocol + "//" + self.dataset.host + "/site_boundaries/plotPolygons/" + getUrlParameter('site') + ".geojson", "Plot Polygons");
   
   
   self.map.addControl(new ol.control.LayerSwitcher());
-  
+
+
+    $.getJSON("https://worldview.earthdata.nasa.gov/config/wv.json",
+	      data => {
+		  Object.entries(data["layers"]).forEach(([key,value]) => {
+		      m = value["projections"]?.["geographic"]?.["matrixSet"];
+		      if (m) {
+			  mat = data["sources"]?.["GIBS:geographic"]?.["matrixSets"]?.[m];
+			  if (mat) {
+			      var source = new ol.source.WMTS({
+				  url: data["sources"]["GIBS:geographic"]["url"] + '?TIME=default',
+				  layer: key,
+				  format: value["format"],
+				  projection : 'EPSG:4326',
+				  matrixSet: m,
+				  tileGrid: new ol.tilegrid.WMTS({
+				      origin: [-180, 90],
+				      resolutions: mat["resolutions"],
+				      matrixIds: Array.from(Array(mat["resolutions"].length).keys()),
+				      tileSize: mat["tileSize"][0]
+				  })
+			      });
+			      
+			      var layer = new ol.layer.Tile({
+				  title: key,
+				  source: source,
+				  zIndex: 1,
+				  visible: false,
+			      });
+			      
+			      self.addLayerToGroup(layer, "GIBS");
+			  }
+		      }
+		  });
+	      });
 
   if (self.ADD_SCALE_LEGEND == 1) {
     //map.addControl(new ol.control.ScaleLine({units: "metric"}));
