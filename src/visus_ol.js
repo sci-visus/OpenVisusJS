@@ -793,7 +793,7 @@ function VisusOL(params)
   self.map.addControl(new ol.control.LayerSwitcher());
 
 
-    $.getJSON("https://worldview.earthdata.nasa.gov/config/wv.json",
+    $.getJSON("wv_examples.json",
 	      data => {
 		  Object.entries(data["layers"]).forEach(([key,value]) => {
 		      m = value["projections"]?.["geographic"]?.["matrixSet"];
