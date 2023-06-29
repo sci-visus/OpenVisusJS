@@ -9,6 +9,7 @@ const path = require('path');
 const envPath = path.join(__dirname, '../.env');
 dotenv.config({ path: envPath });
 const DEPLOY_SERVER = process.env.DEPLOY_SERVER || 'localhost';
+DEFAULT_SERVER='http://'+DEPLOY_SERVER':8080/mod_visus?';
 
-DEFAULT_SERVER='http://${DEPLOY_SERVER}:8080/mod_visus?';
- 
+//DEFAULT_SERVER='http://${DEPLOY_SERVER}:8080/mod_visus?';
+
