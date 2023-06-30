@@ -754,6 +754,18 @@ function getParameterByName(name, url) {
 let pre_server = getParameterByName('server'); 
 let pre_dataset = getParameterByName('dataset'); 
 
+//AAG: Adding to use env variable
+// Server module URL
+const dotenv = require('dotenv');
+const path = require('path');
+
+// Server module URL
+const envPath = path.join(__dirname, '../.env');
+dotenv.config({ path: envPath });
+const DEPLOY_SERVER = process.env.DEPLOY_SERVER || 'localhost';
+DEFAULT_SERVER='http://'+DEPLOY_SERVER':8080/mod_visus?';
+
+
 if(pre_server==null)
     pre_server = DEFAULT_SERVER
 
