@@ -758,11 +758,11 @@ let pre_dataset = getParameterByName('dataset');
 // Server module URL
 const dotenv = require('dotenv');
 const path = require('path');
-
+//remember to fix
 // Server module URL
 const envPath = path.join(__dirname, '../.env');
 dotenv.config({ path: envPath });
-const DEPLOY_SERVER = process.env.DEPLOY_SERVER || 'localhost:8080';
+const DEPLOY_SERVER = process.env.DEPLOY_SERVER || 'http://51.81.155.171';
 const PORT="";
 const DEFAULT_SERVER='http://'+DEPLOY_SERVER+':'+PORT+'/mod_visus?';
 
