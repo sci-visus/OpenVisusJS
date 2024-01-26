@@ -762,7 +762,7 @@ const path = require('path');
 // Server module URL
 const envPath = path.join(__dirname, '../.env');
 dotenv.config({ path: envPath });
-const DEPLOY_SERVER = process.env.DEPLOY_SERVER || 'http://51.81.155.171';
+const DEPLOY_SERVER = process.env.DEPLOY_SERVER || 'http://54.39.133.137';
 const PORT="";
 const DEFAULT_SERVER='http://'+DEPLOY_SERVER+':'+PORT+'/mod_visus?';
 
