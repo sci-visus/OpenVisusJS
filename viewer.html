@@ -419,6 +419,20 @@ body{
   <script src="src/colormaps.js"></script>
   <script src="src/dvr.js"></script>
   <script src="src/visus.js"></script>
+  <script>
+    // Extract deploy_server from URL parameters
+    function getParameterByName(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+    
+    var deploy_server = getParameterByName('deploy_server') || 'https://ns1007523.ip-51-81-155.us';
+  </script>
   <script src="config.js"></script>
   <script src="src/viewer.js"></script>
 
